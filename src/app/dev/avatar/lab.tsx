@@ -11,6 +11,7 @@ import { AvatarStore } from "@/lib/avatar/store";
 import { PERSONAS, type PersonaId } from "@/lib/interview/personas";
 import { BOT_ACCESSORIES, BOT_SHAPES, type BotColorId } from "@/lib/avatar/style";
 import type { AvatarState } from "@/lib/avatar/types";
+import { PALETTE } from "@/lib/palette";
 
 /** Development page for tuning the interviewer's states and personas. */
 export function AvatarLab() {
@@ -21,7 +22,7 @@ export function AvatarLab() {
   const seats = useMemo(() => {
     const all: PersonaId[] = ["warm_recruiter", "hiring_manager", "direct_manager", "skeptic", "executive", "peer"];
     const ids: PersonaId[] = family ? all : panel ? ["hiring_manager", "skeptic", "peer"] : [persona];
-    return ids.map((id, seat) => ({ seat, personaId: id, name: PERSONAS[id].name, accent: PERSONAS[id].accent, expressiveness: PERSONAS[id].expressiveness, warmth: PERSONAS[id].warmth, skepticism: PERSONAS[id].skepticism }));
+    return ids.map((id, seat) => ({ seat, personaId: id, name: PERSONAS[id].name, accent: PALETTE.accent, expressiveness: PERSONAS[id].expressiveness, warmth: PERSONAS[id].warmth, skepticism: PERSONAS[id].skepticism }));
   }, [panel, persona, family]);
   const set = (m: AvatarState) => {
     store.setMode(m);

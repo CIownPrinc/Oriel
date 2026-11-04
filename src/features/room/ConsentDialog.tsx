@@ -41,10 +41,10 @@ export function ConsentDialog({ open, defaults, recordingAllowed, onConfirm, onC
             <Input id="consent-signature" className="mt-1.5" value={signature} onChange={(e) => setSignature(e.target.value)} placeholder="Full name" autoComplete="name" />
           </div>
         )}
-        <p className="mt-5 text-meta leading-relaxed text-fg-subtle">Never measured: attractiveness, age, race, emotion, personality or accent. You can delete this session and its recording at any time from Playback or your profile. <a href="/privacy#biometric" target="_blank" className="underline decoration-1 underline-offset-[0.2em] hover:text-fg">Biometric &amp; retention policy</a>. Consent version {CONSENT_VERSION}.</p>
+        <p className="mt-5 text-meta leading-relaxed text-fg-subtle">Never measured: attractiveness, age, race, emotion, personality or accent. You can delete this session and its recording at any time from Playback or your profile. <a href="/privacy#biometric" target="_blank" className="underline decoration-1 underline-offset-text hover:text-fg">Biometric &amp; retention policy</a>. Consent version {CONSENT_VERSION}.</p>
         <div className="mt-7 flex flex-wrap items-center justify-end gap-3">
           <Button variant="ghost" onClick={onCancel}>Not now</Button>
-          <Button variant="lume" disabled={needsSignature} title={needsSignature ? "Sign to enable camera-based signals, or turn them off" : undefined}
+          <Button disabled={needsSignature} title={needsSignature ? "Sign to enable camera-based signals, or turn them off" : undefined}
             onClick={() => onConfirm({ ...c, recording: c.recording && recordingAllowed }, CONSENT_VERSION, c.cameraMetrics ? signature.trim() : null)}>
             {c.microphone ? "Agree and continue" : "Continue in text mode"}
           </Button>

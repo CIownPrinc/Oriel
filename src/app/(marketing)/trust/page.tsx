@@ -38,7 +38,7 @@ export default function TrustPage() {
 
       <section className="mt-20">
         <h2 className="text-display-m text-fg">Speech measurements</h2>
-        <p className="mt-2 max-w-[48rem] text-ui text-fg-muted">{s.length} labelled clips across {byAccent.size} accents (synthetic voices with known silences, pauses and scripts), run through the product&apos;s own code. {speech ? `Run ${speech.generatedAt.slice(0, 10)}.` : "Not run yet."}</p>
+        <p className="mt-2 max-w-column text-ui text-fg-muted">{s.length} labelled clips across {byAccent.size} accents (synthetic voices with known silences, pauses and scripts), run through the product&apos;s own code. {speech ? `Run ${speech.generatedAt.slice(0, 10)}.` : "Not run yet."}</p>
         {s.length > 0 && (
           <>
             <div className="mt-6 grid gap-3 sm:grid-cols-4">
@@ -69,7 +69,7 @@ export default function TrustPage() {
 
       <section className="mt-20">
         <h2 className="text-display-m text-fg">Camera signals</h2>
-        <p className="mt-2 max-w-[48rem] text-ui text-fg-muted">{c.length} synthetic webcam portraits, labelled &ldquo;looking at the lens&rdquo; or &ldquo;looking away&rdquo;, run through the Room&apos;s on-device face tracker without calibration. {camera ? `Run ${camera.generatedAt.slice(0, 10)}.` : "Not run yet."}</p>
+        <p className="mt-2 max-w-column text-ui text-fg-muted">{c.length} synthetic webcam portraits, labelled &ldquo;looking at the lens&rdquo; or &ldquo;looking away&rdquo;, run through the Room&apos;s on-device face tracker without calibration. {camera ? `Run ${camera.generatedAt.slice(0, 10)}.` : "Not run yet."}</p>
         {c.length > 0 && (
           <>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -93,7 +93,7 @@ export default function TrustPage() {
         {p.length > 0 && (
           <>
             <h3 className="mt-12 text-display-m text-fg">Posture</h3>
-            <p className="mt-2 max-w-[48rem] text-ui text-fg-muted">Each lens-facing portrait calibrated as its own baseline, then zoomed out and in to mimic sitting back and leaning in ({p.length} runs). Moving nearer or farther must never read as a slouch.</p>
+            <p className="mt-2 max-w-column text-ui text-fg-muted">Each lens-facing portrait calibrated as its own baseline, then zoomed out and in to mimic sitting back and leaning in ({p.length} runs). Moving nearer or farther must never read as a slouch.</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 ["Shoulders found at calibration", `${portraits.filter((f) => p.find((r) => r.file === f)?.postureReady).length}/${portraits.length}`],

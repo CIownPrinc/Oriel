@@ -59,7 +59,7 @@ export function AppNav({ isAdmin, name, mockProviders }: { isAdmin: boolean; nam
 
   return (
     <>
-      <header className={cn("sticky top-0 z-40 border-b bg-page transition-colors duration-[var(--dur-state)]", scrolled || sheet ? "border-line" : "border-transparent")}>
+      <header className={cn("sticky top-0 z-40 border-b bg-page transition-colors duration-state", scrolled || sheet ? "border-line" : "border-transparent")}>
         <div className="frame flex h-14 items-center gap-10">
           <Link href="/home" aria-label="Oriel home" className="-ml-1 inline-flex shrink-0 items-center rounded-control p-1" onClick={() => setSheet(false)}><Logo /></Link>
           <nav aria-label="Main" className="hidden h-full items-stretch gap-7 lg:flex">
@@ -67,7 +67,7 @@ export function AppNav({ isAdmin, name, mockProviders }: { isAdmin: boolean; nam
               const on = section?.href === href;
               return (
                 <Link key={href} href={href} aria-current={on ? "true" : undefined}
-                  className={cn("relative flex items-center whitespace-nowrap text-ui transition-colors duration-[var(--dur-press)]", on ? "text-fg" : "text-fg-muted hover:text-fg")}>
+                  className={cn("relative flex items-center whitespace-nowrap text-ui transition-colors duration-press", on ? "text-fg" : "text-fg-muted hover:text-fg")}>
                   {label}
                   {on && <motion.span layoutId="nav-mark" className="absolute inset-x-0 -bottom-px h-0.5 bg-accent" transition={{ duration: 0.32, ease: EASE }} />}
                 </Link>
@@ -90,7 +90,7 @@ export function AppNav({ isAdmin, name, mockProviders }: { isAdmin: boolean; nam
               const on = isOn(href);
               return (
                 <Link key={href} href={href} aria-current={on ? "page" : undefined}
-                  className={cn("relative flex items-center text-ui transition-colors duration-[var(--dur-press)]", on ? "text-fg" : "text-fg-muted hover:text-fg")}>
+                  className={cn("relative flex items-center text-ui transition-colors duration-press", on ? "text-fg" : "text-fg-muted hover:text-fg")}>
                   {label}
                   {on && <span className="absolute inset-x-0 -bottom-px h-px bg-fg" />}
                 </Link>
@@ -115,7 +115,7 @@ export function AppNav({ isAdmin, name, mockProviders }: { isAdmin: boolean; nam
               ))}
               <div className="mt-8 flex items-center justify-between gap-4">
                 <span className="text-ui text-fg-muted">{name ?? "Signed in"}</span>
-                <button type="button" onClick={signOut} className="h-11 rounded-button border border-control px-5 text-ui font-medium text-fg transition-colors duration-[var(--dur-press)] hover:border-fg-muted">Sign out</button>
+                <button type="button" onClick={signOut} className="h-11 rounded-button border border-control px-5 text-ui font-medium text-fg transition-colors duration-press hover:border-fg-muted">Sign out</button>
               </div>
             </nav>
           </motion.div>
@@ -150,7 +150,7 @@ function AccountMenu({ name, links, onSignOut, active }: { name: string | null; 
   return (
     <div ref={box} className="relative hidden lg:block">
       <button ref={button} type="button" onClick={() => setOpen(!open)} aria-haspopup="menu" aria-expanded={open} aria-label="Account"
-        className={cn("grid size-8 place-items-center rounded-full bg-raised font-display text-body leading-none text-fg transition-shadow duration-[var(--dur-press)]",
+        className={cn("grid size-8 place-items-center rounded-full bg-raised font-display text-body leading-none text-fg transition-shadow duration-press",
           active || open ? "shadow-[0_0_0_1px_var(--color-accent)]" : "hover:shadow-[0_0_0_1px_var(--color-control)]")}>
         {initial}
       </button>

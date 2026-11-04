@@ -183,8 +183,8 @@ export function DrillRunner({ drill, sourceSessionId, serverStt, lesson }: { dri
   const over = secs > drill.durationSec;
 
   return (
-    <div className="max-w-[48rem]">
-      {lesson ? <Link href={`/lessons/${lesson.key}`} className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-[var(--dur-press)] hover:text-fg">← Lesson: {lesson.title}</Link> : <Link href="/drills" className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-[var(--dur-press)] hover:text-fg">← Drills</Link>}
+    <div className="max-w-column">
+      {lesson ? <Link href={`/lessons/${lesson.key}`} className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-press hover:text-fg">← Lesson: {lesson.title}</Link> : <Link href="/drills" className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-press hover:text-fg">← Drills</Link>}
       <h1 className="mt-6 text-display-l text-fg">{drill.title}</h1>
       <p className="mt-5 text-body-l text-fg-muted">{drill.objective}</p>
       <p className="mt-3 text-ui text-fg-subtle">A {Math.round(drill.durationSec / 60) || 1}-minute drill{drill.requiresCamera ? ", on camera" : ""}.</p>
@@ -196,7 +196,7 @@ export function DrillRunner({ drill, sourceSessionId, serverStt, lesson }: { dri
           <p className="mt-4 text-ui text-fg-muted">Target: {drill.passRule}</p>
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Button size="lg" onClick={begin}>Start drill</Button>
-            {!drill.requiresCamera && !voiceOnly && <button type="button" className="h-11 rounded-control text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg" onClick={() => setTextMode(!textMode)}>{textMode ? "Use my voice" : "Type instead"}</button>}
+            {!drill.requiresCamera && !voiceOnly && <button type="button" className="h-11 rounded-control text-ui text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg" onClick={() => setTextMode(!textMode)}>{textMode ? "Use my voice" : "Type instead"}</button>}
             {voiceOnly && <span className="text-ui text-fg-muted">Spoken only: this is measured from your voice.</span>}
           </div>
           <FieldError>{error}</FieldError>
@@ -265,12 +265,12 @@ export function DrillRunner({ drill, sourceSessionId, serverStt, lesson }: { dri
           {result.lesson && (
             <div className="mt-8 flex flex-wrap items-baseline justify-between gap-3 border-y border-line py-4">
               <p className="text-ui text-fg-muted">Lesson practice · <span className="text-fg">{result.lesson.title}</span>: {Math.min(result.lesson.passes, result.lesson.needed)} of {result.lesson.needed} passes{result.lesson.passes >= result.lesson.needed ? ". Practiced. Now use it in an interview." : ""}</p>
-              <Link href={`/lessons/${result.lesson.key}`} className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">Back to the lesson</Link>
+              <Link href={`/lessons/${result.lesson.key}`} className="text-ui text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">Back to the lesson</Link>
             </div>
           )}
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Button size="lg" onClick={again}>Try again</Button>
-            <Link href="/drills" className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">Other drills</Link>
+            <Link href="/drills" className="text-ui text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">Other drills</Link>
           </div>
         </section>
       )}

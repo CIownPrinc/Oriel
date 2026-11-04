@@ -51,7 +51,7 @@ export function CodeAnswer({ spec, busy, onSubmit }: { spec: CodeSpec; busy: boo
             requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = a + 2; });
           }
         }}
-        style={MONO} className="mt-2 min-h-56 w-full resize-y rounded-control border border-control bg-surface px-4 py-3.5 text-[0.9375rem] leading-relaxed text-fg transition-colors duration-[var(--dur-press)] hover:border-fg-subtle" />
+        style={MONO} className="mt-2 min-h-56 w-full resize-y rounded-control border border-control bg-surface px-4 py-3.5 text-[0.9375rem] leading-relaxed text-fg transition-colors duration-press hover:border-fg-subtle" />
       <p className="mt-2 text-meta text-fg-subtle">Tab indents. Press Escape, then Tab, to move on.</p>
 
       <div className="mt-4">
@@ -77,7 +77,7 @@ export function CodeAnswer({ spec, busy, onSubmit }: { spec: CodeSpec; busy: boo
       <label htmlFor="explain" className="mt-6 block text-ui font-medium text-fg">Your approach</label>
       <textarea id="explain" value={explanation} onChange={(e) => setExplanation(e.target.value)} disabled={busy}
         placeholder="How it works, and what it costs, as you'd say it to the interviewer."
-        className="mt-2 min-h-24 w-full resize-y rounded-control border border-control bg-surface px-4 py-3 text-body leading-relaxed text-fg placeholder:text-fg-subtle transition-colors duration-[var(--dur-press)] hover:border-fg-subtle" />
+        className="mt-2 min-h-24 w-full resize-y rounded-control border border-control bg-surface px-4 py-3 text-body leading-relaxed text-fg placeholder:text-fg-subtle transition-colors duration-press hover:border-fg-subtle" />
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <Button type="button" variant="secondary" size="lg" onClick={runExamples} loading={running && !busy} disabled={busy}>Run examples</Button>

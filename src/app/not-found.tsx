@@ -13,10 +13,10 @@ export default function NotFound() {
         <div className="page-grid w-full items-center gap-y-6">
           <div className="col-span-4 sm:col-span-8 lg:col-span-6">
             <h1 className="text-display-l text-fg">That page isn&apos;t in the room<span className="text-accent">.</span></h1>
-            <p className="mt-5 max-w-[34rem] text-body-l text-fg-muted">The link may be old, or the page may have moved (error 404). Everything else is where you left it.</p>
+            <p className="mt-5 max-w-prose text-body-l text-fg-muted">The link may be old, or the page may have moved (error 404). Everything else is where you left it.</p>
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Link href="/" className="inline-flex h-12 items-center rounded-button border border-transparent bg-accent px-6 text-ui font-medium text-on-accent transition-[background-color,transform] duration-[var(--dur-press)] hover:bg-accent-hover active:bg-accent-press active:scale-[0.97]">Go to the home page</Link>
-              <Link href="/home" className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg">Open Oriel</Link>
+              <Link href="/" className="inline-flex h-12 items-center rounded-button border border-transparent bg-accent px-6 text-ui font-medium text-on-accent transition-[background-color,transform] duration-press hover:bg-accent-hover active:bg-accent-press active:scale-97">Go to the home page</Link>
+              <Link href="/home" className="text-ui text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg">Open Oriel</Link>
             </div>
           </div>
           <InterviewerStage personaIds={["hiring_manager"]} className="col-span-4 h-[clamp(12rem,8rem+12vw,22rem)] sm:col-span-8 lg:col-span-6" />

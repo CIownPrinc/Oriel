@@ -31,13 +31,13 @@ export default async function TrainPage() {
 
   return (
     <div>
-      <header className="max-w-[44rem]">
+      <header className="max-w-lead">
         <h1 className="text-display-l text-fg">Practice one skill until it holds<span className="text-accent">.</span></h1>
         <p className="mt-5 text-body-l text-fg-muted">Answer cold. Get one note. Try again on your own. Then face a question you haven&apos;t seen, and come back later to see if it stuck.</p>
       </header>
 
       {(due.length > 0 || open.length > 0) && (
-        <section aria-labelledby="due-title" className="mt-[var(--spacing-group)]">
+        <section aria-labelledby="due-title" className="mt-group">
           <h2 id="due-title" className="text-ui font-medium text-fg">Waiting for you</h2>
           <ul className="mt-3 border-t border-line">
             {due.map((r) => (
@@ -55,14 +55,14 @@ export default async function TrainPage() {
                   <p className="text-body text-fg">{l.kind === "review" ? "Review" : "Practice"} in progress</p>
                   <p className="text-meta text-fg-subtle">{CATEGORIES.find((c) => c.id === l.category)?.label} · started {day(l.createdAt.toISOString())}</p>
                 </div>
-                <Link href={`/train/${l.id}`} className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">Resume</Link>
+                <Link href={`/train/${l.id}`} className="text-ui text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">Resume</Link>
               </li>
             ))}
           </ul>
         </section>
       )}
 
-      <section aria-labelledby="start-title" className="page-grid mt-[var(--spacing-group)] gap-y-12">
+      <section aria-labelledby="start-title" className="page-grid mt-group gap-y-12">
         <div className="col-span-4 sm:col-span-8 lg:col-span-6">
           <h2 id="start-title" className="text-display-m text-fg">Start a practice</h2>
           <div className="mt-6"><StartPractice defaultCategory={preferred} /></div>
@@ -86,9 +86,9 @@ export default async function TrainPage() {
         </aside>
       </section>
 
-      <section aria-labelledby="history-title" className="mt-[var(--spacing-section)]">
+      <section aria-labelledby="history-title" className="mt-section">
         <h2 id="history-title" className="text-display-m text-fg">What you&apos;ve shown</h2>
-        <p className="mt-2 max-w-[44rem] text-ui text-fg-muted">Three things are kept apart: improving on the same question, carrying it to a new one, and holding it after a delay. Each is based only on answers there was enough evidence to judge.</p>
+        <p className="mt-2 max-w-lead text-ui text-fg-muted">Three things are kept apart: improving on the same question, carrying it to a new one, and holding it after a delay. Each is based only on answers there was enough evidence to judge.</p>
         {assessed.length ? (
           <div className="mt-6 overflow-x-auto" tabIndex={0} role="region" aria-label="What you've shown, by skill">
             <table className="w-full min-w-[40rem] text-left text-ui">

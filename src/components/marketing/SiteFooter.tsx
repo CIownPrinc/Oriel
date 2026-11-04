@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 
-const linkCls = "inline-block py-1 text-fg-muted transition-colors duration-[var(--dur-press)] hover:text-fg";
+const linkCls = "inline-block py-1 text-fg-muted transition-colors duration-press hover:text-fg";
 
 /** The colophon, on the page grid: what Oriel is and how to reach it, then the directory from the spine. */
 export function SiteFooter({ signedIn }: { signedIn: boolean }) {

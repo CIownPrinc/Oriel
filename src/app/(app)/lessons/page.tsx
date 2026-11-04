@@ -40,7 +40,7 @@ export default async function LessonsPage() {
     return (
       <div>
         <h1 className="max-w-[20ch] text-display-l text-fg">Your lessons start with one interview<span className="text-accent">.</span></h1>
-        <p className="mt-5 max-w-[44rem] text-body-l text-fg-muted">Lessons are built from what we measure while you practice: your pace and fillers, how your answers land, your posture and eye contact on camera. Do one interview and we&apos;ll pick the skills that will make the biggest difference for you, using your own answers as the examples.</p>
+        <p className="mt-5 max-w-lead text-body-l text-fg-muted">Lessons are built from what we measure while you practice: your pace and fillers, how your answers land, your posture and eye contact on camera. Do one interview and we&apos;ll pick the skills that will make the biggest difference for you, using your own answers as the examples.</p>
         <ButtonLink href="/practice" size="lg" className="mt-8">Start an interview</ButtonLink>
         <Library title="What you could learn" />
       </div>
@@ -50,7 +50,7 @@ export default async function LessonsPage() {
   return (
     <div>
       <h1 className="text-display-l text-fg">Built from how you interviewed<span className="text-accent">.</span></h1>
-      <p className="mt-5 max-w-[44rem] text-body-l text-fg-muted">
+      <p className="mt-5 max-w-lead text-body-l text-fg-muted">
         {open.length
           ? <>From your interview {relPhrase(latest.endedAt ?? latest.createdAt)}: the skills furthest from target, taught with your own answers. Learn it, pass the practice twice, then use it in your next interview: that&apos;s where we confirm it.</>
           : <>Every skill we measured in your interview {relPhrase(latest.endedAt ?? latest.createdAt)} was on target. Raise the pressure next time; new lessons appear when something slips.</>}
@@ -59,19 +59,19 @@ export default async function LessonsPage() {
       {first && (() => {
         const def = LESSONS[first.lessonKey as LessonKey];
         return (
-          <Link href={`/lessons/${first.lessonKey}`} className="group mt-[var(--spacing-group)] block rounded-panel bg-surface px-6 py-7 transition-colors duration-[var(--dur-state)] hover:bg-raised sm:px-10 sm:py-10">
+          <Link href={`/lessons/${first.lessonKey}`} className="group mt-group block rounded-panel bg-surface px-6 py-7 transition-colors duration-state hover:bg-raised sm:px-10 sm:py-10">
             <div className="grid gap-8 md:grid-cols-[1.4fr_1fr] md:items-end">
               <div>
                 <p className="text-ui font-medium text-fg">Start here · <TrackLabel track={def.track} className="text-fg-muted" /></p>
                 <p className="mt-3 text-display-l text-fg">{def.title}</p>
-                <p className="mt-3 max-w-[36rem] text-body-l text-fg-muted">{def.promise}</p>
+                <p className="mt-3 max-w-prose text-body-l text-fg-muted">{def.promise}</p>
               </div>
               <div>
                 <p className="text-ui text-fg-muted">In your interview</p>
                 <p className="mt-1 text-body-l text-fg">{first.evidence.display}</p>
                 <p className="text-ui text-fg-subtle">target {first.evidence.target}</p>
                 <LessonSteps l={summarize(first)} className="mt-5" />
-                <span className="mt-5 inline-block text-ui font-medium text-fg underline decoration-accent decoration-1 underline-offset-[0.2em] group-hover:decoration-2">Open the lesson</span>
+                <span className="mt-5 inline-block text-ui font-medium text-fg underline decoration-accent decoration-1 underline-offset-text group-hover:decoration-2">Open the lesson</span>
               </div>
             </div>
           </Link>
@@ -122,7 +122,7 @@ function Library({ title }: { title: string }) {
             <TrackLabel track={t} />
             <ul className="mt-3 space-y-3">
               {LESSON_ORDER.filter((k) => LESSONS[k].track === t).map((k) => (
-                <li key={k}><Link href={`/lessons/${k}`} className="-mx-2 block rounded-control px-2 py-1 text-ui text-fg transition-colors duration-[var(--dur-press)] hover:bg-surface">{LESSONS[k].title}<span className="block text-meta text-fg-subtle">{LESSONS[k].promise}</span></Link></li>
+                <li key={k}><Link href={`/lessons/${k}`} className="-mx-2 block rounded-control px-2 py-1 text-ui text-fg transition-colors duration-press hover:bg-surface">{LESSONS[k].title}<span className="block text-meta text-fg-subtle">{LESSONS[k].promise}</span></Link></li>
               ))}
             </ul>
           </div>

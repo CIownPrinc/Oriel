@@ -6,6 +6,7 @@ import { PERSONAS, PANEL_ROLE_LABEL, type PanelRole, type PersonaId } from "@/li
 import { pressurePolicy, clampPressure } from "@/lib/interview/pressure";
 import { getSpeechToText } from "@/lib/ai/providers/registry";
 import { Room } from "@/features/room/Room";
+import { PALETTE } from "@/lib/palette";
 
 export const metadata = { title: "The Room" };
 
@@ -24,7 +25,7 @@ export default async function RoomPage({ params }: { params: Promise<{ id: strin
   const seats = ctx.interviewers.map((iv) => {
     const p = PERSONAS[iv.personaId as PersonaId];
     return {
-      seat: iv.seat, personaId: p.id, name: iv.displayName, style: iv.avatarStyle, accent: p.accent, expressiveness: p.expressiveness, warmth: p.warmth, skepticism: p.skepticism,
+      seat: iv.seat, personaId: p.id, name: iv.displayName, style: iv.avatarStyle, accent: PALETTE.accent, expressiveness: p.expressiveness, warmth: p.warmth, skepticism: p.skepticism,
       title: iv.panelRole ? PANEL_ROLE_LABEL[iv.panelRole as PanelRole] : p.title,
     };
   });

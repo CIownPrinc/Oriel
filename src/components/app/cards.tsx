@@ -24,14 +24,14 @@ export function PlaybackClipCard({ clip, href, active, onClick, compact }: {
       <p className="mt-2 text-ui text-fg">{clip.suggestion.startsWith("Try:") ? <><span className="font-medium text-accent">Try:</span>{clip.suggestion.slice(4)}</> : clip.suggestion}</p>
     </>
   );
-  const cls = cn("-mx-2 block w-[calc(100%+1rem)] rounded-control border-t px-2 py-5 text-left transition-colors duration-[var(--dur-press)]", active ? "border-transparent bg-raised" : "border-line hover:bg-surface");
+  const cls = cn("-mx-2 block w-[calc(100%+1rem)] rounded-control border-t px-2 py-5 text-left transition-colors duration-press", active ? "border-transparent bg-raised" : "border-line hover:bg-surface");
   if (href) return <Link href={href} className={cls}>{body}</Link>;
   return <button type="button" onClick={onClick} className={cls} aria-pressed={active}>{body}</button>;
 }
 
 export function DrillCard({ drill, recommended, lastValue }: { drill: { id: string; title: string; objective: string; durationSec: number; requiresCamera: boolean }; recommended?: string | null; lastValue?: string | null }) {
   return (
-    <Link href={`/drills/${drill.id}`} className={cn("group flex flex-col border-t pb-2 pt-4 transition-colors duration-[var(--dur-press)]", "border-line-strong hover:border-fg-subtle")}>
+    <Link href={`/drills/${drill.id}`} className={cn("group flex flex-col border-t pb-2 pt-4 transition-colors duration-press", "border-line-strong hover:border-fg-subtle")}>
       <div className="flex items-center justify-between gap-3">
         <span className="text-meta text-fg-subtle">{Math.round(drill.durationSec / 60) || 1} min{drill.requiresCamera ? " · camera" : ""}</span>
         {recommended && <span className="text-meta font-medium text-accent">Recommended</span>}

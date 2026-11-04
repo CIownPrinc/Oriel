@@ -98,8 +98,8 @@ async function TrainEvidence() {
   return (
     <section>
       <h2 className="text-ui font-medium text-fg">Train: is it working?</h2>
-      <p className="mt-2 max-w-[48rem] text-meta text-fg-muted">{t.loops} completed practice loops. People choose what to practise and when to come back, so these are associations, not effects; a real test needs a comparison group. Answers judged by the model: {t.evaluators.model}; by pattern rules: {t.evaluators.pattern}; not assessable: {t.evaluators.insufficient}.</p>
-      <table className="mt-4 w-full max-w-[48rem] text-left text-ui">
+      <p className="mt-2 max-w-column text-meta text-fg-muted">{t.loops} completed practice loops. People choose what to practise and when to come back, so these are associations, not effects; a real test needs a comparison group. Answers judged by the model: {t.evaluators.model}; by pattern rules: {t.evaluators.pattern}; not assessable: {t.evaluators.insufficient}.</p>
+      <table className="mt-4 w-full max-w-column text-left text-ui">
         <tbody>{rows.map(([k, c]) => <tr key={k} className="border-t border-line"><th scope="row" className="py-2.5 pr-4 font-normal text-fg-muted">{k}</th><td className="py-2.5">{rate(c)}</td></tr>)}</tbody>
       </table>
     </section>

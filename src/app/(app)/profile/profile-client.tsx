@@ -76,10 +76,10 @@ export function ProfileClient(p: {
   const sections: [string, string][] = [["documents", "Resume & role"], ["interviewers", "Your interviewers"], ["privacy", "Privacy"], ["plan", "Plan"], ["data", "Your data"]];
 
   return (
-    <div className="page-grid mt-[var(--spacing-group)] gap-y-12">
+    <div className="page-grid mt-group gap-y-12">
       {/* The page's own contents in the margin, as a document's would be. */}
       <nav aria-label="On this page" className="hidden lg:col-span-3 lg:block">
-        <ul className="sticky top-24 space-y-1 text-ui">{sections.map(([id, l]) => <li key={id}><a href={`#${id}`} className="-mx-2 block rounded-control px-2 py-1.5 text-fg-muted transition-colors duration-[var(--dur-press)] hover:bg-surface hover:text-fg">{l}</a></li>)}</ul>
+        <ul className="sticky top-24 space-y-1 text-ui">{sections.map(([id, l]) => <li key={id}><a href={`#${id}`} className="-mx-2 block rounded-control px-2 py-1.5 text-fg-muted transition-colors duration-press hover:bg-surface hover:text-fg">{l}</a></li>)}</ul>
       </nav>
       <div className="col-span-4 space-y-20 sm:col-span-8 lg:col-span-9">
         <section id="documents">
@@ -107,18 +107,18 @@ export function ProfileClient(p: {
 
         <section id="interviewers">
           <h2 className="text-display-m text-fg">Your interviewers</h2>
-          <p className="mt-2 max-w-[40rem] text-ui text-fg-muted">Give any of them a new shape, color, name and voice. They keep their interviewing style; the look and sound are yours.</p>
+          <p className="mt-2 max-w-lead text-ui text-fg-muted">Give any of them a new shape, color, name and voice. They keep their interviewing style; the look and sound are yours.</p>
           {/* The whole cast, standing together: each the real avatar, as it appears in the Room. */}
           <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3">
             {(Object.keys(PERSONAS) as PersonaId[]).map((id) => {
               const name = styles[id]?.name ?? PERSONAS[id].name.split(" ")[0];
               return (
                 <div key={id} className="flex flex-col items-center text-center">
-                  <BotStill personaId={id} style={styles[id]} accent={PERSONAS[id].accent} className="aspect-square w-full max-w-[11rem]" />
+                  <BotStill personaId={id} style={styles[id]} className="aspect-square w-full max-w-[11rem]" />
                   <p className="-mt-1 max-w-full truncate text-display-m text-fg">{name}</p>
-                  <p className="mt-1 text-meta text-fg-muted">{PERSONAS[id].title} · {voiceFor(id, styles[id])} voice</p>
+                  <p className="mt-1 text-meta text-fg-muted">{PERSONAS[id].label} · {voiceFor(id, styles[id])} voice</p>
                   <button type="button" onClick={() => setEditing(id)} aria-label={`Customize ${name}`}
-                    className="mt-2 h-9 rounded-control px-3 text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg pointer-coarse:h-11">Customize</button>
+                    className="mt-2 h-9 rounded-control px-3 text-ui text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg pointer-coarse:h-11">Customize</button>
                 </div>
               );
             })}
@@ -128,7 +128,7 @@ export function ProfileClient(p: {
 
         <section id="privacy">
           <h2 className="text-display-m text-fg">Privacy</h2>
-          <p className="mt-2 max-w-[40rem] text-ui text-fg-muted">Camera signals are computed on your device; only derived numbers are stored. We never sell biometric data or share individual results with employers.</p>
+          <p className="mt-2 max-w-lead text-ui text-fg-muted">Camera signals are computed on your device; only derived numbers are stored. We never sell biometric data or share individual results with employers.</p>
           <div className="mt-6 divide-y divide-line border-y border-line">
             <Toggle checked={privacy.cameraMetricsEnabled} onChange={(v) => savePrivacy({ cameraMetricsEnabled: v })} label="Camera-based signals" description="Estimate camera engagement and posture. Off: you still see yourself and can record, but no camera measurements are made." />
             <Toggle checked={privacy.gazeMetricEnabled} disabled={!privacy.cameraMetricsEnabled} onChange={(v) => savePrivacy({ gazeMetricEnabled: v })} label="Camera engagement (gaze)" description="Turn off if you avoid eye contact for cultural, neurological or personal reasons; nothing is penalized." />
@@ -136,7 +136,7 @@ export function ProfileClient(p: {
             <Toggle checked={privacy.recordVideo} onChange={(v) => savePrivacy({ recordVideo: v })} label="Record sessions" description="Needed for video Playback. Off: you still get the transcript and the Read." />
             <div className="py-4">
               <p className="text-ui font-medium text-fg">Keep raw video for</p>
-              <p className="mt-1 max-w-[40rem] text-ui text-fg-muted">Recordings are encrypted and deleted automatically after this period. Shortening it applies to existing recordings too.</p>
+              <p className="mt-1 max-w-lead text-ui text-fg-muted">Recordings are encrypted and deleted automatically after this period. Shortening it applies to existing recordings too.</p>
               <Segmented className="mt-3" name="Retention" value={String(privacy.videoRetentionDays)} onChange={(v) => savePrivacy({ videoRetentionDays: Number(v) as 1 | 7 | 30 | 90 })} options={[{ value: "1", label: "1 day" }, { value: "7", label: "7 days" }, { value: "30", label: "30 days" }, { value: "90", label: "90 days" }]} />
             </div>
           </div>
@@ -164,7 +164,7 @@ export function ProfileClient(p: {
           <h2 className="text-display-m text-fg">Your data</h2>
           <p className="mt-2 text-ui text-fg-muted">{p.storedRecordings} encrypted recording{p.storedRecordings === 1 ? "" : "s"} stored. Delete individual sessions from Playback.</p>
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            <a href="/api/privacy/export" className="inline-flex h-10 items-center rounded-button border border-control px-4 text-ui font-medium text-fg transition-colors duration-[var(--dur-press)] hover:border-fg-muted hover:bg-surface pointer-coarse:h-11">Download my data (JSON)</a>
+            <a href="/api/privacy/export" className="inline-flex h-10 items-center rounded-button border border-control px-4 text-ui font-medium text-fg transition-colors duration-press hover:border-fg-muted hover:bg-surface pointer-coarse:h-11">Download my data (JSON)</a>
             <Button variant="danger" onClick={() => setConfirmDelete(true)}>Delete my account</Button>
           </div>
           <h3 className="mt-12 text-ui font-medium text-fg">Consent history</h3>

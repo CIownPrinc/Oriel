@@ -2,6 +2,7 @@ import type { LibSQLDatabase } from "drizzle-orm/libsql";
 import * as schema from "./schema";
 import { PERSONAS } from "@/lib/interview/personas";
 import { LADDER, DRILLS } from "@/lib/practice/catalog";
+import { PALETTE } from "@/lib/palette";
 
 /**
  * Catalog content (personas, drills, ladder) lives in code and is upserted into the
@@ -14,7 +15,7 @@ export async function seedCatalog(db: LibSQLDatabase<typeof schema>) {
       warmth: p.warmth, skepticism: p.skepticism, pace: p.pace,
       interruptionRate: p.interruptionRate, silenceTolerance: p.silenceTolerance,
       specificityDemand: p.specificityDemand, expressiveness: p.expressiveness,
-      voice: p.voice, accent: p.accent,
+      voice: p.voice, accent: PALETTE.accent,
     };
     await db.insert(schema.personas).values(row).onConflictDoUpdate({ target: schema.personas.id, set: row }).run();
   }

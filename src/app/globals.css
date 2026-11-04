@@ -122,6 +122,15 @@
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);   /* entrances */
   --ease-state: cubic-bezier(0.65, 0, 0.35, 1);   /* state changes */
+
+  /* Measures: three line lengths, by job. Prose stays near 65 characters; a lead sentence can run
+     wider; a form or list column wider still. Use max-w-prose / max-w-lead / max-w-column. */
+  /* Things that float in (menus, dialogs) settle from just below. */
+  --animate-enter: enter var(--dur-panel) var(--ease-enter);
+
+  --container-prose: 36rem;
+  --container-lead: 44rem;
+  --container-column: 48rem;
 }
 
 :root {
@@ -186,6 +195,14 @@
   .shadow-sheet { box-shadow: var(--shadow-sheet); }
 }
 
+/* Motion and link tokens as plain utility names, so no component writes duration-[var(--…)]. */
+@utility duration-press { transition-duration: var(--dur-press); }
+@utility duration-state { transition-duration: var(--dur-state); }
+@utility duration-panel { transition-duration: var(--dur-panel); }
+@utility duration-enter { transition-duration: var(--dur-enter); }
+/* Links: the underline sits 0.2em below the baseline at every size. */
+@utility underline-offset-text { text-underline-offset: 0.2em; }
+
 /* The interviewer blinks: a quick squint, then a long pause. Used by the mark when Oriel is working. */
 @keyframes blink { 0%, 88%, 100% { transform: scaleY(1); } 92% { transform: scaleY(0.12); } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -207,7 +224,7 @@
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
 
-input[type="range"].dial { -webkit-appearance: none; appearance: none; background: transparent; height: 32px; cursor: pointer; }
+input[type="range"].dial { -webkit-appearance: none; appearance: none; background: transparent; height: 44px; cursor: pointer; }
 input[type="range"].dial::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, var(--color-accent) var(--fill, 50%), var(--color-line-strong) var(--fill, 50%)); }
 input[type="range"].dial::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; margin-top: -9px; border-radius: 50%; background: var(--color-on-accent); border: 5px solid var(--color-accent); transition: transform var(--dur-state) var(--ease-enter); }
 input[type="range"].dial:active::-webkit-slider-thumb { transform: scale(1.1); }

@@ -141,7 +141,7 @@ function Studio({ personaId, saved, onClose, onSaved }: { personaId: PersonaId; 
         <p className="self-start text-ui text-fg-muted">Make it yours</p>
         <BotAvatar store={store} seats={[seat]} compact className="mt-2 h-52 w-full sm:h-64 md:h-72" />
         <p className="mt-1 max-w-full truncate text-display-l text-fg" aria-live="polite">{shown}</p>
-        <p className="mt-1 text-ui text-fg-muted">{persona.title}</p>
+        <p className="mt-1 text-ui text-fg-muted">{persona.label}</p>
         <p className="mt-5 max-w-[32ch] text-center text-meta text-fg-subtle">The look, name and voice are yours. How {shown} interviews stays the same.</p>
       </div>
 
@@ -159,13 +159,13 @@ function Studio({ personaId, saved, onClose, onSaved }: { personaId: PersonaId; 
             {BOT_VOICES.map((v) => {
               const on = voice === v.id;
               return (
-                <div key={v.id} className={cn("flex items-center rounded-control pl-3 pr-1 transition-[background-color,box-shadow] duration-[var(--dur-press)]", on ? "bg-raised shadow-[inset_0_0_0_1px_var(--color-control)]" : "hover:bg-surface")}>
+                <div key={v.id} className={cn("flex items-center rounded-control pl-3 pr-1 transition-[background-color,box-shadow] duration-press", on ? "bg-raised inset-ring inset-ring-control" : "hover:bg-surface")}>
                   <button type="button" role="radio" aria-checked={on} onClick={() => setDraft({ ...draft, voice: v.id === persona.voice ? null : (v.id as BotVoice) })} className="min-w-0 flex-1 py-2 text-left">
                     <span className={cn("block truncate text-ui", on ? "text-fg" : "text-fg-muted")}>{v.id}</span>
                     <span className="block truncate text-meta text-fg-subtle">{v.label}{v.id === persona.voice ? " · default" : ""}</span>
                   </button>
                   <button type="button" onClick={() => play(v.id)} aria-label={playing === v.id ? `Stop ${v.id}` : `Play ${v.id}`} title={playing === v.id ? "Stop" : "Hear it"}
-                    className={cn("grid size-9 shrink-0 place-items-center rounded-full transition-colors duration-[var(--dur-press)] hover:bg-fg/10 pointer-coarse:size-11", playing === v.id ? "text-accent" : "text-fg-muted hover:text-fg")}>
+                    className={cn("grid size-9 shrink-0 place-items-center rounded-full transition-colors duration-press hover:bg-fg/10 pointer-coarse:size-11", playing === v.id ? "text-accent" : "text-fg-muted hover:text-fg")}>
                     {playing === v.id
                       ? <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden><rect width="10" height="10" rx="1.5" fill="currentColor" /></svg>
                       : <svg width="10" height="12" viewBox="0 0 10 12" aria-hidden><path d="M0 0v12l10-6z" fill="currentColor" /></svg>}
@@ -184,7 +184,7 @@ function Studio({ personaId, saved, onClose, onSaved }: { personaId: PersonaId; 
               const on = draft.shape === s.id;
               return (
                 <button key={s.id} type="button" role="radio" aria-checked={on} aria-label={s.label} onClick={() => setDraft({ ...draft, shape: s.id })}
-                  className={cn("flex flex-col items-center rounded-control px-1 pb-2 pt-1 transition-[background-color,box-shadow] duration-[var(--dur-press)]", on ? "bg-raised shadow-[inset_0_0_0_1px_var(--color-control)]" : "hover:bg-surface")}>
+                  className={cn("flex flex-col items-center rounded-control px-1 pb-2 pt-1 transition-[background-color,box-shadow] duration-press", on ? "bg-raised inset-ring inset-ring-control" : "hover:bg-surface")}>
                   <BotStill personaId={personaId} style={{ ...draft, shape: s.id }} className="aspect-square w-full" />
                   <span className={cn("text-meta", on ? "text-fg" : "text-fg-muted")}>{s.label}</span>
                 </button>
@@ -200,7 +200,7 @@ function Studio({ personaId, saved, onClose, onSaved }: { personaId: PersonaId; 
               const on = draft.color === id;
               return (
                 <button key={id} type="button" role="radio" aria-checked={on} aria-label={c.label} title={c.label} onClick={() => setDraft({ ...draft, color: id })}
-                  className={cn("size-9 rounded-full border transition-[box-shadow,transform] duration-[var(--dur-state)] ease-[var(--ease-enter)] hover:scale-105", on ? "border-transparent shadow-[0_0_0_2px_var(--color-surface),0_0_0_4px_var(--color-accent)]" : "border-control")}
+                  className={cn("size-9 rounded-full border transition-[box-shadow,transform] duration-state ease-enter hover:scale-105", on ? "border-transparent shadow-[0_0_0_2px_var(--color-surface),0_0_0_4px_var(--color-accent)]" : "border-control")}
                   style={{ background: c.face }} />
               );
             })}
@@ -214,7 +214,7 @@ function Studio({ personaId, saved, onClose, onSaved }: { personaId: PersonaId; 
               const on = draft.accessory === a.id;
               return (
                 <button key={a.id} type="button" role="radio" aria-checked={on} onClick={() => setDraft({ ...draft, accessory: a.id })}
-                  className={cn("h-9 rounded-control px-3 text-ui transition-[background-color,box-shadow,color] duration-[var(--dur-press)] pointer-coarse:h-11", on ? "bg-raised shadow-[inset_0_0_0_1px_var(--color-control)] text-fg" : "text-fg-muted hover:bg-surface hover:text-fg")}>
+                  className={cn("h-9 rounded-control px-3 text-ui transition-[background-color,box-shadow,color] duration-press pointer-coarse:h-11", on ? "bg-raised inset-ring inset-ring-control text-fg" : "text-fg-muted hover:bg-surface hover:text-fg")}>
                   {a.label}
                 </button>
               );

@@ -16,11 +16,11 @@ import { PERSONAS, type PersonaId } from "@/lib/interview/personas";
  */
 
 const gap = "mt-12 sm:mt-16";
-const linkCls = "text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-accent";
+const linkCls = "text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-accent";
 
 function Statement({ id, title, sub, center }: { id: string; title: React.ReactNode; sub?: string; center?: boolean }) {
   return (
-    <div className={cn("max-w-[44rem]", center && "mx-auto text-center")}>
+    <div className={cn("max-w-lead", center && "mx-auto text-center")}>
       {/* The recurring tally mark: one short accent rule opens every section. */}
       <span className={cn("mb-6 block h-0.5 w-8 bg-accent", center && "mx-auto")} aria-hidden />
       <h2 id={id} className="text-balance text-display-section text-fg">{title}</h2>

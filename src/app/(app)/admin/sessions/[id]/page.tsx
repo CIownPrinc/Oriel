@@ -32,7 +32,7 @@ export default async function AdminSessionPage({ params }: { params: Promise<{ i
       <section className="grid gap-4 md:grid-cols-3">
         <Card className="p-5"><h2 className="text-ui font-medium text-fg">Cost record</h2><p className="mt-2 text-body-l text-fg">${total.toFixed(4)}</p><ul className="mt-3 space-y-1 text-ui text-fg-muted">{byCat.map(([k, v]) => <li key={k} className="flex justify-between"><span>{k}</span>${v.toFixed(4)}</li>)}</ul></Card>
         <Card className="p-5"><h2 className="text-ui font-medium text-fg">Pipeline</h2>{d.jobs.map((j) => <div key={j.id} className="mt-2 text-ui"><p>{j.status} · attempts {j.attempts}</p>{j.error && <p className="text-meta text-danger">{j.error}</p>}<ul className="mt-2 space-y-0.5 text-meta text-fg-subtle">{Object.entries(j.stepTimings ?? {}).map(([k, v]) => <li key={k}>{k}: {v}ms</li>)}</ul></div>)}</Card>
-        <Card className="p-5"><h2 className="text-ui font-medium text-fg">Memory ledger (claims)</h2><ul className="mt-2 space-y-1 text-ui">{d.claims.map((c) => <li key={c.id}><Badge tone={c.status === "weak" ? "warn" : c.status === "probed" ? "lume" : c.status === "supported" ? "good" : "neutral"}>{c.status}</Badge> <span className="text-fg-muted">#{c.answerSeq} {c.text}</span></li>)}</ul></Card>
+        <Card className="p-5"><h2 className="text-ui font-medium text-fg">Memory ledger (claims)</h2><ul className="mt-2 space-y-1 text-ui">{d.claims.map((c) => <li key={c.id}><Badge tone={c.status === "weak" ? "warn" : c.status === "probed" ? "accent" : c.status === "supported" ? "good" : "neutral"}>{c.status}</Badge> <span className="text-fg-muted">#{c.answerSeq} {c.text}</span></li>)}</ul></Card>
       </section>
 
       <section>

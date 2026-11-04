@@ -91,7 +91,7 @@ export function SetupCheck({ passes, needed, inPlan }: { passes: number; needed:
       {stage === "passed" ? (
         <p className="mt-4 text-ui text-success">Your setup looks good.{inPlan ? ` ${Math.min(count, needed)} of ${needed} checks passed.` : ""}</p>
       ) : (
-        <Button variant="lume" className="mt-5 w-full" onClick={start} loading={stage === "starting"} disabled={stage === "checking"}>{stage === "checking" ? "Checking…" : "Start the check"}</Button>
+        <Button className="mt-5 w-full" onClick={start} loading={stage === "starting"} disabled={stage === "checking"}>{stage === "checking" ? "Checking…" : "Start the check"}</Button>
       )}
       {stage === "passed" && <Button variant="secondary" size="sm" className="mt-3" onClick={start}>Check again</Button>}
       <FieldError>{error}</FieldError>

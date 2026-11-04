@@ -16,7 +16,7 @@ export default async function ProgressPage() {
   const sessions = await listSessions(user.id, 200);
   if (history.length === 0) {
     return (
-      <header className="max-w-[40rem]">
+      <header className="max-w-lead">
         <h1 className="text-display-l text-fg">Your baseline starts with your first session<span className="text-accent">.</span></h1>
         <p className="mt-5 text-body-l text-fg-muted">Every session after that is measured against you, never against other people.</p>
         <ButtonLink href="/practice" size="lg" className="mt-8">Start practice</ButtonLink>
@@ -33,12 +33,12 @@ export default async function ProgressPage() {
 
   return (
     <div>
-      <header className="max-w-[44rem]">
+      <header className="max-w-lead">
         <h1 className="text-display-l text-fg">{history.length > 1 ? "You against you." : "Baseline set."}</h1>
         <p className="mt-5 text-body-l text-fg-muted">{history.length} analyzed session{history.length > 1 ? "s" : ""}. Comparisons are always with your own history, never other people.</p>
       </header>
 
-      <table className="mt-[var(--spacing-group)] w-full text-left">
+      <table className="mt-group w-full text-left">
         <thead>
           <tr className="border-b border-line text-meta text-fg-subtle">
             <th scope="col" className="pb-2 font-normal">Measure</th>
@@ -68,7 +68,7 @@ export default async function ProgressPage() {
           ))}
         </tbody>
       </table>
-      <p className="mt-6 max-w-[44rem] text-ui text-fg-muted">{completed} completed session{completed === 1 ? "" : "s"} in total. The dashed line is your baseline. Camera engagement is an estimate and only appears when camera signals were on.</p>
+      <p className="mt-6 max-w-lead text-ui text-fg-muted">{completed} completed session{completed === 1 ? "" : "s"} in total. The dashed line is your baseline. Camera engagement is an estimate and only appears when camera signals were on.</p>
     </div>
   );
 }

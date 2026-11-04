@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { cloneElement, forwardRef, isValidElement, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 import { cn } from "./cn";
 
 /*
@@ -6,7 +6,7 @@ import { cn } from "./cn";
  * asks of a field's boundary); focus is the page-wide accent outline. Text is 16px or larger,
  * so phones never zoom into a field.
  */
-const control = "w-full rounded-control border border-control bg-surface px-3.5 text-body text-fg placeholder:text-fg-subtle transition-[border-color,background-color] duration-[var(--dur-press)] hover:border-fg-subtle aria-[invalid=true]:border-danger disabled:opacity-50";
+const control = "w-full rounded-control border border-control bg-surface px-3.5 text-body text-fg placeholder:text-fg-subtle transition-[border-color,background-color] duration-press hover:border-fg-subtle aria-[invalid=true]:border-danger disabled:opacity-50";
 
 export function Label({ children, htmlFor, hint }: { children: React.ReactNode; htmlFor?: string; hint?: string }) {
   return (
@@ -34,6 +34,22 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
   );
 });
 
+/**
+ * A labelled control with its own error. The error sits under the field it is about, marks the
+ * field invalid and is read out with it, so nobody has to guess which field a message means.
+ */
+export function Field({ id, label, hint, error, children, className }: { id: string; label: React.ReactNode; hint?: string; error?: string | null; children: React.ReactElement<{ id?: string; "aria-invalid"?: boolean; "aria-describedby"?: string }>; className?: string }) {
+  const errId = `${id}-error`;
+  const control = isValidElement(children) ? cloneElement(children, { id, "aria-invalid": error ? true : undefined, "aria-describedby": error ? errId : undefined }) : children;
+  return (
+    <div className={className}>
+      <Label htmlFor={id} hint={hint}>{label}</Label>
+      {control}
+      <FieldError id={errId}>{error}</FieldError>
+    </div>
+  );
+}
+
 export function FieldError({ children, id }: { children?: React.ReactNode; id?: string }) {
   if (!children) return null;
   return (
@@ -57,10 +73,10 @@ export function Segmented<T extends string>({ value, onChange, options, name, cl
         const on = o.value === value;
         return rows ? (
           <button key={o.value} type="button" role="radio" aria-checked={on} aria-label={o.hint ? `${o.label}, ${o.hint}` : o.label} disabled={o.disabled} onClick={() => onChange(o.value)}
-            className={cn("group grid grid-cols-[1.25rem_minmax(0,1fr)] items-baseline gap-x-3 border-b border-line py-3.5 text-left transition-colors duration-[var(--dur-press)] disabled:cursor-not-allowed disabled:opacity-40",
+            className={cn("group grid grid-cols-[1.25rem_minmax(0,1fr)] items-baseline gap-x-3 border-b border-line py-3.5 text-left transition-colors duration-press disabled:cursor-not-allowed disabled:opacity-40",
               !on && "hover:bg-surface/60")}>
-            <span className={cn("relative top-[3px] grid size-4 place-items-center rounded-full border transition-colors duration-[var(--dur-press)]", on ? "border-accent" : "border-control group-hover:border-fg-subtle")} aria-hidden>
-              <span className={cn("size-2 rounded-full bg-accent transition-transform duration-[var(--dur-state)] ease-[var(--ease-enter)]", on ? "scale-100" : "scale-0")} />
+            <span className={cn("relative top-[3px] grid size-4 place-items-center rounded-full border transition-colors duration-press", on ? "border-accent" : "border-control group-hover:border-fg-subtle")} aria-hidden>
+              <span className={cn("size-2 rounded-full bg-accent transition-transform duration-state ease-enter", on ? "scale-100" : "scale-0")} />
             </span>
             <span>
               <span className={cn("block text-ui font-medium", on ? "text-fg" : "text-fg-muted")}>{o.label}</span>
@@ -69,8 +85,8 @@ export function Segmented<T extends string>({ value, onChange, options, name, cl
           </button>
         ) : (
           <button key={o.value} type="button" role="radio" aria-checked={on} aria-label={o.spoken ?? o.label} disabled={o.disabled} onClick={() => onChange(o.value)}
-            className={cn("h-9 min-w-9 whitespace-nowrap rounded-control px-3 text-ui transition-[background-color,color,box-shadow] duration-[var(--dur-press)] disabled:cursor-not-allowed disabled:opacity-40 pointer-coarse:h-11",
-              on ? "bg-raised text-fg shadow-[inset_0_0_0_1px_var(--color-control)]" : "text-fg-muted hover:bg-surface hover:text-fg")}>
+            className={cn("h-9 min-w-9 whitespace-nowrap rounded-control px-3 text-ui transition-[background-color,color,box-shadow] duration-press disabled:cursor-not-allowed disabled:opacity-40 pointer-coarse:h-11",
+              on ? "bg-raised text-fg inset-ring inset-ring-control" : "text-fg-muted hover:bg-surface hover:text-fg")}>
             {o.label}
           </button>
         );
@@ -87,8 +103,8 @@ export function Toggle({ checked, onChange, label, description, disabled }: { ch
         {description && <span className="mt-1 block max-w-prose text-ui leading-relaxed text-fg-muted">{description}</span>}
       </span>
       <button type="button" role="switch" aria-checked={checked} aria-label={label} disabled={disabled} onClick={() => onChange(!checked)}
-        className={cn("relative mt-0.5 h-6 w-10 shrink-0 rounded-full border transition-colors duration-[var(--dur-state)]", checked ? "border-accent bg-accent" : "border-control bg-raised")}>
-        <span className={cn("absolute left-[2px] top-[2px] size-[18px] rounded-full transition-transform duration-[var(--dur-state)] ease-[var(--ease-enter)]", checked ? "translate-x-4 bg-on-accent" : "translate-x-0 bg-fg-muted")} />
+        className={cn("relative mt-0.5 h-6 w-10 shrink-0 rounded-full border transition-colors duration-state", checked ? "border-accent bg-accent" : "border-control bg-raised")}>
+        <span className={cn("absolute left-[2px] top-[2px] size-[18px] rounded-full transition-transform duration-state ease-enter", checked ? "translate-x-4 bg-on-accent" : "translate-x-0 bg-fg-muted")} />
       </button>
     </label>
   );

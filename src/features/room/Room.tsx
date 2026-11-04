@@ -303,7 +303,7 @@ export function Room(props: RoomProps) {
 
               {/* The conversation: who is talking, and the question you're answering. */}
               <div className="shrink-0 px-5 pb-5 pt-2 sm:px-10">
-                <div className="mx-auto max-w-[44rem]">
+                <div className="mx-auto max-w-lead">
                   <p className="flex items-center gap-2 text-meta">
                     <span className={cn("size-1.5 shrink-0 rounded-full transition-colors duration-300", phase === "interviewer" ? "bg-fg" : phase === "listening" ? "bg-accent" : "bg-fg-subtle")} aria-hidden />
                     <span className="font-medium text-fg">{active.name} · {active.title}</span>
@@ -314,14 +314,14 @@ export function Room(props: RoomProps) {
                       with captions off), and grows sentence by sentence with the voice. */}
                   <div className="mt-2 min-h-[4.25rem]">
                     {showQuestion && (
-                      <p key={ui?.questionKey ?? question} className={cn("text-display-m transition-[color,opacity] duration-[var(--dur-panel)] ease-[var(--ease-state)] motion-safe:animate-[enter_var(--dur-panel)_var(--ease-enter)]",
+                      <p key={ui?.questionKey ?? question} className={cn("text-display-m transition-[color,opacity] duration-panel ease-state motion-safe:animate-enter",
                         phase === "processing" ? "text-fg-muted opacity-60" : "text-fg")}>{question}</p>
                     )}
                   </div>
                   {stage === "live" && ui?.phase === "listening" && ui.inputMode === "text" && (
                     <form onSubmit={(e) => { e.preventDefault(); controller.current?.submitText(typed); setTyped(""); }} className="mt-3 flex items-end gap-2">
                       <textarea autoFocus value={typed} onChange={(e) => { controller.current?.noteKeystroke(); setTyped(e.target.value); }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); controller.current?.submitText(typed); setTyped(""); } }}
-                        rows={2} placeholder="Type your answer. Enter sends it." aria-label="Your answer" className="flex-1 resize-none rounded-control border border-control bg-surface px-3.5 py-2.5 text-body leading-relaxed transition-colors duration-[var(--dur-press)] hover:border-fg-subtle" />
+                        rows={2} placeholder="Type your answer. Enter sends it." aria-label="Your answer" className="flex-1 resize-none rounded-control border border-control bg-surface px-3.5 py-2.5 text-body leading-relaxed transition-colors duration-press hover:border-fg-subtle" />
                       <Button type="submit" disabled={!typed.trim()}>Send</Button>
                     </form>
                   )}
@@ -356,7 +356,7 @@ export function Room(props: RoomProps) {
             {stage === "live" ? (
               <nav aria-label="Interview controls" className="flex items-center gap-1.5 sm:gap-2">
                 <button type="button" onClick={toggleMute} disabled={!devices?.mic} aria-keyshortcuts="M"
-                  className={cn("flex h-10 items-center gap-2 rounded-control px-3 text-ui font-medium transition-colors duration-[var(--dur-press)] disabled:opacity-40 pointer-coarse:h-11", muted ? "bg-danger/10 text-danger" : "text-fg hover:bg-surface")}>
+                  className={cn("flex h-10 items-center gap-2 rounded-control px-3 text-ui font-medium transition-colors duration-press disabled:opacity-40 pointer-coarse:h-11", muted ? "bg-danger/10 text-danger" : "text-fg hover:bg-surface")}>
                   {muted ? "Unmute" : <><MicMeter controller={controller.current} live={phase === "listening" && ui?.inputMode === "voice"} />Mute</>}
                   <Kbd className="hidden md:inline-grid">M</Kbd>
                 </button>
@@ -489,7 +489,7 @@ function Kbd({ children, className }: { children: ReactNode; className?: string 
 function Ctl({ children, on, onClick, disabled, shortcut }: { children: ReactNode; on?: boolean; onClick: () => void; disabled?: boolean; shortcut?: string }) {
   return (
     <button type="button" aria-pressed={on} aria-keyshortcuts={shortcut} onClick={onClick} disabled={disabled}
-      className={cn("flex h-10 items-center gap-2 rounded-control px-3 text-ui font-medium transition-colors duration-[var(--dur-press)] disabled:opacity-40 pointer-coarse:h-11", on ? "bg-raised text-fg shadow-[inset_0_0_0_1px_var(--color-control)]" : "text-fg hover:bg-surface")}>
+      className={cn("flex h-10 items-center gap-2 rounded-control px-3 text-ui font-medium transition-colors duration-press disabled:opacity-40 pointer-coarse:h-11", on ? "bg-raised text-fg inset-ring inset-ring-control" : "text-fg hover:bg-surface")}>
       {children}
       {shortcut && <Kbd className="hidden md:inline-grid">{shortcut}</Kbd>}
     </button>

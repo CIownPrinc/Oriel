@@ -1,10 +1,6 @@
-import { Thinking } from "@/components/ui/Logo";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 
-/** Shown only when a page takes a moment: it fades in after a short delay, so quick navigations never flash it. */
+/** Every app page loads in its own shape: a title, a sentence, rows. Nothing jumps when it arrives. */
 export default function Loading() {
-  return (
-    <div className="grid min-h-[40vh] place-items-center opacity-0 motion-safe:animate-[fade-in_var(--dur-panel)_var(--ease-enter)_400ms_forwards] motion-reduce:opacity-100">
-      <Thinking label="Loading" />
-    </div>
-  );
+  return <PageSkeleton />;
 }

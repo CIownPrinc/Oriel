@@ -28,16 +28,16 @@ const CONTENTS: [string, string][] = [
 export default function PrivacyPage() {
   return (
     <main id="content" tabIndex={-1} className="frame pb-section pt-[calc(var(--header-h)+var(--spacing-hero))] focus:outline-none">
-      <header className="max-w-[48rem]">
+      <header className="max-w-column">
         <h1 className="text-display-l text-fg">Privacy and biometric policy</h1>
         <p className="mt-5 text-body-l text-fg-muted">Oriel is a practice tool. It is not used by employers to screen candidates, and it never feeds you answers during a real interview.</p>
         <p className="mt-4 text-ui text-fg-subtle">Draft, pending review by privacy counsel. Consent version {CONSENT_VERSION}.</p>
       </header>
       {/* A long document reads with its contents in the margin, as the profile does. */}
-      <div className="page-grid mt-[var(--spacing-group)] gap-y-10">
+      <div className="page-grid mt-group gap-y-10">
         <nav aria-label="On this page" className="hidden lg:col-span-3 lg:block">
           <ul className="sticky top-24 space-y-1 text-ui">
-            {CONTENTS.map(([id, label]) => <li key={id}><a href={`#${id}`} className="-mx-2 block rounded-control px-2 py-1.5 text-fg-muted transition-colors duration-[var(--dur-press)] hover:bg-surface hover:text-fg">{label}</a></li>)}
+            {CONTENTS.map(([id, label]) => <li key={id}><a href={`#${id}`} className="-mx-2 block rounded-control px-2 py-1.5 text-fg-muted transition-colors duration-press hover:bg-surface hover:text-fg">{label}</a></li>)}
           </ul>
         </nav>
         <article className="col-span-4 sm:col-span-8 lg:col-span-7 lg:col-start-4">

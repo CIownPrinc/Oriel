@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="relative min-h-dvh lg:grid lg:grid-cols-[1.05fr_1fr]">
       <aside className="hidden bg-surface px-10 py-6 lg:flex lg:flex-col lg:justify-between xl:px-14">
         <Link href="/" aria-label="Oriel home" className="-ml-1 inline-flex self-start rounded-control p-1"><Logo /></Link>
-        <figure className="w-full max-w-[34rem] self-center">
+        <figure className="w-full max-w-prose self-center">
           <InterviewerStage personaIds={["hiring_manager"]} className="mx-auto h-[clamp(14rem,9rem+12vw,22rem)] w-full" />
           <blockquote className="hang -mt-2 text-display-m text-fg">“Tell me about a time you had to make a decision without all the data you wanted.”</blockquote>
           <figcaption className="mt-4 text-ui text-fg-muted"><span className="text-fg">Daniel</span>, hiring manager. One of six interviewers you can practice with.</figcaption>

@@ -95,9 +95,9 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
   return (
     <article>
       {/* The assessment as the title; the session it describes as its byline. */}
-      <header className="pb-[var(--spacing-group)]">
+      <header className="pb-group">
         <h1 className="max-w-[28ch] text-display-l text-fg">{d.headline ?? "Now you know what happened."}</h1>
-        <p className="mt-5 max-w-[48rem] text-ui text-fg-muted">{d.subtitle}</p>
+        <p className="mt-5 max-w-column text-ui text-fg-muted">{d.subtitle}</p>
         {d.summarySource === "heuristic" && <p className="mt-2 text-meta text-fg-subtle">Coaching generated from measurements (no language model configured).</p>}
       </header>
 
@@ -205,7 +205,7 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
         <section className="pt-20">
           <div className="flex flex-wrap items-baseline justify-between gap-4">
             <h2 className="text-display-m text-fg">What to work on next</h2>
-            <Link href="/lessons" className="text-meta text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">All lessons</Link>
+            <Link href="/lessons" className="text-meta text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">All lessons</Link>
           </div>
           <p className="mt-2 max-w-2xl text-ui text-fg-muted">Built from this interview; each one uses your own answers as the example and ends with measured practice.</p>
           <div className="mt-5 grid gap-x-8 sm:grid-cols-2 lg:grid-cols-3">{d.lessons.map((l) => <LessonCard key={l.key} l={l} />)}</div>
@@ -246,7 +246,7 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
           {d.rewrite && (
             <div>
               <h2 className="text-display-m text-fg">Your weakest answer, tightened</h2>
-              <p className="hang mt-3 max-w-[40rem] font-display text-body-l text-fg-muted">“{d.rewrite.question}”</p>
+              <p className="hang mt-3 max-w-lead font-display text-body-l text-fg-muted">“{d.rewrite.question}”</p>
               <div className="page-grid mt-6 gap-y-6">
                 <figure className="col-span-4 border-t border-line pt-4 sm:col-span-8 lg:col-span-6"><figcaption className="text-meta font-medium text-fg-subtle">What you said</figcaption><blockquote className="mt-2 text-body-l text-fg-muted">{d.rewrite.original}</blockquote></figure>
                 <figure className="col-span-4 border-t border-line pt-4 sm:col-span-8 lg:col-span-6"><figcaption className="text-meta font-medium text-fg-subtle">Same facts, tighter</figcaption><blockquote className="mt-2 text-body-l text-fg">{d.rewrite.rewritten}</blockquote><p className="mt-3 text-meta text-fg-subtle">{d.rewrite.note} Only facts from your answer are used; [brackets] mark details only you can fill in.</p></figure>
@@ -271,7 +271,7 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
         <ol className="mt-5 divide-y divide-line border-y border-line">
           {d.transcript.map((x) => (
             <li key={x.id}>
-              <button type="button" onClick={() => seek(x.startMs)} disabled={!d.media} className={cn("grid w-full grid-cols-[3rem_minmax(0,1fr)] items-baseline gap-x-4 px-1 py-4 text-left transition-colors duration-[var(--dur-press)] enabled:hover:bg-surface sm:grid-cols-[3rem_8rem_minmax(0,1fr)]", d.media && time > 0 && time * 1000 >= x.startMs && time * 1000 < x.endMs && "bg-accent-tint")}>
+              <button type="button" onClick={() => seek(x.startMs)} disabled={!d.media} className={cn("grid w-full grid-cols-[3rem_minmax(0,1fr)] items-baseline gap-x-4 px-1 py-4 text-left transition-colors duration-press enabled:hover:bg-surface sm:grid-cols-[3rem_8rem_minmax(0,1fr)]", d.media && time > 0 && time * 1000 >= x.startMs && time * 1000 < x.endMs && "bg-accent-tint")}>
                 <span className="text-meta text-fg-subtle">{mmss(x.startMs)}</span>
                 <span className={cn("text-meta font-medium", x.speaker === "interviewer" ? "text-fg-subtle" : "text-fg")}>{x.who}</span>
                 <span className={cn("col-start-2 sm:col-start-auto", x.speaker === "interviewer" ? "font-display text-body-l leading-snug text-fg-muted" : "text-body text-fg")}>{x.text}</span>

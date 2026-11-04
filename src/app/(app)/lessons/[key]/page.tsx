@@ -29,17 +29,17 @@ export default async function LessonPage({ params }: { params: Promise<{ key: st
 
   return (
     <div>
-      <Link href="/lessons" className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-[var(--dur-press)] hover:text-fg">← Lessons</Link>
-      <header className="mt-6 max-w-[48rem]">
+      <Link href="/lessons" className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-press hover:text-fg">← Lessons</Link>
+      <header className="mt-6 max-w-column">
         <h1 className="text-display-l text-fg">{def.title}</h1>
         <p className="mt-5 text-body-l text-fg-muted">{def.promise}</p>
         <p className="mt-3 text-ui text-fg-subtle">
           {TRACKS[def.track].label} lesson.{status === "active" ? <> <span className="text-fg">In your plan.</span></> : status === "queued" ? " Up next." : status === "mastered" ? <> <span className="text-success">Mastered.</span></> : ""}
         </p>
-        {l && <LessonSteps l={{ ...summarize(l), viewed: true }} className="mt-8 max-w-[34rem]" />}
+        {l && <LessonSteps l={{ ...summarize(l), viewed: true }} className="mt-8 max-w-prose" />}
       </header>
 
-      <div className="page-grid mt-[var(--spacing-group)] gap-y-12">
+      <div className="page-grid mt-group gap-y-12">
         <div className="col-span-4 space-y-14 sm:col-span-8 lg:col-span-7">
           {l ? (
             <section className="border-t border-line pt-6">
@@ -58,7 +58,7 @@ export default async function LessonPage({ params }: { params: Promise<{ key: st
                       <blockquote className="hang-sans mt-1.5 text-body-l text-fg">“{q.text}”</blockquote>
                       <p className="mt-1.5 flex flex-wrap gap-x-3 text-meta text-fg-subtle">
                         {q.note && <span>{q.note}</span>}
-                        {q.startMs !== null && <Link href={`/playback/${q.sessionId}?t=${q.startMs}`} className="text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">{found?.recorded && !q.typed ? "Hear it in Playback" : "See it in Playback"}</Link>}
+                        {q.startMs !== null && <Link href={`/playback/${q.sessionId}?t=${q.startMs}`} className="text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">{found?.recorded && !q.typed ? "Hear it in Playback" : "See it in Playback"}</Link>}
                       </p>
                     </li>
                   ))}
@@ -67,7 +67,7 @@ export default async function LessonPage({ params }: { params: Promise<{ key: st
               {l.evidence.moments.length > 0 && (
                 <ul className="mt-6 space-y-2">
                   {l.evidence.moments.map((m, i) => (
-                    <li key={i}><Link href={`/playback/${m.sessionId}?t=${m.startMs}`} className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">{m.label}</Link></li>
+                    <li key={i}><Link href={`/playback/${m.sessionId}?t=${m.startMs}`} className="text-ui text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">{m.label}</Link></li>
                   ))}
                 </ul>
               )}

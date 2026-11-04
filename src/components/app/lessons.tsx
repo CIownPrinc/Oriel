@@ -46,7 +46,7 @@ export function TrackLabel({ track, className }: { track: Track; className?: str
 export function LessonCard({ l }: { l: LessonSummary }) {
   const def = LESSONS[l.key];
   return (
-    <Link href={`/lessons/${l.key}`} className={cn("group block border-t pb-2 pt-4 transition-colors duration-[var(--dur-press)]", l.status === "active" ? "border-line-strong hover:border-fg-subtle" : "border-line hover:border-fg-subtle")}>
+    <Link href={`/lessons/${l.key}`} className={cn("group block border-t pb-2 pt-4 transition-colors duration-press", l.status === "active" ? "border-line-strong hover:border-fg-subtle" : "border-line hover:border-fg-subtle")}>
       <div className="flex items-start justify-between gap-3">
         <TrackLabel track={def.track} />
         {l.status === "queued" && <span className="text-meta font-medium text-fg-subtle">Up next</span>}

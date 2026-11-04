@@ -150,8 +150,8 @@ export function TrainingSession({ initial }: { initial: LoopView }) {
   const done = view.stage === "done";
 
   return (
-    <div className="mx-auto max-w-[48rem]">
-      <Link href="/train" className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-[var(--dur-press)] hover:text-fg">← Training</Link>
+    <div className="mx-auto max-w-column">
+      <Link href="/train" className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-press hover:text-fg">← Training</Link>
       <p className="mt-4 text-ui text-fg-subtle">{view.kind === "review" ? "Review" : "Practice"} · {category}</p>
 
       {done ? <Summary view={view} /> : (
@@ -164,9 +164,9 @@ export function TrainingSession({ initial }: { initial: LoopView }) {
             <div className="mt-3 flex items-start gap-4 sm:gap-6">
               <InterviewerStage personaIds={["hiring_manager"]} store={voice.store} still="/interviewer/hiring_manager.webp" className="aspect-square w-20 shrink-0 sm:w-28" />
               <div className="pt-2">
-                <h1 id="question" key={view.question.text} className="text-display-m text-fg motion-safe:animate-[enter_var(--dur-panel)_var(--ease-enter)]">{view.question.text}</h1>
+                <h1 id="question" key={view.question.text} className="text-display-m text-fg motion-safe:animate-enter">{view.question.text}</h1>
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
-                  <button type="button" onClick={() => { if (speaking) { voice.stopSpeaking(); setSpeaking(false); } else void hear(); }} className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg">
+                  <button type="button" onClick={() => { if (speaking) { voice.stopSpeaking(); setSpeaking(false); } else void hear(); }} className="text-ui text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg">
                     {speaking ? "Stop" : "Hear the question"}
                   </button>
                   <label className="flex items-center gap-2 text-meta text-fg-subtle">
@@ -195,7 +195,7 @@ export function TrainingSession({ initial }: { initial: LoopView }) {
               onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void submit(); } }}
               readOnly={recording !== "off"}
               placeholder={recording === "on" ? "Listening… your words appear here." : "Answer out loud, or type, as you would in the room."}
-              className="min-h-44 w-full resize-y rounded-control border border-control bg-surface px-4 py-3.5 text-body leading-relaxed text-fg placeholder:text-fg-subtle transition-colors duration-[var(--dur-press)] hover:border-fg-subtle disabled:opacity-60" />
+              className="min-h-44 w-full resize-y rounded-control border border-control bg-surface px-4 py-3.5 text-body leading-relaxed text-fg placeholder:text-fg-subtle transition-colors duration-press hover:border-fg-subtle disabled:opacity-60" />
             <div className="mt-3 flex flex-wrap items-center gap-3">
               {canRecord && (
                 <Button type="button" variant={recording === "on" ? "primary" : "secondary"} size="lg" onClick={toggleRecording} disabled={busy || recording === "transcribing"} loading={recording === "transcribing"} aria-pressed={recording === "on"}>

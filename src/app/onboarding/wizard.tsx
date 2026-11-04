@@ -112,7 +112,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
         {step > 0 && step < DONE && <p className="text-meta font-medium text-fg-subtle lg:hidden">{step} of {STEPS.length}</p>}
       </header>
 
-      <Stage personaId={p.preferredPersona} line={line} speaker={`${first} · ${persona.title}`} celebrate={step === DONE} />
+      <Stage personaId={p.preferredPersona} line={line} speaker={`${first} · ${persona.label}`} celebrate={step === DONE} />
 
       <main className="relative flex flex-col px-5 pb-14 pt-6 sm:px-10 lg:min-h-dvh lg:px-[clamp(2.5rem,6vw,6rem)] lg:pt-20">
         <div className={cn("mx-auto w-full max-w-[540px] transition-opacity duration-500", step === 0 || step === DONE ? "pointer-events-none h-0 opacity-0 lg:h-auto" : "opacity-100")}>
@@ -134,7 +134,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
                     ))}
                   </ol>
                   <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
-                    <Button size="lg" variant="lume" onClick={() => go(1)}>Let’s begin</Button>
+                    <Button size="lg" onClick={() => go(1)}>Let’s begin</Button>
                     <p className="text-meta text-fg-subtle">Your interviewer is an AI. What you share stays private.</p>
                   </div>
                 </StepShell>
@@ -215,8 +215,8 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
                         const who = PERSONAS[id];
                         return (
                           <button key={id} type="button" role="radio" aria-checked={on} aria-label={`${who.name.split(" ")[0]}, ${who.title}: ${hint}`} onClick={() => set("preferredPersona", id)}
-                            className={cn("rounded-panel px-2 pb-4 pt-1 text-center transition-colors duration-[var(--dur-state)]", on ? "bg-surface" : "hover:bg-surface/50")}>
-                            <BotStill personaId={id} accent={who.accent} className={cn("mx-auto aspect-square w-[min(100%,8rem)] transition-opacity duration-[var(--dur-state)]", !on && "opacity-80")} />
+                            className={cn("rounded-panel px-2 pb-4 pt-1 text-center transition-colors duration-state", on ? "bg-surface" : "hover:bg-surface/50")}>
+                            <BotStill personaId={id} className={cn("mx-auto aspect-square w-[min(100%,8rem)] transition-opacity duration-state", !on && "opacity-80")} />
                             <span className={cn("-mt-1 block font-display text-body-l", on ? "text-fg" : "text-fg-muted")}>{who.name.split(" ")[0]}</span>
                             <span className="mt-0.5 block text-meta text-fg-muted">{who.title}</span>
                             <span className="mt-1 block text-meta text-fg-subtle">{hint}</span>
@@ -232,7 +232,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
                     ]} />
                   </div>
                   <FieldError>{error}</FieldError>
-                  <Nav onBack={() => go(4)} onNext={finish} nextLabel="Set up my first interview" busy={busy} lume />
+                  <Nav onBack={() => go(4)} onNext={finish} nextLabel="Set up my first interview" busy={busy} />
                 </StepShell>
               )}
 
@@ -388,7 +388,7 @@ function DropZone({ busy, onFile }: { busy: boolean; onFile: (f: File) => void }
       <button type="button" onClick={() => fileRef.current?.click()} disabled={busy}
         onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
         onDrop={(e) => { e.preventDefault(); setOver(false); const f = e.dataTransfer.files?.[0]; if (f) onFile(f); }}
-        className={cn("mt-8 flex w-full flex-col items-center justify-center rounded-panel border border-dashed px-6 py-9 text-center transition-[border-color,background-color] duration-[var(--dur-press)]",
+        className={cn("mt-8 flex w-full flex-col items-center justify-center rounded-panel border border-dashed px-6 py-9 text-center transition-[border-color,background-color] duration-press",
           over ? "border-accent bg-accent-tint" : "border-control hover:border-fg-subtle hover:bg-surface")}>
         {busy ? (
           <span className="flex w-full max-w-[260px] flex-col items-center gap-2.5">
@@ -445,13 +445,13 @@ function ResumeSummary({ r }: { r: ParsedResume }) {
   );
 }
 
-function Nav({ onBack, onNext, onSkip, nextLabel = "Continue", backLabel = "Back", nextDisabled, busy, submit, lume }: { onBack?: () => void; onNext?: () => void; onSkip?: () => void; nextLabel?: string; backLabel?: string; nextDisabled?: boolean; busy?: boolean; submit?: boolean; lume?: boolean }) {
+function Nav({ onBack, onNext, onSkip, nextLabel = "Continue", backLabel = "Back", nextDisabled, busy, submit }: { onBack?: () => void; onNext?: () => void; onSkip?: () => void; nextLabel?: string; backLabel?: string; nextDisabled?: boolean; busy?: boolean; submit?: boolean }) {
   return (
     <div className="mt-9 flex flex-wrap items-center gap-x-2 gap-y-3">
       {onBack && <Button variant="ghost" onClick={onBack} className="-ml-4 px-4 max-sm:px-3">{backLabel}</Button>}
       <div className="ml-auto flex items-center gap-1 sm:gap-2">
         {onSkip && <Button variant="ghost" onClick={onSkip} className="max-sm:px-3">Skip for now</Button>}
-        <Button type={submit ? "submit" : "button"} variant={lume ? "lume" : "primary"} onClick={submit ? undefined : onNext} disabled={nextDisabled} loading={busy}>{nextLabel}</Button>
+        <Button type={submit ? "submit" : "button"} variant="primary" onClick={submit ? undefined : onNext} disabled={nextDisabled} loading={busy}>{nextLabel}</Button>
       </div>
     </div>
   );

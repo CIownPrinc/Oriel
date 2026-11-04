@@ -33,15 +33,15 @@ export default async function DrillsPage() {
   const recommended = DRILLS.find((d) => d.id === rec.drillId);
   return (
     <div>
-      <header className="max-w-[44rem]">
+      <header className="max-w-lead">
         <h1 className="text-display-l text-fg">Five minutes on one thing<span className="text-accent">.</span></h1>
         <p className="mt-5 text-body-l text-fg-muted">Each drill has one objective, one measurement and your own baseline to beat.</p>
       </header>
 
       {recommended && (
-        <section className="page-grid mt-[var(--spacing-group)] gap-y-5 border-t border-line pt-10">
+        <section className="page-grid mt-group gap-y-5 border-t border-line pt-10">
           <h2 className="col-span-4 text-ui font-medium text-fg sm:col-span-8 lg:col-span-3">Recommended for you</h2>
-          <div className="col-span-4 max-w-[36rem] sm:col-span-8 lg:col-span-9"><DrillCard drill={recommended} recommended={rec.reason} lastValue={last(recommended.id)} /></div>
+          <div className="col-span-4 max-w-prose sm:col-span-8 lg:col-span-9"><DrillCard drill={recommended} recommended={rec.reason} lastValue={last(recommended.id)} /></div>
         </section>
       )}
 
