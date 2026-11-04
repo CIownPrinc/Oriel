@@ -16,11 +16,13 @@ import { PERSONAS, type PersonaId } from "@/lib/interview/personas";
  */
 
 const gap = "mt-12 sm:mt-16";
-const linkCls = "text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg";
+const linkCls = "text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-accent";
 
 function Statement({ id, title, sub, center }: { id: string; title: React.ReactNode; sub?: string; center?: boolean }) {
   return (
     <div className={cn("max-w-[44rem]", center && "mx-auto text-center")}>
+      {/* The recurring tally mark: one short accent rule opens every section. */}
+      <span className={cn("mb-6 block h-0.5 w-8 bg-accent", center && "mx-auto")} aria-hidden />
       <h2 id={id} className="text-balance text-display-section text-fg">{title}</h2>
       {sub && <p className="mt-5 text-balance text-body-l text-fg-muted">{sub}</p>}
     </div>
@@ -61,7 +63,7 @@ export function Interviewers() {
 // ─── The Read ─────────────────────────────────────────────────────────────────
 
 const markCls = "bg-transparent text-fg underline decoration-accent decoration-2 underline-offset-[0.28em]";
-const noteNo = "text-meta text-fg-subtle";
+const noteNo = "text-meta text-accent";
 
 /** Three measures from the same sample Read: the number, what it measures, and its target. */
 const MEASURES: [string, string, string][] = [
@@ -105,7 +107,7 @@ export function Feedback() {
             {MEASURES.map(([value, what, target]) => (
               <div key={what}>
                 <dt className="sr-only">{what}</dt>
-                <dd className="text-display-l text-fg">{value}</dd>
+                <dd className="text-display-l text-accent">{value}</dd>
                 <dd className="mt-1 text-ui text-fg-muted">{what}</dd>
                 <dd className="text-meta text-fg-subtle">{target}</dd>
               </div>
@@ -189,7 +191,7 @@ export function Pricing({ cta }: { cta: string }) {
             // The plan built for an interview on the calendar carries the page's one filled action.
             const featured = id === "sprint";
             return (
-              <li key={id} className="flex flex-col border-t border-line pt-6">
+              <li key={id} className={cn("flex flex-col border-t pt-6", featured ? "border-t-2 border-accent" : "border-line")}>
                 <h3 className="text-ui font-medium text-fg">{p.name}</h3>
                 <p className="mt-3 flex items-baseline gap-2">
                   <span className="text-display-l leading-none text-fg">{p.price}</span>
@@ -224,7 +226,7 @@ export function Closing({ cta, signedIn }: { cta: string; signedIn: boolean }) {
             <img key={id} src={`/interviewer/${id}.webp`} alt="" width={352} height={352} loading="lazy" decoding="async" className="size-16 sm:size-20" />
           ))}
         </div>
-        <h2 id="closing-title" className="mt-6 text-display-xl text-fg">Walk in ready.</h2>
+        <h2 id="closing-title" className="mt-6 text-display-xl text-fg">Walk in ready<span className="text-accent">.</span></h2>
         <ButtonLink href={cta} size="lg" className="mt-10 w-full min-[480px]:w-auto">
           {signedIn ? "Practice an interview" : "Start practicing free"}
         </ButtonLink>

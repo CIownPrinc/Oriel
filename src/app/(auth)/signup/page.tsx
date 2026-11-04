@@ -8,7 +8,7 @@ export default async function SignupPage() {
   if (await getCurrentUser()) redirect("/home");
   return (
     <>
-      <h1 className="text-display-l text-fg">Start practicing.</h1>
+      <h1 className="text-display-l text-fg">Start practicing<span className="text-accent">.</span></h1>
       <p className="mb-9 mt-3 text-body-l text-fg-muted">Free to try. No card required.</p>
       <AuthForm mode="signup" />
     </>

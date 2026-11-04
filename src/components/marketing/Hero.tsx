@@ -9,7 +9,7 @@ export function Hero({ cta, signedIn }: { cta: string; signedIn: boolean }) {
   return (
     <section aria-labelledby="hero-title" className="frame flex flex-col items-center pt-[calc(var(--header-h)+var(--spacing-hero))] text-center">
       <h1 id="hero-title" className="max-w-[11em] text-balance text-display-xl text-fg">
-        Practice for the&nbsp;room before you’re in&nbsp;it.
+        Practice for the&nbsp;room before you’re in&nbsp;it<span className="text-accent">.</span>
       </h1>
       <p className="mt-6 max-w-[34rem] text-balance text-body-l text-fg-muted">
         An AI interviewer that asks real follow‑ups, then shows you exactly what to fix.

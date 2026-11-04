@@ -8,7 +8,7 @@ export default async function LoginPage() {
   if (await getCurrentUser()) redirect("/home");
   return (
     <>
-      <h1 className="text-display-l text-fg">Welcome back.</h1>
+      <h1 className="text-display-l text-fg">Welcome back<span className="text-accent">.</span></h1>
       <p className="mb-9 mt-3 text-body-l text-fg-muted">Pick up where you left off.</p>
       <AuthForm mode="login" />
     </>

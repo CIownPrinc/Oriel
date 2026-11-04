@@ -17,7 +17,7 @@ export default async function ProgressPage() {
   if (history.length === 0) {
     return (
       <header className="max-w-[40rem]">
-        <h1 className="text-display-l text-fg">Your baseline starts with your first session.</h1>
+        <h1 className="text-display-l text-fg">Your baseline starts with your first session<span className="text-accent">.</span></h1>
         <p className="mt-5 text-body-l text-fg-muted">Every session after that is measured against you, never against other people.</p>
         <ButtonLink href="/practice" size="lg" className="mt-8">Start practice</ButtonLink>
       </header>

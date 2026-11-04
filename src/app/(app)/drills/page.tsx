@@ -34,7 +34,7 @@ export default async function DrillsPage() {
   return (
     <div>
       <header className="max-w-[44rem]">
-        <h1 className="text-display-l text-fg">Five minutes on one thing.</h1>
+        <h1 className="text-display-l text-fg">Five minutes on one thing<span className="text-accent">.</span></h1>
         <p className="mt-5 text-body-l text-fg-muted">Each drill has one objective, one measurement and your own baseline to beat.</p>
       </header>
 

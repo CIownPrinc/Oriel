@@ -257,7 +257,7 @@ export function DrillRunner({ drill, sourceSessionId, serverStt, lesson }: { dri
             </div>
             {typeof result.measurement.details.reason === "string" && <p className="mt-4 text-ui text-warning">{result.measurement.details.reason}</p>}
             <p className="mt-6 text-body text-fg">{result.feedback.feedback}</p>
-            <p className="mt-3 text-body text-fg"><span className="font-medium text-fg">Next try:</span> {result.feedback.nextTry}</p>
+            <p className="mt-3 text-body text-fg"><span className="font-medium text-accent">Next try:</span> {result.feedback.nextTry}</p>
             {Array.isArray(result.measurement.details.statements) && (result.measurement.details.statements as string[]).length > 0 && (
               <ul className="mt-5 space-y-1 border-t border-line pt-4 text-ui text-fg-muted">{(result.measurement.details.statements as string[]).map((s) => <li key={s} className="hang-sans">“{s}”</li>)}</ul>
             )}

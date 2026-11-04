@@ -39,7 +39,7 @@ export default async function LessonsPage() {
   if (!latest) {
     return (
       <div>
-        <h1 className="max-w-[20ch] text-display-l text-fg">Your lessons start with one interview.</h1>
+        <h1 className="max-w-[20ch] text-display-l text-fg">Your lessons start with one interview<span className="text-accent">.</span></h1>
         <p className="mt-5 max-w-[44rem] text-body-l text-fg-muted">Lessons are built from what we measure while you practice: your pace and fillers, how your answers land, your posture and eye contact on camera. Do one interview and we&apos;ll pick the skills that will make the biggest difference for you, using your own answers as the examples.</p>
         <ButtonLink href="/practice" size="lg" className="mt-8">Start an interview</ButtonLink>
         <Library title="What you could learn" />
@@ -49,7 +49,7 @@ export default async function LessonsPage() {
 
   return (
     <div>
-      <h1 className="text-display-l text-fg">Built from how you interviewed.</h1>
+      <h1 className="text-display-l text-fg">Built from how you interviewed<span className="text-accent">.</span></h1>
       <p className="mt-5 max-w-[44rem] text-body-l text-fg-muted">
         {open.length
           ? <>From your interview {relPhrase(latest.endedAt ?? latest.createdAt)}: the skills furthest from target, taught with your own answers. Learn it, pass the practice twice, then use it in your next interview: that&apos;s where we confirm it.</>

@@ -17,7 +17,7 @@ export default async function LadderPage() {
   return (
     <div className="page-grid gap-y-12">
       <div className="col-span-4 sm:col-span-8 lg:sticky lg:top-24 lg:col-span-5 lg:self-start">
-        <h1 className="text-display-l text-fg">From friendly recruiter to curveball panel.</h1>
+        <h1 className="text-display-l text-fg">From friendly recruiter to curveball panel<span className="text-accent">.</span></h1>
         <p className="mt-5 text-body-l text-fg-muted">Each rung is a harder room. You unlock the next after two sessions above your own baseline, measured against you, never against anyone else.</p>
         <div className="mt-10 rounded-panel bg-surface px-6 pb-6 pt-4 sm:px-8 sm:pb-8">
           <InterviewerStage personaIds={current.personaIds} styles={await savedStyles(user.id)} className="mx-auto h-[clamp(10rem,7rem+8vw,14rem)] w-full" />

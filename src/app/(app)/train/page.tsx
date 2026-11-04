@@ -32,7 +32,7 @@ export default async function TrainPage() {
   return (
     <div>
       <header className="max-w-[44rem]">
-        <h1 className="text-display-l text-fg">Practice one skill until it holds.</h1>
+        <h1 className="text-display-l text-fg">Practice one skill until it holds<span className="text-accent">.</span></h1>
         <p className="mt-5 text-body-l text-fg-muted">Answer cold. Get one note. Try again on your own. Then face a question you haven&apos;t seen, and come back later to see if it stuck.</p>
       </header>
 

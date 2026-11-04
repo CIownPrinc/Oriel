@@ -15,13 +15,13 @@ export function PlaybackClipCard({ clip, href, active, onClick, compact }: {
   const body = (
     <>
       <div className="flex items-baseline gap-3">
-        <span className="text-meta text-fg-subtle">{mmss(clip.startMs)}</span>
+        <span className="text-meta text-accent">{mmss(clip.startMs)}</span>
         <span className="text-ui font-medium text-fg">{clip.title}</span>
         {!compact && <span className="ml-auto hidden sm:block"><ConfidenceMark confidence={clip.confidence} /></span>}
       </div>
       {!compact && <p className="mt-1.5 line-clamp-1 font-display text-body text-fg-subtle">“{clip.questionText}”</p>}
       <p className="mt-2.5 text-ui text-fg-muted">{clip.observed}</p>
-      <p className="mt-2 text-ui text-fg">{clip.suggestion.startsWith("Try:") ? <><span className="font-medium text-fg">Try:</span>{clip.suggestion.slice(4)}</> : clip.suggestion}</p>
+      <p className="mt-2 text-ui text-fg">{clip.suggestion.startsWith("Try:") ? <><span className="font-medium text-accent">Try:</span>{clip.suggestion.slice(4)}</> : clip.suggestion}</p>
     </>
   );
   const cls = cn("-mx-2 block w-[calc(100%+1rem)] rounded-control border-t px-2 py-5 text-left transition-colors duration-[var(--dur-press)]", active ? "border-transparent bg-raised" : "border-line hover:bg-surface");

@@ -17,7 +17,7 @@ export default async function PlaybackIndex() {
     <div>
       <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-6">
         <div className="max-w-[44rem]">
-          <h1 className="text-display-l text-fg">Every session, with evidence.</h1>
+          <h1 className="text-display-l text-fg">Every session, with evidence<span className="text-accent">.</span></h1>
           <p className="mt-5 text-body-l text-fg-muted">Your recording, the moments that mattered and what to change, for every interview you finish.</p>
         </div>
         <ButtonLink href="/practice" size="lg">New session</ButtonLink>

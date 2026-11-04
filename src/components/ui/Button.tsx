@@ -39,6 +39,6 @@ export function ButtonLink({ href, variant = "primary", size = "md", className, 
 
 /** An inline link: muted text with an accent underline offset by 0.2em; full-strength text on hover. */
 export function TextLink({ href, children, className, external }: { href: string; children: React.ReactNode; className?: string; external?: boolean }) {
-  const cls = cn("text-fg-muted underline decoration-accent decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg", className);
+  const cls = cn("text-fg-muted underline decoration-accent decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-accent", className);
   return external ? <a href={href} className={cls}>{children}</a> : <Link href={href} className={cls}>{children}</Link>;
 }

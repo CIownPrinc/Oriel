@@ -127,7 +127,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
                   <ol className="mt-9 border-t border-line">
                     {[["About you", "Your name, the role you want"], ["Your field", "Sets what gets probed"], ["Your resume", "Optional"], ["The role", "Optional"], ["Your interviewer", "Who sits across from you"]].map(([t, d], i) => (
                       <li key={t} className="flex items-baseline gap-4 border-b border-line py-3">
-                        <span className="w-5 shrink-0 font-display text-body-l leading-none text-fg-subtle">{i + 1}</span>
+                        <span className="w-5 shrink-0 font-display text-body-l leading-none text-accent">{i + 1}</span>
                         <span className="flex-1 text-ui font-medium text-fg">{t}</span>
                         <span className="text-meta text-fg-subtle">{d}</span>
                       </li>
