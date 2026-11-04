@@ -72,7 +72,7 @@ export function AppNav({ isAdmin, name, mockProviders }: { isAdmin: boolean; nam
       }
       if (k === "g") { g = Date.now(); return; }
       if (k === "n") { e.preventDefault(); router.push("/practice"); return; }
-      if (e.key === "?") { e.preventDefault(); setHelp((h) => !h); }
+      if (e.key === "?" || (e.key === "/" && e.shiftKey)) { e.preventDefault(); setHelp((h) => !h); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
