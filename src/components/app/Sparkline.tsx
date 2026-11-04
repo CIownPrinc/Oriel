@@ -11,9 +11,9 @@ export function Sparkline({ values, baseline, better, className }: { values: num
   const good = baseline === null ? null : better === "lower" ? last < baseline : better === "higher" ? last > baseline : null;
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className={className} preserveAspectRatio="none" role="img" aria-label={`Trend over ${values.length} sessions`}>
-      {baseline !== null && <line x1={0} x2={w} y1={y(baseline)} y2={y(baseline)} stroke="currentColor" className="text-stone-dim/40" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />}
-      <path d={d} fill="none" stroke="currentColor" className={good ? "text-signal-good" : "text-olive-light"} strokeWidth={1.75} vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
-      {values.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={i === values.length - 1 ? 3 : 1.6} className={good ? "fill-signal-good" : "fill-olive-light"} />)}
+      {baseline !== null && <line x1={0} x2={w} y1={y(baseline)} y2={y(baseline)} stroke="currentColor" className="text-fg-subtle/40" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />}
+      <path d={d} fill="none" stroke="currentColor" className={good ? "text-success" : "text-fg-muted"} strokeWidth={1.75} vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+      {values.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={i === values.length - 1 ? 3 : 1.6} className={good ? "fill-success" : "fill-fg-muted"} />)}
     </svg>
   );
 }

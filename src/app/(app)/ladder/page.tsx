@@ -17,14 +17,14 @@ export default async function LadderPage() {
   return (
     <div className="page-grid gap-y-12">
       <div className="col-span-4 sm:col-span-8 lg:sticky lg:top-24 lg:col-span-5 lg:self-start">
-        <h1 className="text-display-l text-ivory">From friendly recruiter to curveball panel.</h1>
-        <p className="mt-5 text-body-l text-stone">Each rung is a harder room. You unlock the next after two sessions above your own baseline, measured against you, never against anyone else.</p>
-        <div className="mt-10 rounded-panel bg-surface-1 px-6 pb-6 pt-4 sm:px-8 sm:pb-8">
+        <h1 className="text-display-l text-fg">From friendly recruiter to curveball panel.</h1>
+        <p className="mt-5 text-body-l text-fg-muted">Each rung is a harder room. You unlock the next after two sessions above your own baseline, measured against you, never against anyone else.</p>
+        <div className="mt-10 rounded-panel bg-surface px-6 pb-6 pt-4 sm:px-8 sm:pb-8">
           <InterviewerStage personaIds={current.personaIds} styles={await savedStyles(user.id)} className="mx-auto h-[clamp(10rem,7rem+8vw,14rem)] w-full" />
-          <p className="-mt-2 text-display-m text-ivory">{current.name}</p>
-          <p className="mt-2 text-ui text-stone"><span className="text-olive-light">You&apos;re on rung {current.level} of {steps.length}.</span> {current.description}</p>
+          <p className="-mt-2 text-display-m text-fg">{current.name}</p>
+          <p className="mt-2 text-ui text-fg-muted"><span className="text-fg">You&apos;re on rung {current.level} of {steps.length}.</span> {current.description}</p>
           {allowed.allowed ? <ButtonLink href={`/practice?ladder=${current.level}`} size="lg" className="mt-6">Practice this rung</ButtonLink> : (
-            <><p className="mt-4 text-ui text-stone">{allowed.reason}</p><ButtonLink href="/profile#plan" variant="secondary" className="mt-4">See plans</ButtonLink></>
+            <><p className="mt-4 text-ui text-fg-muted">{allowed.reason}</p><ButtonLink href="/profile#plan" variant="secondary" className="mt-4">See plans</ButtonLink></>
           )}
         </div>
       </div>

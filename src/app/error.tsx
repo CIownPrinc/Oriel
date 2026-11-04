@@ -11,12 +11,12 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
       <header className="frame flex h-16 items-center"><Link href="/" aria-label="Oriel home" className="-ml-1 inline-flex rounded-control p-1"><Logo /></Link></header>
       <main id="content" className="frame flex flex-1 items-center pb-section">
         <div className="max-w-[40rem]">
-          <h1 className="text-display-l text-ivory">This page didn&apos;t load.</h1>
-          <p className="mt-5 text-body-l text-stone">Nothing you&apos;ve saved is lost. Try again, and if it keeps happening, come back in a few minutes.</p>
-          {error.digest && <p className="mt-3 text-meta text-stone-dim">Reference {error.digest}</p>}
+          <h1 className="text-display-l text-fg">This page didn&apos;t load.</h1>
+          <p className="mt-5 text-body-l text-fg-muted">Nothing you&apos;ve saved is lost. Try again, and if it keeps happening, come back in a few minutes.</p>
+          {error.digest && <p className="mt-3 text-meta text-fg-subtle">Reference {error.digest}</p>}
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <button type="button" onClick={reset} className="inline-flex h-12 items-center rounded-button border border-transparent bg-ivory px-6 text-ui font-medium text-ink transition-[background-color,transform] duration-[var(--dur-press)] hover:bg-ivory-press active:scale-[0.97]">Try again</button>
-            <Link href="/" className="text-ui text-stone underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-ivory">Go to the home page</Link>
+            <button type="button" onClick={reset} className="inline-flex h-12 items-center rounded-button border border-transparent bg-accent px-6 text-ui font-medium text-on-accent transition-[background-color,transform] duration-[var(--dur-press)] hover:bg-accent-hover active:bg-accent-press active:scale-[0.97]">Try again</button>
+            <Link href="/" className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg">Go to the home page</Link>
           </div>
         </div>
       </main>

@@ -49,25 +49,25 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         <div className="relative">
           <Input id="password" type={show ? "text" : "password"} autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className="pr-20" />
           <button type="button" onClick={() => setShow(!show)} aria-pressed={show} aria-controls="password"
-            className="absolute right-1.5 top-1/2 h-8 -translate-y-1/2 rounded-sm px-2.5 text-meta font-medium text-stone transition-colors duration-[var(--dur-press)] hover:bg-surface-2 hover:text-ivory">{show ? "Hide" : "Show"}</button>
+            className="absolute right-1.5 top-1/2 h-8 -translate-y-1/2 rounded-sm px-2.5 text-meta font-medium text-fg-muted transition-colors duration-[var(--dur-press)] hover:bg-raised hover:text-fg">{show ? "Hide" : "Show"}</button>
         </div>
       </div>
       {mode === "signup" && (
-        <label className="flex cursor-pointer items-start gap-3 text-ui leading-relaxed text-stone">
+        <label className="flex cursor-pointer items-start gap-3 text-ui leading-relaxed text-fg-muted">
           <span className="relative mt-0.5 grid shrink-0 place-items-center">
             <input type="checkbox" checked={accept} onChange={(e) => setAccept(e.target.checked)}
-              className="peer size-[18px] cursor-pointer appearance-none rounded-sm border border-control bg-surface-1 transition-colors checked:border-olive-light checked:bg-olive-light" />
-            <svg viewBox="0 0 12 12" className="pointer-events-none absolute size-3 text-ink opacity-0 transition-opacity peer-checked:opacity-100" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m2.5 6.2 2.3 2.3 4.7-5" /></svg>
+              className="peer size-[18px] cursor-pointer appearance-none rounded-sm border border-control bg-surface transition-colors checked:border-accent checked:bg-accent" />
+            <svg viewBox="0 0 12 12" className="pointer-events-none absolute size-3 text-on-accent opacity-0 transition-opacity peer-checked:opacity-100" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m2.5 6.2 2.3 2.3 4.7-5" /></svg>
           </span>
-          <span>I understand Oriel is a practice tool with an AI interviewer, and I agree to the terms and the <a href="/privacy" target="_blank" className="text-ivory underline decoration-1 underline-offset-[0.2em]">privacy and biometric policy</a>. Camera and microphone are only used after I consent in the Room.</span>
+          <span>I understand Oriel is a practice tool with an AI interviewer, and I agree to the terms and the <a href="/privacy" target="_blank" className="text-fg underline decoration-1 underline-offset-[0.2em]">privacy and biometric policy</a>. Camera and microphone are only used after I consent in the Room.</span>
         </label>
       )}
       <FieldError>{error}</FieldError>
       <Button type="submit" size="lg" className="w-full" loading={busy}>
         {mode === "signup" ? "Create account" : "Sign in"}
       </Button>
-      <p className="pt-2 text-center text-ui text-stone">
-        {mode === "signup" ? <>Already have an account? <Link href="/login" className="font-medium text-ivory underline decoration-1 underline-offset-[0.2em]">Sign in</Link></> : <>New to Oriel? <Link href="/signup" className="font-medium text-ivory underline decoration-1 underline-offset-[0.2em]">Create an account</Link></>}
+      <p className="pt-2 text-center text-ui text-fg-muted">
+        {mode === "signup" ? <>Already have an account? <Link href="/login" className="font-medium text-fg underline decoration-1 underline-offset-[0.2em]">Sign in</Link></> : <>New to Oriel? <Link href="/signup" className="font-medium text-fg underline decoration-1 underline-offset-[0.2em]">Create an account</Link></>}
       </p>
     </form>
   );

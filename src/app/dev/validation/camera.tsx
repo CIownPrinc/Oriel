@@ -96,11 +96,11 @@ export function CameraValidation() {
   }, []);
   return (
     <main className="p-8 text-ui">
-      <h1 className="text-display-m text-ivory">Camera signal validation</h1>
-      <p className="mt-2 text-stone-dim" data-testid="status">{status}</p>
+      <h1 className="text-display-m text-fg">Camera signal validation</h1>
+      <p className="mt-2 text-fg-subtle" data-testid="status">{status}</p>
       <table className="mt-6 w-full font-mono text-meta">
-        <thead><tr className="text-left text-stone-dim"><th>file</th><th>tone</th><th>eyewear</th><th>cover</th><th>light</th><th>gaze</th><th>face</th><th>engagement</th><th>yaw</th><th>pitch</th><th>result</th></tr></thead>
-        <tbody>{rows.map((r) => <tr key={r.file} className="border-t border-ivory/10"><td>{r.file}</td><td>{r.skinTone}</td><td>{r.eyewear}</td><td>{r.headCovering}</td><td>{r.lighting}</td><td>{r.gaze}</td><td>{String(r.faceDetected)}</td><td>{r.engagement}</td><td>{r.yaw}</td><td>{r.pitch}</td><td className={r.classifiedAs === r.gaze ? "text-signal-good" : "text-signal-bad"}>{r.classifiedAs}</td></tr>)}</tbody>
+        <thead><tr className="text-left text-fg-subtle"><th>file</th><th>tone</th><th>eyewear</th><th>cover</th><th>light</th><th>gaze</th><th>face</th><th>engagement</th><th>yaw</th><th>pitch</th><th>result</th></tr></thead>
+        <tbody>{rows.map((r) => <tr key={r.file} className="border-t border-fg/10"><td>{r.file}</td><td>{r.skinTone}</td><td>{r.eyewear}</td><td>{r.headCovering}</td><td>{r.lighting}</td><td>{r.gaze}</td><td>{String(r.faceDetected)}</td><td>{r.engagement}</td><td>{r.yaw}</td><td>{r.pitch}</td><td className={r.classifiedAs === r.gaze ? "text-success" : "text-danger"}>{r.classifiedAs}</td></tr>)}</tbody>
       </table>
     </main>
   );

@@ -43,8 +43,8 @@ export default async function Home() {
       {/* The promise of the page, and the interviewer it promises: standing on the page, not boxed. */}
       <section className="page-grid items-center gap-y-6 pb-[var(--spacing-group)]">
         <div className="col-span-4 sm:col-span-8 lg:col-span-6">
-          <h1 className="text-display-l text-ivory">Ready for the room{profile?.name ? `, ${profile.name.split(" ")[0]}` : ""}?</h1>
-          <p className="mt-5 max-w-[34rem] text-body-l text-stone">
+          <h1 className="text-display-l text-fg">Ready for the room{profile?.name ? `, ${profile.name.split(" ")[0]}` : ""}?</h1>
+          <p className="mt-5 max-w-[34rem] text-body-l text-fg-muted">
             {history.length
               ? `${history.length} session${history.length > 1 ? "s" : ""} analyzed${profile?.targetRole ? ` for ${profile.targetRole}` : ""}. Next on the Ladder, rung ${current.level} of 6: ${current.name}, pressure ${current.pressure} of 5.`
               : "Your first session sets your baseline. Everything after is measured against you."}
@@ -56,8 +56,8 @@ export default async function Home() {
         </div>
         <figure className="col-span-4 sm:col-span-8 lg:col-span-6">
           <InterviewerStage personaIds={current.personaIds} styles={styles} className="mx-auto h-[clamp(13rem,9rem+12vw,22rem)] w-full max-w-[34rem]" />
-          <figcaption className="-mt-1 text-center text-ui text-stone">
-            <span className="text-ivory">{callName(PERSONAS[next as PersonaId]?.name ?? "Your interviewer", styles[next as PersonaId])}</span>
+          <figcaption className="-mt-1 text-center text-ui text-fg-muted">
+            <span className="text-fg">{callName(PERSONAS[next as PersonaId]?.name ?? "Your interviewer", styles[next as PersonaId])}</span>
             {current.mode === "panel" ? `, leading a ${current.personaIds.length}-person panel` : `, ${PERSONAS[next as PersonaId]?.title ?? ""}`}
           </figcaption>
         </figure>
@@ -66,30 +66,30 @@ export default async function Home() {
       {/* After the greeting, only two things: the one thing to do next, and where you've been. */}
       <section className="page-grid gap-y-14 pt-16">
         <div className="col-span-4 sm:col-span-8 lg:col-span-6">
-          <h2 className="text-ui font-medium text-ivory">Up next</h2>
-          <div className="mt-3 border-t border-divider pt-5">
-            <p className="text-display-m text-ivory">{upNext.title}</p>
-            <p className="mt-2 max-w-[34rem] text-ui text-stone">{upNext.why}</p>
+          <h2 className="text-ui font-medium text-fg">Up next</h2>
+          <div className="mt-3 border-t border-line pt-5">
+            <p className="text-display-m text-fg">{upNext.title}</p>
+            <p className="mt-2 max-w-[34rem] text-ui text-fg-muted">{upNext.why}</p>
             <TextLink href={upNext.href} className="mt-4 inline-block text-ui">{upNext.action}</TextLink>
           </div>
         </div>
         <div className="col-span-4 sm:col-span-8 lg:col-span-5 lg:col-start-8">
           <div className="flex items-baseline justify-between gap-4">
-            <h2 className="text-ui font-medium text-ivory">Recent sessions</h2>
+            <h2 className="text-ui font-medium text-fg">Recent sessions</h2>
             {sessions.length > 0 && <TextLink href="/playback" className="text-meta">All results</TextLink>}
           </div>
-          <ul className="mt-3 border-t border-divider">
+          <ul className="mt-3 border-t border-line">
             {sessions.length ? sessions.slice(0, 3).map((s) => (
-              <li key={s.id} className="border-b border-divider">
-                <Link href={s.status === "ended" ? `/playback/${s.id}` : `/room/${s.id}`} className="-mx-2 flex items-center gap-4 rounded-control px-2 py-3.5 transition-colors duration-[var(--dur-press)] hover:bg-surface-1">
+              <li key={s.id} className="border-b border-line">
+                <Link href={s.status === "ended" ? `/playback/${s.id}` : `/room/${s.id}`} className="-mx-2 flex items-center gap-4 rounded-control px-2 py-3.5 transition-colors duration-[var(--dur-press)] hover:bg-surface">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-ui text-ivory">{s.role} · {TYPE_LABEL[s.type] ?? s.type}{s.mode === "panel" ? " · panel" : ""}</p>
-                    <p className="mt-0.5 text-meta text-stone-dim">{relDate(s.createdAt)} · pressure {s.pressure} of 5</p>
+                    <p className="truncate text-ui text-fg">{s.role} · {TYPE_LABEL[s.type] ?? s.type}{s.mode === "panel" ? " · panel" : ""}</p>
+                    <p className="mt-0.5 text-meta text-fg-subtle">{relDate(s.createdAt)} · pressure {s.pressure} of 5</p>
                   </div>
                   {s.status !== "ended" ? <Badge tone="warn">Unfinished</Badge> : s.analysisStatus === "complete" ? <Badge>Read ready</Badge> : s.analysisStatus === "failed" ? <Badge tone="bad">Needs retry</Badge> : <Badge>Analyzing</Badge>}
                 </Link>
               </li>
-            )) : <li className="py-5 text-ui text-stone-dim">No sessions yet.</li>}
+            )) : <li className="py-5 text-ui text-fg-subtle">No sessions yet.</li>}
           </ul>
         </div>
       </section>

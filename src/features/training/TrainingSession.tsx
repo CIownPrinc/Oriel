@@ -151,8 +151,8 @@ export function TrainingSession({ initial }: { initial: LoopView }) {
 
   return (
     <div className="mx-auto max-w-[48rem]">
-      <Link href="/train" className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-stone transition-colors duration-[var(--dur-press)] hover:text-ivory">← Training</Link>
-      <p className="mt-4 text-ui text-stone-dim">{view.kind === "review" ? "Review" : "Practice"} · {category}</p>
+      <Link href="/train" className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-[var(--dur-press)] hover:text-fg">← Training</Link>
+      <p className="mt-4 text-ui text-fg-subtle">{view.kind === "review" ? "Review" : "Practice"} · {category}</p>
 
       {done ? <Summary view={view} /> : (
         <>
@@ -160,24 +160,24 @@ export function TrainingSession({ initial }: { initial: LoopView }) {
           {last?.evaluation && <Note view={view} attempt={last} />}
 
           <section aria-labelledby="question" className="mt-10">
-            <p className="text-meta text-stone-dim" aria-live="polite">{transitionLine(view, last)}</p>
+            <p className="text-meta text-fg-subtle" aria-live="polite">{transitionLine(view, last)}</p>
             <div className="mt-3 flex items-start gap-4 sm:gap-6">
               <InterviewerStage personaIds={["hiring_manager"]} store={voice.store} still="/interviewer/hiring_manager.webp" className="aspect-square w-20 shrink-0 sm:w-28" />
               <div className="pt-2">
-                <h1 id="question" key={view.question.text} className="text-display-m text-ivory motion-safe:animate-[enter_var(--dur-panel)_var(--ease-enter)]">{view.question.text}</h1>
+                <h1 id="question" key={view.question.text} className="text-display-m text-fg motion-safe:animate-[enter_var(--dur-panel)_var(--ease-enter)]">{view.question.text}</h1>
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
-                  <button type="button" onClick={() => { if (speaking) { voice.stopSpeaking(); setSpeaking(false); } else void hear(); }} className="text-ui text-stone underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-ivory">
+                  <button type="button" onClick={() => { if (speaking) { voice.stopSpeaking(); setSpeaking(false); } else void hear(); }} className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg">
                     {speaking ? "Stop" : "Hear the question"}
                   </button>
-                  <label className="flex items-center gap-2 text-meta text-stone-dim">
-                    <input type="checkbox" checked={voiceOn} onChange={(e) => setVoicePref(e.target.checked)} className="size-4 accent-[var(--color-olive-light)]" />
+                  <label className="flex items-center gap-2 text-meta text-fg-subtle">
+                    <input type="checkbox" checked={voiceOn} onChange={(e) => setVoicePref(e.target.checked)} className="size-4 accent-[var(--color-accent)]" />
                     Read new questions aloud
                   </label>
                 </div>
               </div>
             </div>
             {view.scaffold && (
-              <p className="mt-5 border-t border-divider pt-4 text-ui text-stone"><span className="font-medium text-ivory">To help: </span>{view.scaffold}</p>
+              <p className="mt-5 border-t border-line pt-4 text-ui text-fg-muted"><span className="font-medium text-fg">To help: </span>{view.scaffold}</p>
             )}
           </section>
 
@@ -195,17 +195,17 @@ export function TrainingSession({ initial }: { initial: LoopView }) {
               onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void submit(); } }}
               readOnly={recording !== "off"}
               placeholder={recording === "on" ? "Listening… your words appear here." : "Answer out loud, or type, as you would in the room."}
-              className="min-h-44 w-full resize-y rounded-control border border-control bg-surface-1 px-4 py-3.5 text-body leading-relaxed text-ivory placeholder:text-stone-dim transition-colors duration-[var(--dur-press)] hover:border-stone-dim disabled:opacity-60" />
+              className="min-h-44 w-full resize-y rounded-control border border-control bg-surface px-4 py-3.5 text-body leading-relaxed text-fg placeholder:text-fg-subtle transition-colors duration-[var(--dur-press)] hover:border-fg-subtle disabled:opacity-60" />
             <div className="mt-3 flex flex-wrap items-center gap-3">
               {canRecord && (
                 <Button type="button" variant={recording === "on" ? "primary" : "secondary"} size="lg" onClick={toggleRecording} disabled={busy || recording === "transcribing"} loading={recording === "transcribing"} aria-pressed={recording === "on"}>
-                  {recording === "on" ? <><span className="size-1.5 rounded-full bg-signal-bad" aria-hidden />I&rsquo;m done speaking</> : recording === "transcribing" ? "Transcribing" : "Answer out loud"}
+                  {recording === "on" ? <><span className="size-1.5 rounded-full bg-danger" aria-hidden />I&rsquo;m done speaking</> : recording === "transcribing" ? "Transcribing" : "Answer out loud"}
                 </Button>
               )}
               <Button type="submit" size="lg" variant={canRecord && !answer.trim() ? "secondary" : "primary"} loading={busy} disabled={!answer.trim() || recording !== "off"}>Submit answer</Button>
-              <span className="hidden text-meta text-stone-dim pointer-fine:inline">⌘ Enter submits</span>
+              <span className="hidden text-meta text-fg-subtle pointer-fine:inline">⌘ Enter submits</span>
             </div>
-            {mode === "voice" && recording === "off" && answer && !busy && <p className="mt-3 text-meta text-stone-dim">Your spoken answer, transcribed. Check it reads as you meant, then submit.</p>}
+            {mode === "voice" && recording === "off" && answer && !busy && <p className="mt-3 text-meta text-fg-subtle">Your spoken answer, transcribed. Check it reads as you meant, then submit.</p>}
             {busy && <Thinking label="Reading your answer" className="mt-5" />}
             {error && <FieldError>{error}</FieldError>}
           </form>
@@ -214,14 +214,14 @@ export function TrainingSession({ initial }: { initial: LoopView }) {
       )}
 
       {view.attempts.length > 0 && (
-        <details className="mt-16 border-t border-divider pt-4">
-          <summary className="cursor-pointer text-ui text-stone hover:text-ivory">Your answers so far ({view.attempts.length})</summary>
+        <details className="mt-16 border-t border-line pt-4">
+          <summary className="cursor-pointer text-ui text-fg-muted hover:text-fg">Your answers so far ({view.attempts.length})</summary>
           <ol className="mt-4 space-y-6">
             {view.attempts.map((a) => (
               <li key={a.id}>
-                <p className="text-meta text-stone-dim">{STAGE_WORD[a.stage]}{a.questionSource === "generated" ? " · a generated question" : ""}</p>
-                <p className="mt-1 font-display text-body-l text-stone">{a.question}</p>
-                <p className="mt-2 whitespace-pre-line text-body text-ivory">{a.response}</p>
+                <p className="text-meta text-fg-subtle">{STAGE_WORD[a.stage]}{a.questionSource === "generated" ? " · a generated question" : ""}</p>
+                <p className="mt-1 font-display text-body-l text-fg-muted">{a.question}</p>
+                <p className="mt-2 whitespace-pre-line text-body text-fg">{a.response}</p>
               </li>
             ))}
           </ol>
@@ -247,9 +247,9 @@ function Note({ view, attempt }: { view: LoopView; attempt: AttemptView }) {
   const e = attempt.evaluation!;
   if (!e.enoughEvidence) {
     return (
-      <section aria-label="About your last answer" className="mt-8 border-t border-divider pt-6">
-        <p className="text-body-l text-ivory">{e.insufficientReason ?? "There wasn't enough in that answer to judge."}</p>
-        <p className="mt-2 text-ui text-stone">That isn&rsquo;t counted against you.</p>
+      <section aria-label="About your last answer" className="mt-8 border-t border-line pt-6">
+        <p className="text-body-l text-fg">{e.insufficientReason ?? "There wasn't enough in that answer to judge."}</p>
+        <p className="mt-2 text-ui text-fg-muted">That isn&rsquo;t counted against you.</p>
       </section>
     );
   }
@@ -261,32 +261,32 @@ function Note({ view, attempt }: { view: LoopView; attempt: AttemptView }) {
   const p = e.primary;
   const quote = p ? e.criteria.find((c) => c.id === p.criterionId)?.evidence : null;
   return (
-    <section aria-label="About your last answer" className="mt-8 border-t border-divider pt-6">
+    <section aria-label="About your last answer" className="mt-8 border-t border-line pt-6">
       {showComparison && (
-        <p className="mb-5 text-ui text-stone">
-          <span className="text-ivory">{view.target?.label ?? "The point you worked on"}:</span> {LEVEL_WORD(level(prev))} before, {LEVEL_WORD(level(e))} now.
+        <p className="mb-5 text-ui text-fg-muted">
+          <span className="text-fg">{view.target?.label ?? "The point you worked on"}:</span> {LEVEL_WORD(level(prev))} before, {LEVEL_WORD(level(e))} now.
           {view.stage === "transfer" && level(e) !== 2 && " Moving on to a new question rather than repeating this one."}
         </p>
       )}
       {p && view.stage === "retry" ? (
         <>
-          <p className="text-body-l text-ivory">{p.observation}</p>
+          <p className="text-body-l text-fg">{p.observation}</p>
           {quote && (
             <figure className="mt-4">
-              <blockquote className="hang-sans text-body text-stone">“{quote}”</blockquote>
-              <figcaption className="mt-1 text-meta text-stone-dim">From your answer</figcaption>
+              <blockquote className="hang-sans text-body text-fg-muted">“{quote}”</blockquote>
+              <figcaption className="mt-1 text-meta text-fg-subtle">From your answer</figcaption>
             </figure>
           )}
-          <p className="mt-4 text-ui text-stone">{p.whyItMatters}</p>
-          <p className="mt-4 text-body text-ivory"><span className="font-medium">Next attempt: </span>{p.instruction}</p>
+          <p className="mt-4 text-ui text-fg-muted">{p.whyItMatters}</p>
+          <p className="mt-4 text-body text-fg"><span className="font-medium">Next attempt: </span>{p.instruction}</p>
         </>
       ) : !showComparison && (
-        <p className="text-body-l text-ivory">{view.stage === "transfer" ? "That answer covered the ground. Here\u2019s a different one." : ""}</p>
+        <p className="text-body-l text-fg">{view.stage === "transfer" ? "That answer covered the ground. Here\u2019s a different one." : ""}</p>
       )}
       {e.secondary.length > 0 && view.stage === "retry" && (
         <details className="mt-4">
-          <summary className="cursor-pointer text-meta text-stone hover:text-ivory">More notes</summary>
-          <ul className="mt-2 space-y-1.5 text-ui text-stone">{e.secondary.map((s) => <li key={s}>{s}</li>)}</ul>
+          <summary className="cursor-pointer text-meta text-fg-muted hover:text-fg">More notes</summary>
+          <ul className="mt-2 space-y-1.5 text-ui text-fg-muted">{e.secondary.map((s) => <li key={s}>{s}</li>)}</ul>
         </details>
       )}
       <Assessor e={e} />
@@ -296,7 +296,7 @@ function Note({ view, attempt }: { view: LoopView; attempt: AttemptView }) {
 
 function Assessor({ e }: { e: Evaluation }) {
   return (
-    <p className="mt-4 text-meta text-stone-dim">
+    <p className="mt-4 text-meta text-fg-subtle">
       {e.competencyId === "implementation"
         ? `Pass or fail comes only from running the tests. The explanation was ${e.evaluator === "model" ? `assessed by the AI, ${e.confidence} confidence` : "checked by pattern rules"}.`
         : e.evaluator === "model" ? `Assessed by the AI against a fixed rubric, ${e.confidence} confidence.` : "Assessed by pattern rules, not the AI; treat it as approximate."}
@@ -314,35 +314,35 @@ function Summary({ view }: { view: LoopView }) {
     : [["On the same question", OUTCOME_WORD.same[o?.improvedOnRetry ?? "not_assessed"]], ["On a new question", OUTCOME_WORD.new[o?.transferred ?? "not_assessed"]]];
   return (
     <section aria-labelledby="summary-title" className="mt-6">
-      <h1 id="summary-title" className="text-display-l text-ivory">{view.competency.label}</h1>
-      <p className="mt-4 text-body-l text-stone">{view.competency.summary}{view.target ? ` This time: ${view.target.label.toLowerCase()}.` : ""}</p>
-      <dl className="mt-10 border-t border-divider">
+      <h1 id="summary-title" className="text-display-l text-fg">{view.competency.label}</h1>
+      <p className="mt-4 text-body-l text-fg-muted">{view.competency.summary}{view.target ? ` This time: ${view.target.label.toLowerCase()}.` : ""}</p>
+      <dl className="mt-10 border-t border-line">
         {rows.map(([k, v]) => (
-          <div key={k} className="grid gap-1 border-b border-divider py-4 sm:grid-cols-[14rem_minmax(0,1fr)]">
-            <dt className="text-ui text-stone">{k}</dt>
-            <dd className="text-body text-ivory">{v}</dd>
+          <div key={k} className="grid gap-1 border-b border-line py-4 sm:grid-cols-[14rem_minmax(0,1fr)]">
+            <dt className="text-ui text-fg-muted">{k}</dt>
+            <dd className="text-body text-fg">{v}</dd>
           </div>
         ))}
-        <div className="grid gap-1 border-b border-divider py-4 sm:grid-cols-[14rem_minmax(0,1fr)]">
-          <dt className="text-ui text-stone">{view.kind === "review" ? "Next look" : "After a delay"}</dt>
-          <dd className="text-body text-ivory">{view.nextReview ? `A review on ${fmtDate(view.nextReview)}, with a different question` : "Nothing scheduled: there wasn't enough to assess"}</dd>
+        <div className="grid gap-1 border-b border-line py-4 sm:grid-cols-[14rem_minmax(0,1fr)]">
+          <dt className="text-ui text-fg-muted">{view.kind === "review" ? "Next look" : "After a delay"}</dt>
+          <dd className="text-body text-fg">{view.nextReview ? `A review on ${fmtDate(view.nextReview)}, with a different question` : "Nothing scheduled: there wasn't enough to assess"}</dd>
         </div>
       </dl>
       {transfer?.enoughEvidence && (
         <div className="mt-10">
-          <h2 className="text-ui font-medium text-ivory">{view.kind === "review" ? "On the review question" : "On the new question"}</h2>
+          <h2 className="text-ui font-medium text-fg">{view.kind === "review" ? "On the review question" : "On the new question"}</h2>
           <ul className="mt-3 space-y-3">
             {transfer.criteria.map((c) => (
               <li key={c.id} className="grid gap-1 sm:grid-cols-[14rem_minmax(0,1fr)]">
-                <span className={cn("text-ui", c.level === 2 ? "text-ivory" : "text-stone")}>{c.label}</span>
-                <span className="text-ui text-stone">{LEVEL_WORD(c.level)}{c.evidence ? `: “${c.evidence}”` : ""}</span>
+                <span className={cn("text-ui", c.level === 2 ? "text-fg" : "text-fg-muted")}>{c.label}</span>
+                <span className="text-ui text-fg-muted">{LEVEL_WORD(c.level)}{c.evidence ? `: “${c.evidence}”` : ""}</span>
               </li>
             ))}
           </ul>
           <Assessor e={transfer} />
         </div>
       )}
-      <p className="mt-10 text-meta text-stone-dim">These are observations about answers, not a grade of you or a prediction of any interview.</p>
+      <p className="mt-10 text-meta text-fg-subtle">These are observations about answers, not a grade of you or a prediction of any interview.</p>
       <div className="mt-8 flex flex-wrap gap-3">
         <ButtonLink href="/train" size="lg">Back to training</ButtonLink>
       </div>

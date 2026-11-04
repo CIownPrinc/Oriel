@@ -30,16 +30,16 @@ export function AvatarLab() {
     store.candidateSpeaking = m === "listening";
   };
   return (
-    <main className="min-h-dvh bg-ink glow-gold">
+    <main className="min-h-dvh bg-page glow-gold">
       <BotAvatar key={seats.map((s) => s.personaId).join()} store={store} seats={seats} className="h-[72dvh] w-full"
-        labels={(s, active) => <span className={`font-mono text-meta uppercase tracking-widest ${active ? "text-olive-light" : "text-stone-dim"}`}>{s.name.split(" ")[0]}</span>} />
+        labels={(s, active) => <span className={`font-mono text-meta uppercase tracking-widest ${active ? "text-accent" : "text-fg-subtle"}`}>{s.name.split(" ")[0]}</span>} />
       <div className="flex flex-wrap gap-2 p-4 text-ui">
-        {(["idle", "listening", "thinking", "speaking", "interrupting"] as AvatarState[]).map((m) => <button key={m} onClick={() => set(m)} className="rounded-full border border-ivory/15 px-3 py-1">{m}</button>)}
-        {(["nod", "brow_raise", "lean_in", "gaze_shift"] as const).map((c) => <button key={c} onClick={() => store.fireCue(c)} className="rounded-full border border-olive-light/40 px-3 py-1 text-olive-light">{c}</button>)}
-        <select value={persona} onChange={(e) => setPersona(e.target.value as PersonaId)} className="bg-surface-2 rounded-control px-2">{Object.keys(PERSONAS).map((p) => <option key={p}>{p}</option>)}</select>
-        <button onClick={() => setPanel(!panel)} className="rounded-full border border-ivory/15 px-3 py-1">panel: {String(panel)}</button>
-        {panel && [0, 1, 2].map((i) => <button key={i} onClick={() => { store.activeSeat = i; }} className="rounded-full border border-ivory/15 px-3 py-1">speaker {i}</button>)}
-        <button onClick={() => { setFamily(!family); }} className="rounded-full border border-ivory/15 px-3 py-1">family: {String(family)}</button>
+        {(["idle", "listening", "thinking", "speaking", "interrupting"] as AvatarState[]).map((m) => <button key={m} onClick={() => set(m)} className="rounded-full border border-fg/15 px-3 py-1">{m}</button>)}
+        {(["nod", "brow_raise", "lean_in", "gaze_shift"] as const).map((c) => <button key={c} onClick={() => store.fireCue(c)} className="rounded-full border border-accent/40 px-3 py-1 text-accent">{c}</button>)}
+        <select value={persona} onChange={(e) => setPersona(e.target.value as PersonaId)} className="bg-raised rounded-control px-2">{Object.keys(PERSONAS).map((p) => <option key={p}>{p}</option>)}</select>
+        <button onClick={() => setPanel(!panel)} className="rounded-full border border-fg/15 px-3 py-1">panel: {String(panel)}</button>
+        {panel && [0, 1, 2].map((i) => <button key={i} onClick={() => { store.activeSeat = i; }} className="rounded-full border border-fg/15 px-3 py-1">speaker {i}</button>)}
+        <button onClick={() => { setFamily(!family); }} className="rounded-full border border-fg/15 px-3 py-1">family: {String(family)}</button>
         <input type="range" min={0} max={1} step={0.05} defaultValue={0.3} onChange={(e) => { store.stillness = Number(e.target.value); }} /> stillness
       </div>
       <ExpressionSheet />

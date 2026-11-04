@@ -13,8 +13,8 @@ const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month
 
 /** An outcome in words, with its date; "not assessed" is said as such, never as a low result. */
 function said(o: { outcome: Outcome; at: string | null }, yes: string, no: string) {
-  if (o.outcome === "not_assessed") return <span className="text-stone-dim">Not assessed</span>;
-  return <span className={o.outcome === "yes" ? "text-ivory" : "text-stone"}>{o.outcome === "yes" ? yes : no}{o.at ? `, ${day(o.at)}` : ""}</span>;
+  if (o.outcome === "not_assessed") return <span className="text-fg-subtle">Not assessed</span>;
+  return <span className={o.outcome === "yes" ? "text-fg" : "text-fg-muted"}>{o.outcome === "yes" ? yes : no}{o.at ? `, ${day(o.at)}` : ""}</span>;
 }
 
 export default async function TrainPage() {
@@ -32,30 +32,30 @@ export default async function TrainPage() {
   return (
     <div>
       <header className="max-w-[44rem]">
-        <h1 className="text-display-l text-ivory">Practice one skill until it holds.</h1>
-        <p className="mt-5 text-body-l text-stone">Answer cold. Get one note. Try again on your own. Then face a question you haven&apos;t seen, and come back later to see if it stuck.</p>
+        <h1 className="text-display-l text-fg">Practice one skill until it holds.</h1>
+        <p className="mt-5 text-body-l text-fg-muted">Answer cold. Get one note. Try again on your own. Then face a question you haven&apos;t seen, and come back later to see if it stuck.</p>
       </header>
 
       {(due.length > 0 || open.length > 0) && (
         <section aria-labelledby="due-title" className="mt-[var(--spacing-group)]">
-          <h2 id="due-title" className="text-ui font-medium text-ivory">Waiting for you</h2>
-          <ul className="mt-3 border-t border-divider">
+          <h2 id="due-title" className="text-ui font-medium text-fg">Waiting for you</h2>
+          <ul className="mt-3 border-t border-line">
             {due.map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-divider py-4">
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-line py-4">
                 <div>
-                  <p className="text-body text-ivory">Review: {r.label}</p>
-                  <p className="text-meta text-stone-dim">Due {day(r.dueAt)} · a new question, answered cold</p>
+                  <p className="text-body text-fg">Review: {r.label}</p>
+                  <p className="text-meta text-fg-subtle">Due {day(r.dueAt)} · a new question, answered cold</p>
                 </div>
                 <StartReview id={r.id} label={r.label} />
               </li>
             ))}
             {open.map((l) => (
-              <li key={l.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-divider py-4">
+              <li key={l.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-line py-4">
                 <div>
-                  <p className="text-body text-ivory">{l.kind === "review" ? "Review" : "Practice"} in progress</p>
-                  <p className="text-meta text-stone-dim">{CATEGORIES.find((c) => c.id === l.category)?.label} · started {day(l.createdAt.toISOString())}</p>
+                  <p className="text-body text-fg">{l.kind === "review" ? "Review" : "Practice"} in progress</p>
+                  <p className="text-meta text-fg-subtle">{CATEGORIES.find((c) => c.id === l.category)?.label} · started {day(l.createdAt.toISOString())}</p>
                 </div>
-                <Link href={`/train/${l.id}`} className="text-ui text-stone underline decoration-1 underline-offset-[0.2em] hover:text-ivory">Resume</Link>
+                <Link href={`/train/${l.id}`} className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">Resume</Link>
               </li>
             ))}
           </ul>
@@ -64,12 +64,12 @@ export default async function TrainPage() {
 
       <section aria-labelledby="start-title" className="page-grid mt-[var(--spacing-group)] gap-y-12">
         <div className="col-span-4 sm:col-span-8 lg:col-span-6">
-          <h2 id="start-title" className="text-display-m text-ivory">Start a practice</h2>
+          <h2 id="start-title" className="text-display-m text-fg">Start a practice</h2>
           <div className="mt-6"><StartPractice defaultCategory={preferred} /></div>
         </div>
         <aside className="col-span-4 sm:col-span-8 lg:col-span-5 lg:col-start-8">
-          <h2 className="text-ui font-medium text-ivory">How a practice runs</h2>
-          <ol className="mt-3 border-t border-divider text-ui">
+          <h2 className="text-ui font-medium text-fg">How a practice runs</h2>
+          <ol className="mt-3 border-t border-line text-ui">
             {[
               ["Answer", "One question, no hints."],
               ["One note", "The single change that matters most, quoted from your answer."],
@@ -77,9 +77,9 @@ export default async function TrainPage() {
               ["A new question", "A different situation that needs the same skill. It isn't announced."],
               ["Later", "A review on another day, with a different question again."],
             ].map(([t, d], i) => (
-              <li key={t} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-2 border-b border-divider py-3">
-                <span className="text-stone-dim">{i + 1}</span>
-                <span><span className="text-ivory">{t}.</span> <span className="text-stone">{d}</span></span>
+              <li key={t} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-2 border-b border-line py-3">
+                <span className="text-fg-subtle">{i + 1}</span>
+                <span><span className="text-fg">{t}.</span> <span className="text-fg-muted">{d}</span></span>
               </li>
             ))}
           </ol>
@@ -87,21 +87,21 @@ export default async function TrainPage() {
       </section>
 
       <section aria-labelledby="history-title" className="mt-[var(--spacing-section)]">
-        <h2 id="history-title" className="text-display-m text-ivory">What you&apos;ve shown</h2>
-        <p className="mt-2 max-w-[44rem] text-ui text-stone">Three things are kept apart: improving on the same question, carrying it to a new one, and holding it after a delay. Each is based only on answers there was enough evidence to judge.</p>
+        <h2 id="history-title" className="text-display-m text-fg">What you&apos;ve shown</h2>
+        <p className="mt-2 max-w-[44rem] text-ui text-fg-muted">Three things are kept apart: improving on the same question, carrying it to a new one, and holding it after a delay. Each is based only on answers there was enough evidence to judge.</p>
         {assessed.length ? (
           <div className="mt-6 overflow-x-auto" tabIndex={0} role="region" aria-label="What you've shown, by skill">
             <table className="w-full min-w-[40rem] text-left text-ui">
-              <thead><tr className="border-b border-divider text-meta text-stone-dim">
+              <thead><tr className="border-b border-line text-meta text-fg-subtle">
                 <th scope="col" className="pb-2 pr-4 font-normal">Skill</th><th scope="col" className="pb-2 pr-4 font-normal">Same question</th>
                 <th scope="col" className="pb-2 pr-4 font-normal">New question</th><th scope="col" className="pb-2 pr-4 font-normal">After a delay</th><th scope="col" className="pb-2 font-normal">Evidence</th>
               </tr></thead>
               <tbody>{assessed.map((s) => <Row key={s.competencyId} s={s} />)}</tbody>
             </table>
           </div>
-        ) : <p className="mt-6 border-t border-divider pt-4 text-ui text-stone">Nothing assessed yet. Your first practice starts the record.</p>}
+        ) : <p className="mt-6 border-t border-line pt-4 text-ui text-fg-muted">Nothing assessed yet. Your first practice starts the record.</p>}
         {unassessed.length > 0 && (
-          <p className="mt-6 text-ui text-stone-dim">Not assessed yet: {unassessed.map((s) => s.label.toLowerCase()).join(", ")}.</p>
+          <p className="mt-6 text-ui text-fg-subtle">Not assessed yet: {unassessed.map((s) => s.label.toLowerCase()).join(", ")}.</p>
         )}
       </section>
     </div>
@@ -110,12 +110,12 @@ export default async function TrainPage() {
 
 function Row({ s }: { s: SkillState }) {
   return (
-    <tr className="border-b border-divider align-top">
-      <th scope="row" className="py-3 pr-4 font-normal text-ivory">{s.label}</th>
+    <tr className="border-b border-line align-top">
+      <th scope="row" className="py-3 pr-4 font-normal text-fg">{s.label}</th>
       <td className="py-3 pr-4">{said(s.improvedOnRetry, "Improved", "Not yet")}</td>
       <td className="py-3 pr-4">{said(s.transferred, "Carried over", "Not yet")}</td>
-      <td className="py-3 pr-4">{s.retained.outcome !== "not_assessed" ? said(s.retained, "Held", "Not yet") : s.nextReviewAt ? <span className="text-stone">Review {day(s.nextReviewAt)}</span> : <span className="text-stone-dim">Not assessed</span>}</td>
-      <td className="py-3 text-stone-dim">{s.evidence.judged} answer{s.evidence.judged === 1 ? "" : "s"} judged{s.evidence.lowConfidence ? `, ${s.evidence.lowConfidence} with low confidence` : ""}</td>
+      <td className="py-3 pr-4">{s.retained.outcome !== "not_assessed" ? said(s.retained, "Held", "Not yet") : s.nextReviewAt ? <span className="text-fg-muted">Review {day(s.nextReviewAt)}</span> : <span className="text-fg-subtle">Not assessed</span>}</td>
+      <td className="py-3 text-fg-subtle">{s.evidence.judged} answer{s.evidence.judged === 1 ? "" : "s"} judged{s.evidence.lowConfidence ? `, ${s.evidence.lowConfidence} with low confidence` : ""}</td>
     </tr>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Newsreader, Schibsted_Grotesk } from "next/font/google";
 import "./globals.css";
+import { PALETTE } from "@/lib/palette";
 
 /*
  * Two voices: Newsreader for Oriel's headlines and every line an interviewer speaks, Schibsted
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
   description: "Mock interviews with an AI interviewer who listens, follows up and pushes back. Afterwards: your recording, the moments that mattered, and what to change.",
 };
 
-export const viewport: Viewport = { themeColor: "#151515", colorScheme: "dark" };
+export const viewport: Viewport = { themeColor: PALETTE.bg, colorScheme: "dark" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

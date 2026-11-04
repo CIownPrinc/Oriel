@@ -34,13 +34,13 @@ export default async function DrillsPage() {
   return (
     <div>
       <header className="max-w-[44rem]">
-        <h1 className="text-display-l text-ivory">Five minutes on one thing.</h1>
-        <p className="mt-5 text-body-l text-stone">Each drill has one objective, one measurement and your own baseline to beat.</p>
+        <h1 className="text-display-l text-fg">Five minutes on one thing.</h1>
+        <p className="mt-5 text-body-l text-fg-muted">Each drill has one objective, one measurement and your own baseline to beat.</p>
       </header>
 
       {recommended && (
-        <section className="page-grid mt-[var(--spacing-group)] gap-y-5 border-t border-divider pt-10">
-          <h2 className="col-span-4 text-ui font-medium text-ivory sm:col-span-8 lg:col-span-3">Recommended for you</h2>
+        <section className="page-grid mt-[var(--spacing-group)] gap-y-5 border-t border-line pt-10">
+          <h2 className="col-span-4 text-ui font-medium text-fg sm:col-span-8 lg:col-span-3">Recommended for you</h2>
           <div className="col-span-4 max-w-[36rem] sm:col-span-8 lg:col-span-9"><DrillCard drill={recommended} recommended={rec.reason} lastValue={last(recommended.id)} /></div>
         </section>
       )}
@@ -48,9 +48,9 @@ export default async function DrillsPage() {
       <div className="mt-14 grid gap-x-6 gap-y-12 lg:grid-cols-3">
         {ORDER.map((t) => (
           <section key={t}>
-            <div className="flex items-baseline justify-between gap-4 border-b border-divider pb-3">
-              <h2 className="text-display-m text-ivory">{TRACKS[t].label}</h2>
-              <span className="text-meta text-stone-dim">{TRACKS[t].blurb}</span>
+            <div className="flex items-baseline justify-between gap-4 border-b border-line pb-3">
+              <h2 className="text-display-m text-fg">{TRACKS[t].label}</h2>
+              <span className="text-meta text-fg-subtle">{TRACKS[t].blurb}</span>
             </div>
             <div className="mt-2">
               {DRILLS.filter((d) => TRACK_OF[d.targetMetric] === t && d.id !== recommended?.id).map((d) => <DrillCard key={d.id} drill={d} lastValue={last(d.id)} />)}
@@ -61,17 +61,17 @@ export default async function DrillsPage() {
 
       {attempts.length > 0 && (
         <section className="mt-16">
-          <h2 className="text-ui font-medium text-ivory">Recent attempts</h2>
+          <h2 className="text-ui font-medium text-fg">Recent attempts</h2>
           <table className="mt-3 w-full text-left text-ui">
             <thead className="sr-only"><tr><th scope="col">Drill</th><th scope="col">Result</th><th scope="col">Baseline</th><th scope="col">Outcome</th><th scope="col">When</th></tr></thead>
-            <tbody className="border-t border-divider">
+            <tbody className="border-t border-line">
               {attempts.slice(0, 8).map((a) => (
-                <tr key={a.id} className="border-b border-divider">
-                  <th scope="row" className="py-3 pr-4 font-normal text-ivory">{DRILLS.find((d) => d.id === a.drillId)?.title}</th>
-                  <td className="py-3 pr-4 text-stone">{a.value ?? "—"} {(a.result as { unit?: string } | null)?.unit}</td>
-                  <td className="hidden py-3 pr-4 text-stone-dim sm:table-cell">{a.baselineValue !== null ? <>baseline {Math.round(a.baselineValue * 10) / 10}</> : "First attempt"}</td>
-                  <td className={a.passed ? "py-3 pr-4 text-signal-good" : "py-3 pr-4 text-stone-dim"}>{a.passed ? "Target met" : a.passed === false ? "Not yet" : ""}</td>
-                  <td className="py-3 text-right text-stone-dim">{relDate(a.createdAt)}</td>
+                <tr key={a.id} className="border-b border-line">
+                  <th scope="row" className="py-3 pr-4 font-normal text-fg">{DRILLS.find((d) => d.id === a.drillId)?.title}</th>
+                  <td className="py-3 pr-4 text-fg-muted">{a.value ?? "—"} {(a.result as { unit?: string } | null)?.unit}</td>
+                  <td className="hidden py-3 pr-4 text-fg-subtle sm:table-cell">{a.baselineValue !== null ? <>baseline {Math.round(a.baselineValue * 10) / 10}</> : "First attempt"}</td>
+                  <td className={a.passed ? "py-3 pr-4 text-success" : "py-3 pr-4 text-fg-subtle"}>{a.passed ? "Target met" : a.passed === false ? "Not yet" : ""}</td>
+                  <td className="py-3 text-right text-fg-subtle">{relDate(a.createdAt)}</td>
                 </tr>
               ))}
             </tbody>

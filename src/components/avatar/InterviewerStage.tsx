@@ -6,6 +6,7 @@ import { AvatarStore } from "@/lib/avatar/store";
 import type { AvatarStyle } from "@/lib/avatar/style";
 import { PERSONAS, type PersonaId } from "@/lib/interview/personas";
 import { cn } from "@/components/ui/cn";
+import { PALETTE } from "@/lib/palette";
 
 /**
  * The interviewer presented on a page, outside the Room: the same engine and the same face the
@@ -34,7 +35,7 @@ export function InterviewerStage({ personaIds, styles, still, className, store: 
   const key = personaIds.join(",");
   const seats = useMemo(() => key.split(",").map((id, seat) => {
     const p = PERSONAS[id as PersonaId] ?? PERSONAS.hiring_manager;
-    return { seat, personaId: p.id, name: p.name, accent: p.accent, expressiveness: p.expressiveness, warmth: p.warmth, skepticism: p.skepticism, style: styles?.[id] ?? null };
+    return { seat, personaId: p.id, name: p.name, accent: PALETTE.accent, expressiveness: p.expressiveness, warmth: p.warmth, skepticism: p.skepticism, style: styles?.[id] ?? null };
   }), [key, styles]);
 
   useEffect(() => {

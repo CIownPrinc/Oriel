@@ -11,6 +11,31 @@
  * high-contrast action in a view. Olive is a rare signal: the chosen option, the current place.
  * Never a glow, a gradient, a blur or a coloured border.
  */
+:root {
+  /* Quiet 1 (60%) */
+  --bg: #141412;
+  /* Quiet 2 (30%): 1.09:1 against the page, so panels separate without shouting */
+  --surface: #1e1d1a;
+  --surface-raised: #282723;
+  /* Text, all from the same warm hue. On --bg: 16.1, 8.5 and 5.7:1; subtle is still 4.6:1 on raised. */
+  --text: #f2efe8;
+  --text-muted: #b5afa4;
+  --text-subtle: #948e84;
+  --border: rgb(242 239 232 / 0.12);
+  --border-strong: rgb(242 239 232 / 0.2);
+  --control: rgb(242 239 232 / 0.4); /* the visible edge of a control: >= 3:1 */
+  /* Accent (<= 10%). 15.7:1 on --bg, 12.7:1 on raised; --on-accent text on it is 15.7:1. */
+  --accent: #c8ff3d;
+  --accent-hover: #d6ff6e;
+  --accent-press: #b2e62e;
+  --accent-tint: rgb(200 255 61 / 0.1);
+  --on-accent: #141412;
+  /* Status: muted so they never compete with the accent. 6.5 to 8.3:1 on --bg. */
+  --success: #7fb3ae;
+  --warning: #cda968;
+  --danger: #c98a80;
+}
+
 @theme {
   /*
    * Only Oriel's tokens exist. Tailwind's default palette, radii and type sizes are switched off,
@@ -20,25 +45,32 @@
   --radius-*: initial;
   --text-*: initial;
 
-  /* The studio: warm low-light surfaces. Ink is the room, surfaces are the furniture. */
-  --color-ink: #151515;        /* page */
-  --color-surface-1: #20201e;  /* real objects: the session ticket, the Room's stage, a chosen option */
-  --color-surface-2: #272622;  /* raised within a surface; menus */
-  --color-ivory: #f5f2eb;      /* headlines, key content, the primary button, focus rings */
-  --color-stone: #b7b0a4;      /* running text, secondary text */
-  --color-stone-dim: #948e84;  /* third tier, used sparingly; 4.5:1 on every surface */
-  --color-olive: #555c4a;      /* rare signal: fills and decoration only (2.6:1 on ink) */
-  --color-olive-light: #8c957a;/* olive as text, icon or thin indicator (5.8:1 on ink, 4.8:1 on surface-2) */
-  --color-divider: rgb(245 242 235 / 0.12); /* hairlines: ~1.4:1 on every surface */
-  --color-divider-strong: rgb(245 242 235 / 0.2); /* tracks and emphatic rules */
-  --color-control: rgb(245 242 235 / 0.4);  /* the only visible edge of a control: ≥3:1 */
-  --color-ivory-press: #ddd8ce;   /* an ivory fill under the pointer */
-  --color-olive-ground: #23261d;  /* the ground under a chosen option */
-
-  /* Signals describe measurements inside the app only; the marketing pages use no other hues. */
-  --color-signal-good: #93bf8a;
-  --color-signal-warn: #d6a45e;
-  --color-signal-bad: #de7a68;
+  /*
+   * 60-30-10. Two quiet colours and one loud one.
+   *   60  the page: a warm near-black.
+   *   30  surfaces, lines and secondary text: the same warm hue, a step or two up.
+   *   10  the accent: acid lime, the tally light on a studio camera. It marks the one thing to
+   *       act on (primary buttons, the selected option, focus, active nav, progress) and nothing else.
+   * Every state is derived from these three; status colours are the only other hues, kept muted.
+   * The semantic values live on :root (--bg, --text, --accent…); these map them into Tailwind.
+   */
+  --color-page: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--surface-raised);
+  --color-fg: var(--text);
+  --color-fg-muted: var(--text-muted);
+  --color-fg-subtle: var(--text-subtle);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-control: var(--control);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-press: var(--accent-press);
+  --color-accent-tint: var(--accent-tint);
+  --color-on-accent: var(--on-accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
 
   --font-sans: var(--font-schibsted), "Helvetica Neue", Arial, sans-serif;
   --font-display: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
@@ -95,7 +127,7 @@
 :root {
   color-scheme: dark;
   /* One elevation, only for things that float over the page: menus and dialogs. */
-  --shadow-sheet: 0 24px 64px -16px rgb(4 5 6 / 0.75), 0 0 0 1px var(--color-divider-strong);
+  --shadow-sheet: 0 24px 64px -16px rgb(10 10 9 / 0.75), 0 0 0 1px var(--color-line-strong);
   /* Page frame: about 1240px of content, gutters from 20px at 320 to 64px on wide screens. */
   --gutter: clamp(1.25rem, 5vw, 4rem);
   --frame: 1240px;
@@ -108,9 +140,9 @@
 }
 
 @layer base {
-  html { background: var(--color-ink); color: var(--color-ivory); -webkit-text-size-adjust: 100%; font-synthesis: none; scroll-padding-top: calc(var(--header-h) + 1rem); }
+  html { background: var(--color-page); color: var(--color-fg); -webkit-text-size-adjust: 100%; font-synthesis: none; scroll-padding-top: calc(var(--header-h) + 1rem); }
   body {
-    background: var(--color-ink);
+    background: var(--color-page);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -121,9 +153,9 @@
   /* Headings break into even lines; running text avoids a last word alone on its line. */
   body { text-wrap: pretty; }
   h1, h2, h3, dt { text-wrap: balance; }
-  ::selection { background: var(--color-olive); color: var(--color-ivory); }
-  /* Focus is an ivory outline (not a shadow), so it survives forced-colors mode. */
-  :focus-visible { outline: 2px solid var(--color-ivory); outline-offset: 2px; }
+  ::selection { background: var(--color-accent); color: var(--color-on-accent); }
+  /* Focus is an accent outline (not a shadow), so it survives forced-colors mode. */
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
   @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
   * { scrollbar-width: thin; scrollbar-color: var(--color-control) transparent; }
   /* A phone on its side: a smaller headline and less air above it, so the call to action stays in view. */
@@ -139,7 +171,7 @@
   @media (min-width: 640px) { .page-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); column-gap: 1.5rem; } }
   @media (min-width: 1024px) { .page-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); } }
   /* First focusable element on every page: jumps past the navigation. */
-  .skip-link { position: absolute; left: var(--gutter); top: 0.75rem; z-index: 100; transform: translateY(-200%); border-radius: var(--radius-button); background: var(--color-ivory); color: var(--color-ink); padding: 0.625rem 1rem; font-size: var(--text-ui); font-weight: 500; }
+  .skip-link { position: absolute; left: var(--gutter); top: 0.75rem; z-index: 100; transform: translateY(-200%); border-radius: var(--radius-button); background: var(--color-accent); color: var(--color-on-accent); padding: 0.625rem 1rem; font-size: var(--text-ui); font-weight: 500; }
   .skip-link:focus-visible { transform: none; }
 }
 
@@ -166,7 +198,7 @@
 /* Skeletons for anything that loads. */
 .skeleton {
   border-radius: 4px;
-  background: linear-gradient(90deg, var(--color-surface-1) 0%, var(--color-surface-2) 50%, var(--color-surface-1) 100%);
+  background: linear-gradient(90deg, var(--color-surface) 0%, var(--color-raised) 50%, var(--color-surface) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.6s linear infinite;
 }
@@ -176,9 +208,9 @@
 }
 
 input[type="range"].dial { -webkit-appearance: none; appearance: none; background: transparent; height: 32px; cursor: pointer; }
-input[type="range"].dial::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, var(--color-olive-light) var(--fill, 50%), var(--color-divider-strong) var(--fill, 50%)); }
-input[type="range"].dial::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; margin-top: -9px; border-radius: 50%; background: var(--color-ivory); border: 5px solid var(--color-olive-light); transition: transform var(--dur-state) var(--ease-enter); }
+input[type="range"].dial::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, var(--color-accent) var(--fill, 50%), var(--color-line-strong) var(--fill, 50%)); }
+input[type="range"].dial::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; margin-top: -9px; border-radius: 50%; background: var(--color-on-accent); border: 5px solid var(--color-accent); transition: transform var(--dur-state) var(--ease-enter); }
 input[type="range"].dial:active::-webkit-slider-thumb { transform: scale(1.1); }
-input[type="range"].dial::-moz-range-track { height: 2px; background: var(--color-divider-strong); }
-input[type="range"].dial::-moz-range-progress { height: 2px; background: var(--color-olive-light); }
-input[type="range"].dial::-moz-range-thumb { height: 12px; width: 12px; border-radius: 50%; background: var(--color-ivory); border: 5px solid var(--color-olive-light); }
+input[type="range"].dial::-moz-range-track { height: 2px; background: var(--color-line-strong); }
+input[type="range"].dial::-moz-range-progress { height: 2px; background: var(--color-accent); }
+input[type="range"].dial::-moz-range-thumb { height: 12px; width: 12px; border-radius: 50%; background: var(--color-on-accent); border: 5px solid var(--color-accent); }

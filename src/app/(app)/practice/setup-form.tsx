@@ -84,8 +84,8 @@ export function SetupForm(p: Props) {
     <div className="page-grid gap-y-12">
       <div className="col-span-4 sm:col-span-8 lg:col-span-7">
         <header>
-          <h1 className="text-display-l text-ivory">{p.firstRun ? "Your first interview." : "Set up the room."}</h1>
-          {p.firstRun && <p className="mt-5 max-w-[36rem] text-body-l text-stone">We&apos;ve started you at Realistic pressure. Speak naturally: the interviewer can hear pauses, follow-ups adapt to what you say, and nothing is scored until afterwards.</p>}
+          <h1 className="text-display-l text-fg">{p.firstRun ? "Your first interview." : "Set up the room."}</h1>
+          {p.firstRun && <p className="mt-5 max-w-[36rem] text-body-l text-fg-muted">We&apos;ve started you at Realistic pressure. Speak naturally: the interviewer can hear pauses, follow-ups adapt to what you say, and nothing is scored until afterwards.</p>}
         </header>
 
         {/* Two parts, in the order you'd decide them: the interview itself, then who sits across from you. */}
@@ -115,8 +115,8 @@ export function SetupForm(p: Props) {
               {/* Rungs by number; the chosen rung is said in words beneath, so seven options take one line. */}
               <Segmented name="Ladder rung" value={ladderLevel ? String(ladderLevel) : "custom"} onChange={(v) => setLadderLevel(v === "custom" ? null : Number(v))}
                 options={[{ value: "custom", label: "Off" }, ...p.ladder.map((l) => ({ value: String(l.level), label: String(l.level), spoken: `Rung ${l.level}, ${l.name}${l.unlocked ? "" : ", locked"}`, disabled: !l.unlocked }))]} />
-              <p className="mt-3 max-w-[36rem] text-ui text-stone" aria-live="polite">
-                {rung ? <><span className="text-ivory">Rung {rung.level}, {rung.name}.</span> {rung.description}</> : "Off. Choose your own interviewer and pressure below."}
+              <p className="mt-3 max-w-[36rem] text-ui text-fg-muted" aria-live="polite">
+                {rung ? <><span className="text-fg">Rung {rung.level}, {rung.name}.</span> {rung.description}</> : "Off. Choose your own interviewer and pressure below."}
               </p>
             </Group>
           )}
@@ -138,14 +138,14 @@ export function SetupForm(p: Props) {
                       return (
                         <div key={o.id} className="flex flex-col items-center">
                           <button type="button" role="radio" aria-checked={on} aria-label={`${nameOf(o.id)}, ${o.label}: ${o.hint}`} onClick={() => setPersona(o.id as typeof persona)}
-                            className={cn("w-full rounded-panel px-2 pb-4 pt-1 text-center transition-colors duration-[var(--dur-state)]", on ? "bg-surface-1" : "hover:bg-surface-1/50")}>
+                            className={cn("w-full rounded-panel px-2 pb-4 pt-1 text-center transition-colors duration-[var(--dur-state)]", on ? "bg-surface" : "hover:bg-surface/50")}>
                             <BotStill personaId={o.id} style={styles[o.id]} className={cn("mx-auto aspect-square w-full max-w-[8.5rem] transition-opacity duration-[var(--dur-state)]", !on && "opacity-80")} />
-                            <span className={cn("-mt-1 block truncate text-display-m", on ? "text-ivory" : "text-stone")}>{nameOf(o.id)}</span>
-                            <span className="mt-0.5 block text-meta text-stone">{o.label}</span>
-                            <span className="mt-1 line-clamp-2 block text-meta text-stone-dim">{o.hint}</span>
+                            <span className={cn("-mt-1 block truncate text-display-m", on ? "text-fg" : "text-fg-muted")}>{nameOf(o.id)}</span>
+                            <span className="mt-0.5 block text-meta text-fg-muted">{o.label}</span>
+                            <span className="mt-1 line-clamp-2 block text-meta text-fg-subtle">{o.hint}</span>
                           </button>
                           <button type="button" onClick={() => setEditing(o.id)} aria-label={`Customize ${nameOf(o.id)}`}
-                            className="mt-1 h-9 rounded-control px-3 text-meta text-stone underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-ivory pointer-coarse:h-11">Customize</button>
+                            className="mt-1 h-9 rounded-control px-3 text-meta text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg pointer-coarse:h-11">Customize</button>
                         </div>
                       );
                     })}
@@ -160,55 +160,55 @@ export function SetupForm(p: Props) {
                       return (
                         <div key={role} className="flex flex-col items-center text-center">
                           <BotStill personaId={id} style={styles[id]} className="aspect-square w-full max-w-[8.5rem]" />
-                          <p className="-mt-1 max-w-full truncate text-display-m text-ivory">{nameOf(id)}</p>
-                          <p className="mt-0.5 text-meta text-stone">{PANEL_ROLE_LABEL[role]}</p>
+                          <p className="-mt-1 max-w-full truncate text-display-m text-fg">{nameOf(id)}</p>
+                          <p className="mt-0.5 text-meta text-fg-muted">{PANEL_ROLE_LABEL[role]}</p>
                           <button type="button" onClick={() => setEditing(id)} aria-label={`Customize ${nameOf(id)}`}
-                            className="mt-1 h-9 rounded-control px-3 text-meta text-stone underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-ivory pointer-coarse:h-11">Customize</button>
+                            className="mt-1 h-9 rounded-control px-3 text-meta text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg pointer-coarse:h-11">Customize</button>
                         </div>
                       );
                     })}
                   </div>
                 </Group>
               )}
-              <Group label="Pressure" aside={<span className="text-display-m text-ivory">{PRESSURE_LABELS[pressure]}</span>}>
+              <Group label="Pressure" aside={<span className="text-display-m text-fg">{PRESSURE_LABELS[pressure]}</span>}>
                 <input aria-label="Pressure" type="range" min={1} max={5} step={1} value={pressure} onChange={(e) => setPressure(Number(e.target.value) as PressureLevel)} className="dial w-full" />
-                <div className="mt-1 flex justify-between text-meta text-stone-dim">{[1, 2, 3, 4, 5].map((l) => <span key={l}>{l}</span>)}</div>
-                <p className="mt-3 max-w-[36rem] text-ui text-stone">{PRESSURE_DESCRIPTIONS[pressure]}</p>
+                <div className="mt-1 flex justify-between text-meta text-fg-subtle">{[1, 2, 3, 4, 5].map((l) => <span key={l}>{l}</span>)}</div>
+                <p className="mt-3 max-w-[36rem] text-ui text-fg-muted">{PRESSURE_DESCRIPTIONS[pressure]}</p>
               </Group>
             </>
           )}
         </Part>
 
-        <div className="mt-14 border-t border-divider">
+        <div className="mt-14 border-t border-line">
           <Toggle checked={cameraMetrics} onChange={setCameraMetrics} label="Camera-based signals" description="Estimate camera engagement and posture on your device. Off means no gaze or posture in your Read; you can still see yourself and record." />
         </div>
       </div>
 
       {/* The ticket for this session: who you are about to meet, live, and the one action that matters. */}
       <aside aria-label="This session" className="col-span-4 sm:col-span-8 lg:col-span-5 lg:col-start-8 lg:sticky lg:top-24 lg:self-start">
-        <div className="rounded-panel bg-surface-1 px-6 pb-6 pt-4 sm:px-8 sm:pb-8">
+        <div className="rounded-panel bg-surface px-6 pb-6 pt-4 sm:px-8 sm:pb-8">
           <InterviewerStage personaIds={walking} styles={styles} className="mx-auto h-[clamp(11rem,8rem+8vw,15rem)] w-full" />
-          <p className="-mt-2 text-display-m text-ivory">{rung ? rung.name : mode === "panel" ? `A ${panelSize}-person panel` : `${nameOf(persona as PersonaId)}, ${SINGLE.find((o) => o.id === persona)?.walkingInto ?? "an interviewer"}`}</p>
-          <p className="mt-2 text-ui text-stone">{role || "Your role"} · {TYPE_LABELS[type]} · {rung ? `pressure ${rung.pressure} of 5` : PRESSURE_LABELS[pressure]} · about {minutes} min</p>
-          <dl className="mt-6 divide-y divide-divider border-y border-divider text-ui">
-            <div className="flex items-center justify-between py-2.5"><dt className="text-stone">Resume</dt><dd>{p.resume ? <span className="text-ivory">{roles ? `${roles} role${roles === 1 ? "" : "s"}` : "Added"}</span> : <Link href="/profile#documents" className="text-stone underline decoration-1 underline-offset-[0.2em] hover:text-ivory">Add</Link>}</dd></div>
-            <div className="flex items-center justify-between py-2.5"><dt className="text-stone">Job description</dt><dd>{p.jd ? <span className="text-ivory">{p.jd.competencies.length} competencies</span> : <Link href="/profile#documents" className="text-stone underline decoration-1 underline-offset-[0.2em] hover:text-ivory">Add</Link>}</dd></div>
-            <div className="flex items-center justify-between py-2.5"><dt className="text-stone">Plan</dt><dd className="text-ivory">{p.limits.plan}</dd></div>
+          <p className="-mt-2 text-display-m text-fg">{rung ? rung.name : mode === "panel" ? `A ${panelSize}-person panel` : `${nameOf(persona as PersonaId)}, ${SINGLE.find((o) => o.id === persona)?.walkingInto ?? "an interviewer"}`}</p>
+          <p className="mt-2 text-ui text-fg-muted">{role || "Your role"} · {TYPE_LABELS[type]} · {rung ? `pressure ${rung.pressure} of 5` : PRESSURE_LABELS[pressure]} · about {minutes} min</p>
+          <dl className="mt-6 divide-y divide-line border-y border-line text-ui">
+            <div className="flex items-center justify-between py-2.5"><dt className="text-fg-muted">Resume</dt><dd>{p.resume ? <span className="text-fg">{roles ? `${roles} role${roles === 1 ? "" : "s"}` : "Added"}</span> : <Link href="/profile#documents" className="text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">Add</Link>}</dd></div>
+            <div className="flex items-center justify-between py-2.5"><dt className="text-fg-muted">Job description</dt><dd>{p.jd ? <span className="text-fg">{p.jd.competencies.length} competencies</span> : <Link href="/profile#documents" className="text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">Add</Link>}</dd></div>
+            <div className="flex items-center justify-between py-2.5"><dt className="text-fg-muted">Plan</dt><dd className="text-fg">{p.limits.plan}</dd></div>
           </dl>
           {error && (
             <div className="mt-5">
               <FieldError>{error.message}</FieldError>
-              {error.upgrade && <Link href="/profile#plan" className="mt-2 inline-block text-ui text-stone underline decoration-1 underline-offset-[0.2em] hover:text-ivory">See plans</Link>}
+              {error.upgrade && <Link href="/profile#plan" className="mt-2 inline-block text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">See plans</Link>}
             </div>
           )}
           <Button size="lg" className="mt-6 w-full" onClick={start} loading={busy} disabled={!!p.limits.canStart}>Enter the Room</Button>
-          <p className="mt-3 text-center text-meta text-stone-dim">You&apos;ll confirm camera and microphone consent first.</p>
+          <p className="mt-3 text-center text-meta text-fg-subtle">You&apos;ll confirm camera and microphone consent first.</p>
         </div>
       </aside>
       {/* On phones and tablets the ticket sits after every setting, so its action also rides along at the bottom. */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-divider bg-ink pb-[env(safe-area-inset-bottom)] lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-page pb-[env(safe-area-inset-bottom)] lg:hidden">
         <div className="frame flex h-16 items-center justify-between gap-4">
-          <p className="min-w-0 truncate text-ui text-stone"><span className="text-ivory">{rung ? rung.name : mode === "panel" ? `${panelSize}-person panel` : nameOf(persona as PersonaId)}</span> · {minutes} min</p>
+          <p className="min-w-0 truncate text-ui text-fg-muted"><span className="text-fg">{rung ? rung.name : mode === "panel" ? `${panelSize}-person panel` : nameOf(persona as PersonaId)}</span> · {minutes} min</p>
           <Button className="shrink-0" onClick={start} loading={busy} disabled={!!p.limits.canStart}>Enter the Room</Button>
         </div>
       </div>
@@ -222,7 +222,7 @@ export function SetupForm(p: Props) {
 function Part({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-14 first-of-type:mt-[var(--spacing-group)]">
-      <h2 className="border-b border-divider pb-3 text-display-m text-ivory">{title}</h2>
+      <h2 className="border-b border-line pb-3 text-display-m text-fg">{title}</h2>
       <div className="mt-6 space-y-8">{children}</div>
     </section>
   );
@@ -233,7 +233,7 @@ function Group({ label, hint, aside, children }: { label: string; hint?: string;
   return (
     <section>
       <div className="mb-3 flex items-baseline justify-between gap-4">
-        <h3 className="text-ui font-medium text-ivory">{label}{hint && <span className="ml-2 font-normal text-stone-dim">{hint}</span>}</h3>
+        <h3 className="text-ui font-medium text-fg">{label}{hint && <span className="ml-2 font-normal text-fg-subtle">{hint}</span>}</h3>
         {aside}
       </div>
       {children}

@@ -39,8 +39,8 @@ export default async function LessonsPage() {
   if (!latest) {
     return (
       <div>
-        <h1 className="max-w-[20ch] text-display-l text-ivory">Your lessons start with one interview.</h1>
-        <p className="mt-5 max-w-[44rem] text-body-l text-stone">Lessons are built from what we measure while you practice: your pace and fillers, how your answers land, your posture and eye contact on camera. Do one interview and we&apos;ll pick the skills that will make the biggest difference for you, using your own answers as the examples.</p>
+        <h1 className="max-w-[20ch] text-display-l text-fg">Your lessons start with one interview.</h1>
+        <p className="mt-5 max-w-[44rem] text-body-l text-fg-muted">Lessons are built from what we measure while you practice: your pace and fillers, how your answers land, your posture and eye contact on camera. Do one interview and we&apos;ll pick the skills that will make the biggest difference for you, using your own answers as the examples.</p>
         <ButtonLink href="/practice" size="lg" className="mt-8">Start an interview</ButtonLink>
         <Library title="What you could learn" />
       </div>
@@ -49,8 +49,8 @@ export default async function LessonsPage() {
 
   return (
     <div>
-      <h1 className="text-display-l text-ivory">Built from how you interviewed.</h1>
-      <p className="mt-5 max-w-[44rem] text-body-l text-stone">
+      <h1 className="text-display-l text-fg">Built from how you interviewed.</h1>
+      <p className="mt-5 max-w-[44rem] text-body-l text-fg-muted">
         {open.length
           ? <>From your interview {relPhrase(latest.endedAt ?? latest.createdAt)}: the skills furthest from target, taught with your own answers. Learn it, pass the practice twice, then use it in your next interview: that&apos;s where we confirm it.</>
           : <>Every skill we measured in your interview {relPhrase(latest.endedAt ?? latest.createdAt)} was on target. Raise the pressure next time; new lessons appear when something slips.</>}
@@ -59,19 +59,19 @@ export default async function LessonsPage() {
       {first && (() => {
         const def = LESSONS[first.lessonKey as LessonKey];
         return (
-          <Link href={`/lessons/${first.lessonKey}`} className="group mt-[var(--spacing-group)] block rounded-panel bg-surface-1 px-6 py-7 transition-colors duration-[var(--dur-state)] hover:bg-surface-2 sm:px-10 sm:py-10">
+          <Link href={`/lessons/${first.lessonKey}`} className="group mt-[var(--spacing-group)] block rounded-panel bg-surface px-6 py-7 transition-colors duration-[var(--dur-state)] hover:bg-raised sm:px-10 sm:py-10">
             <div className="grid gap-8 md:grid-cols-[1.4fr_1fr] md:items-end">
               <div>
-                <p className="text-ui text-olive-light">Start here · <TrackLabel track={def.track} className="text-olive-light" /></p>
-                <p className="mt-3 text-display-l text-ivory">{def.title}</p>
-                <p className="mt-3 max-w-[36rem] text-body-l text-stone">{def.promise}</p>
+                <p className="text-ui font-medium text-fg">Start here · <TrackLabel track={def.track} className="text-fg-muted" /></p>
+                <p className="mt-3 text-display-l text-fg">{def.title}</p>
+                <p className="mt-3 max-w-[36rem] text-body-l text-fg-muted">{def.promise}</p>
               </div>
               <div>
-                <p className="text-ui text-stone">In your interview</p>
-                <p className="mt-1 text-body-l text-ivory">{first.evidence.display}</p>
-                <p className="text-ui text-stone-dim">target {first.evidence.target}</p>
+                <p className="text-ui text-fg-muted">In your interview</p>
+                <p className="mt-1 text-body-l text-fg">{first.evidence.display}</p>
+                <p className="text-ui text-fg-subtle">target {first.evidence.target}</p>
                 <LessonSteps l={summarize(first)} className="mt-5" />
-                <span className="mt-5 inline-block text-ui font-medium text-ivory underline decoration-olive-light decoration-1 underline-offset-[0.2em] group-hover:decoration-2">Open the lesson</span>
+                <span className="mt-5 inline-block text-ui font-medium text-fg underline decoration-accent decoration-1 underline-offset-[0.2em] group-hover:decoration-2">Open the lesson</span>
               </div>
             </div>
           </Link>
@@ -84,13 +84,13 @@ export default async function LessonsPage() {
           const done = mastered.filter((r) => r.track === t);
           return (
             <section key={t}>
-              <div className="flex items-baseline justify-between border-b border-divider pb-3">
-                <h2 className="text-display-m text-ivory">{TRACKS[t].label}</h2>
-                <span className="text-meta text-stone-dim">{TRACKS[t].blurb}</span>
+              <div className="flex items-baseline justify-between border-b border-line pb-3">
+                <h2 className="text-display-m text-fg">{TRACKS[t].label}</h2>
+                <span className="text-meta text-fg-subtle">{TRACKS[t].blurb}</span>
               </div>
               <div className="mt-2">
                 {ls.map((r) => <LessonCard key={r.id} l={summarize(r)} />)}
-                {!ls.length && <p className="border-t border-divider py-4 text-ui text-stone-dim">{first?.track === t ? "Your first lesson is above." : !measured[t] ? NOT_MEASURED[t] : done.length ? "On target. Nicely done." : "On target in your last interview."}</p>}
+                {!ls.length && <p className="border-t border-line py-4 text-ui text-fg-subtle">{first?.track === t ? "Your first lesson is above." : !measured[t] ? NOT_MEASURED[t] : done.length ? "On target. Nicely done." : "On target in your last interview."}</p>}
               </div>
             </section>
           );
@@ -99,7 +99,7 @@ export default async function LessonsPage() {
 
       {mastered.length > 0 && (
         <section className="mt-14">
-          <h2 className="text-ui font-medium text-ivory">Mastered</h2>
+          <h2 className="text-ui font-medium text-fg">Mastered</h2>
           <div className="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
             {mastered.map((r) => <LessonCard key={r.id} l={summarize(r)} />)}
           </div>
@@ -115,14 +115,14 @@ export default async function LessonsPage() {
 function Library({ title }: { title: string }) {
   return (
     <section className="mt-16">
-      <h2 className="text-ui font-medium text-ivory">{title}</h2>
+      <h2 className="text-ui font-medium text-fg">{title}</h2>
       <div className="mt-4 grid gap-x-8 gap-y-10 md:grid-cols-3">
         {TRACK_ORDER.map((t) => (
-          <div key={t} className="border-t border-divider pt-4">
+          <div key={t} className="border-t border-line pt-4">
             <TrackLabel track={t} />
             <ul className="mt-3 space-y-3">
               {LESSON_ORDER.filter((k) => LESSONS[k].track === t).map((k) => (
-                <li key={k}><Link href={`/lessons/${k}`} className="-mx-2 block rounded-control px-2 py-1 text-ui text-ivory transition-colors duration-[var(--dur-press)] hover:bg-surface-1">{LESSONS[k].title}<span className="block text-meta text-stone-dim">{LESSONS[k].promise}</span></Link></li>
+                <li key={k}><Link href={`/lessons/${k}`} className="-mx-2 block rounded-control px-2 py-1 text-ui text-fg transition-colors duration-[var(--dur-press)] hover:bg-surface">{LESSONS[k].title}<span className="block text-meta text-fg-subtle">{LESSONS[k].promise}</span></Link></li>
               ))}
             </ul>
           </div>

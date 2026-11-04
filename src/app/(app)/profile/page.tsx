@@ -20,8 +20,8 @@ export default async function ProfilePage() {
   const media = await db.select().from(schema.mediaObjects).where(and(eq(schema.mediaObjects.userId, user.id), eq(schema.mediaObjects.status, "complete"))).all();
   return (
     <div>
-      <h1 className="text-display-l text-ivory">{profile.name}</h1>
-      <p className="mt-3 text-body-l text-stone">{user.email} · {profile.targetRole}</p>
+      <h1 className="text-display-l text-fg">{profile.name}</h1>
+      <p className="mt-3 text-body-l text-fg-muted">{user.email} · {profile.targetRole}</p>
       <ProfileClient
         privacy={{ cameraMetricsEnabled: profile.cameraMetricsEnabled, gazeMetricEnabled: profile.gazeMetricEnabled, postureMetricEnabled: profile.postureMetricEnabled, recordVideo: profile.recordVideo, videoRetentionDays: profile.videoRetentionDays }}
         resume={resume ? { name: resume.fileName ?? "Pasted resume", roles: resume.parsed?.roles.map((r) => `${r.title}${r.organization ? ` · ${r.organization}` : ""}`) ?? [], createdAt: resume.createdAt.toISOString() } : null}

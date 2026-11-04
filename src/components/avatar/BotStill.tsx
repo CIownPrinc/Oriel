@@ -6,9 +6,10 @@ import { cn } from "@/components/ui/cn";
 import { drawBot, type BotPose } from "./bot/draw";
 import { lookFor } from "./bot/looks";
 import { BASE_POSE } from "./bot/presets";
+import { PALETTE } from "@/lib/palette";
 
 /** One still frame of a bot (pickers, cards): no animation loop, redrawn only when its look changes. */
-export function BotStill({ personaId, style, pose, accent = "#A3AB8B", className }: {
+export function BotStill({ personaId, style, pose, accent = PALETTE.accent, className }: {
   personaId: string;
   style?: Partial<AvatarStyle> | null;
   pose?: Partial<BotPose>;

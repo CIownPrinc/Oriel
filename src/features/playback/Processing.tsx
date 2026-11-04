@@ -37,15 +37,15 @@ export function Processing({ sessionId, initialStatus }: { sessionId: string; in
     <div className="mx-auto max-w-xl py-24 text-center">
       {status === "failed" ? (
         <>
-          <h1 className="text-display-l text-ivory">Your Read didn&apos;t finish.</h1>
-          <p className="mt-4 text-stone">Your interview is saved. Nothing was lost. {error ? <span className="block mt-2 text-meta text-stone-dim">{error}</span> : null}</p>
+          <h1 className="text-display-l text-fg">Your Read didn&apos;t finish.</h1>
+          <p className="mt-4 text-fg-muted">Your interview is saved. Nothing was lost. {error ? <span className="block mt-2 text-meta text-fg-subtle">{error}</span> : null}</p>
           <Button className="mt-8" onClick={retry}>Retry analysis</Button>
         </>
       ) : (
         <>
-          <h1 className="text-display-l text-ivory">Now let&apos;s see what happened.</h1>
+          <h1 className="text-display-l text-fg">Now let&apos;s see what happened.</h1>
           <ProgressBar className="mt-10" value={status === "complete" ? STEPS.length : idx + (status === "running" ? 0.5 : 0)} max={STEPS.length} label="Analysis progress" />
-          <p className="mt-4 text-ui text-stone" aria-live="polite">{status === "queued" ? "Queued…" : STEPS[idx]?.[1] ?? "Working…"}</p>
+          <p className="mt-4 text-ui text-fg-muted" aria-live="polite">{status === "queued" ? "Queued…" : STEPS[idx]?.[1] ?? "Working…"}</p>
         </>
       )}
     </div>

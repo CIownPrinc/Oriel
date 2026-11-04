@@ -184,55 +184,55 @@ export function DrillRunner({ drill, sourceSessionId, serverStt, lesson }: { dri
 
   return (
     <div className="max-w-[48rem]">
-      {lesson ? <Link href={`/lessons/${lesson.key}`} className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-stone transition-colors duration-[var(--dur-press)] hover:text-ivory">← Lesson: {lesson.title}</Link> : <Link href="/drills" className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-stone transition-colors duration-[var(--dur-press)] hover:text-ivory">← Drills</Link>}
-      <h1 className="mt-6 text-display-l text-ivory">{drill.title}</h1>
-      <p className="mt-5 text-body-l text-stone">{drill.objective}</p>
-      <p className="mt-3 text-ui text-stone-dim">A {Math.round(drill.durationSec / 60) || 1}-minute drill{drill.requiresCamera ? ", on camera" : ""}.</p>
+      {lesson ? <Link href={`/lessons/${lesson.key}`} className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-[var(--dur-press)] hover:text-fg">← Lesson: {lesson.title}</Link> : <Link href="/drills" className="-ml-1 inline-flex h-9 items-center rounded-control px-1 text-ui text-fg-muted transition-colors duration-[var(--dur-press)] hover:text-fg">← Drills</Link>}
+      <h1 className="mt-6 text-display-l text-fg">{drill.title}</h1>
+      <p className="mt-5 text-body-l text-fg-muted">{drill.objective}</p>
+      <p className="mt-3 text-ui text-fg-subtle">A {Math.round(drill.durationSec / 60) || 1}-minute drill{drill.requiresCamera ? ", on camera" : ""}.</p>
 
       {stage === "brief" && (
-        <section className="mt-10 border-t border-divider pt-6">
-          <h2 className="text-ui font-medium text-ivory">How it works</h2>
-          <p className="mt-3 text-body text-ivory">{drill.instructions}</p>
-          <p className="mt-4 text-ui text-stone">Target: {drill.passRule}</p>
+        <section className="mt-10 border-t border-line pt-6">
+          <h2 className="text-ui font-medium text-fg">How it works</h2>
+          <p className="mt-3 text-body text-fg">{drill.instructions}</p>
+          <p className="mt-4 text-ui text-fg-muted">Target: {drill.passRule}</p>
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Button size="lg" onClick={begin}>Start drill</Button>
-            {!drill.requiresCamera && !voiceOnly && <button type="button" className="h-11 rounded-control text-ui text-stone underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-ivory" onClick={() => setTextMode(!textMode)}>{textMode ? "Use my voice" : "Type instead"}</button>}
-            {voiceOnly && <span className="text-ui text-stone">Spoken only: this is measured from your voice.</span>}
+            {!drill.requiresCamera && !voiceOnly && <button type="button" className="h-11 rounded-control text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] transition-colors duration-[var(--dur-press)] hover:text-fg" onClick={() => setTextMode(!textMode)}>{textMode ? "Use my voice" : "Type instead"}</button>}
+            {voiceOnly && <span className="text-ui text-fg-muted">Spoken only: this is measured from your voice.</span>}
           </div>
           <FieldError>{error}</FieldError>
         </section>
       )}
 
       {(stage === "calibrate" || (drill.requiresCamera && stage !== "brief")) && (
-        <div className="mt-8 overflow-hidden rounded-panel bg-surface-1">
+        <div className="mt-8 overflow-hidden rounded-panel bg-surface">
           <video ref={videoRef} muted playsInline className="aspect-video w-full -scale-x-100 object-cover" />
         </div>
       )}
       {stage === "calibrate" && (
         <div className="mt-5 flex items-center gap-4">
           <Button onClick={calibrate}>{postureDrill ? "Sit tall, look at the lens for 2 seconds" : "Look at the lens for 2 seconds"}</Button>
-          {calibOk === false && <p className="text-ui text-signal-warn">{postureDrill ? "We need your face and shoulders in view. Sit back a little or tilt your camera down, add light in front of you, and try again." : "We couldn't see your face clearly. Add light in front of you and try again."}</p>}
+          {calibOk === false && <p className="text-ui text-warning">{postureDrill ? "We need your face and shoulders in view. Sit back a little or tilt your camera down, add light in front of you, and try again." : "We couldn't see your face clearly. Add light in front of you and try again."}</p>}
         </div>
       )}
 
       {(stage === "prompt" || stage === "answer" || stage === "scoring") && (
         <section className="mt-10">
-          <div className="border-t border-divider pt-6">
-            <p className="text-ui text-stone">The question</p>
-            <p className="hang mt-3 text-display-m text-ivory">“{drill.prompt}”</p>
+          <div className="border-t border-line pt-6">
+            <p className="text-ui text-fg-muted">The question</p>
+            <p className="hang mt-3 text-display-m text-fg">“{drill.prompt}”</p>
           </div>
-          {stage === "prompt" && <p className="mt-6 text-ui text-stone">Listen…</p>}
+          {stage === "prompt" && <p className="mt-6 text-ui text-fg-muted">Listen…</p>}
           {stage !== "prompt" && (
             <div className="mt-6">
               <div className="flex items-center justify-between">
-                <span className={cn("text-display-m tabular-nums", over ? "text-signal-warn" : "text-ivory")}>{String(Math.floor(secs / 60)).padStart(1, "0")}:{String(secs % 60).padStart(2, "0")}</span>
-                <span className="text-ui text-stone">target {drill.durationSec} s</span>
+                <span className={cn("text-display-m tabular-nums", over ? "text-warning" : "text-fg")}>{String(Math.floor(secs / 60)).padStart(1, "0")}:{String(secs % 60).padStart(2, "0")}</span>
+                <span className="text-ui text-fg-muted">target {drill.durationSec} s</span>
               </div>
-              <div className="mt-3 h-1 overflow-hidden rounded-full bg-surface-2"><div className={cn("h-full rounded-full transition-[width] duration-300", over ? "bg-signal-warn" : "bg-olive-light")} style={{ width: `${Math.min(100, (elapsed / (drill.durationSec * 1000)) * 100)}%` }} /></div>
+              <div className="mt-3 h-1 overflow-hidden rounded-full bg-raised"><div className={cn("h-full rounded-full transition-[width] duration-300", over ? "bg-warning" : "bg-accent")} style={{ width: `${Math.min(100, (elapsed / (drill.durationSec * 1000)) * 100)}%` }} /></div>
               {textMode ? (
                 <Textarea className="mt-6" rows={6} value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Type your answer" autoFocus />
               ) : (
-                <p className="mt-6 min-h-20 text-body text-stone">{transcript || <span className="text-stone-dim">Speak your answer…</span>}</p>
+                <p className="mt-6 min-h-20 text-body text-fg-muted">{transcript || <span className="text-fg-subtle">Speak your answer…</span>}</p>
               )}
               <div className="mt-6 flex items-center gap-3">
                 <Button size="lg" onClick={finish} loading={stage === "scoring"} disabled={textMode && !typed.trim()}>I&apos;m done</Button>
@@ -246,31 +246,31 @@ export function DrillRunner({ drill, sourceSessionId, serverStt, lesson }: { dri
       {stage === "result" && result && (
         <section className="mt-10">
           {/* The result is the one number this page exists to give: shown large, said in words, with its baseline. */}
-          <div className="border-t border-divider pt-6">
+          <div className="border-t border-line pt-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-ui text-stone">{result.measurement.label}</p>
-                <p className="mt-2 flex items-baseline gap-2"><span className="text-display-l tabular-nums text-ivory">{result.measurement.value ?? "—"}</span><span className="text-body-l text-stone">{result.measurement.unit}</span></p>
-                {result.baseline !== null && <p className="mt-2 text-ui text-stone">Your baseline: {Math.round(result.baseline * 10) / 10} {result.measurement.unit}</p>}
+                <p className="text-ui text-fg-muted">{result.measurement.label}</p>
+                <p className="mt-2 flex items-baseline gap-2"><span className="text-display-l tabular-nums text-fg">{result.measurement.value ?? "—"}</span><span className="text-body-l text-fg-muted">{result.measurement.unit}</span></p>
+                {result.baseline !== null && <p className="mt-2 text-ui text-fg-muted">Your baseline: {Math.round(result.baseline * 10) / 10} {result.measurement.unit}</p>}
               </div>
               {result.measurement.passed !== null && <Badge tone={result.measurement.passed ? "good" : "warn"}>{result.measurement.passed ? "Target met" : "Not yet"}</Badge>}
             </div>
-            {typeof result.measurement.details.reason === "string" && <p className="mt-4 text-ui text-signal-warn">{result.measurement.details.reason}</p>}
-            <p className="mt-6 text-body text-ivory">{result.feedback.feedback}</p>
-            <p className="mt-3 text-body text-ivory"><span className="font-medium text-olive-light">Next try:</span> {result.feedback.nextTry}</p>
+            {typeof result.measurement.details.reason === "string" && <p className="mt-4 text-ui text-warning">{result.measurement.details.reason}</p>}
+            <p className="mt-6 text-body text-fg">{result.feedback.feedback}</p>
+            <p className="mt-3 text-body text-fg"><span className="font-medium text-fg">Next try:</span> {result.feedback.nextTry}</p>
             {Array.isArray(result.measurement.details.statements) && (result.measurement.details.statements as string[]).length > 0 && (
-              <ul className="mt-5 space-y-1 border-t border-divider pt-4 text-ui text-stone">{(result.measurement.details.statements as string[]).map((s) => <li key={s} className="hang-sans">“{s}”</li>)}</ul>
+              <ul className="mt-5 space-y-1 border-t border-line pt-4 text-ui text-fg-muted">{(result.measurement.details.statements as string[]).map((s) => <li key={s} className="hang-sans">“{s}”</li>)}</ul>
             )}
           </div>
           {result.lesson && (
-            <div className="mt-8 flex flex-wrap items-baseline justify-between gap-3 border-y border-divider py-4">
-              <p className="text-ui text-stone">Lesson practice · <span className="text-ivory">{result.lesson.title}</span>: {Math.min(result.lesson.passes, result.lesson.needed)} of {result.lesson.needed} passes{result.lesson.passes >= result.lesson.needed ? ". Practiced. Now use it in an interview." : ""}</p>
-              <Link href={`/lessons/${result.lesson.key}`} className="text-ui text-stone underline decoration-1 underline-offset-[0.2em] hover:text-ivory">Back to the lesson</Link>
+            <div className="mt-8 flex flex-wrap items-baseline justify-between gap-3 border-y border-line py-4">
+              <p className="text-ui text-fg-muted">Lesson practice · <span className="text-fg">{result.lesson.title}</span>: {Math.min(result.lesson.passes, result.lesson.needed)} of {result.lesson.needed} passes{result.lesson.passes >= result.lesson.needed ? ". Practiced. Now use it in an interview." : ""}</p>
+              <Link href={`/lessons/${result.lesson.key}`} className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">Back to the lesson</Link>
             </div>
           )}
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Button size="lg" onClick={again}>Try again</Button>
-            <Link href="/drills" className="text-ui text-stone underline decoration-1 underline-offset-[0.2em] hover:text-ivory">Other drills</Link>
+            <Link href="/drills" className="text-ui text-fg-muted underline decoration-1 underline-offset-[0.2em] hover:text-fg">Other drills</Link>
           </div>
         </section>
       )}

@@ -1,5 +1,6 @@
 import type { BotLook } from "./looks";
 import { extent, halfWidthAt, shapeGeom, type ShapeGeom } from "./shapes";
+import { PALETTE } from "@/lib/palette";
 
 /**
  * Pure canvas drawing for one bot. Everything is expressed in units of `S`, the
@@ -288,7 +289,7 @@ function drawHeadsetMic(ctx: CanvasRenderingContext2D, g: ShapeGeom, X: (u: numb
   ctx.moveTo(X(hw * 0.98), Y(g.eyeY + 0.053));
   ctx.quadraticCurveTo(X(hw * 0.93), Y(g.eyeY + 0.23), X(g.spacing * 0.67), Y(g.eyeY + 0.2));
   ctx.stroke();
-  ctx.fillStyle = p.voice > 0.05 ? "#8C957A" : "#2A2C31";
+  ctx.fillStyle = p.voice > 0.05 ? PALETTE.accent : "#2A2C31";
   ctx.beginPath();
   capsule(ctx, X(g.spacing * 0.57), Y(g.eyeY + 0.2), S * 0.06, S * 0.03);
   ctx.fill();

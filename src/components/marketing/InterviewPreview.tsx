@@ -108,7 +108,7 @@ export function InterviewPreview() {
       {/* While he listens, your voice moves in a small level under his face; while he asks, it rests. */}
       <span className="-mt-3 flex h-3 items-end gap-[3px]" aria-hidden>
         {[0, 1, 2, 3, 4].map((b) => (
-          <span key={b} className={cn("h-full w-[3px] origin-bottom rounded-full bg-olive-light transition-opacity duration-[var(--dur-state)]", listening ? "opacity-100 motion-safe:animate-[meter_900ms_ease-in-out_infinite]" : "opacity-0")}
+          <span key={b} className={cn("h-full w-[3px] origin-bottom rounded-full bg-accent transition-opacity duration-[var(--dur-state)]", listening ? "opacity-100 motion-safe:animate-[meter_900ms_ease-in-out_infinite]" : "opacity-0")}
             style={{ animationDelay: `${b * 130}ms`, transform: "scaleY(0.35)" }} />
         ))}
       </span>
@@ -116,15 +116,15 @@ export function InterviewPreview() {
       {/* His question, as a subtitle; it settles back while you answer. All three share one cell, so the line keeps the tallest one's height. */}
       <div className="mt-4 grid w-full text-display-m" aria-hidden>
         {QUESTIONS.map((q) => <p key={q} className="invisible col-start-1 row-start-1 text-balance">“{q}”</p>)}
-        <p key={scene.i} className={cn("col-start-1 row-start-1 text-balance transition-colors duration-[var(--dur-panel)]", listening ? "text-stone" : "text-ivory", running && !listening && "animate-[fade-in_var(--dur-panel)_var(--ease-enter)]")}>“{QUESTIONS[scene.i]}”</p>
+        <p key={scene.i} className={cn("col-start-1 row-start-1 text-balance transition-colors duration-[var(--dur-panel)]", listening ? "text-fg-muted" : "text-fg", running && !listening && "animate-[fade-in_var(--dur-panel)_var(--ease-enter)]")}>“{QUESTIONS[scene.i]}”</p>
       </div>
 
       {/* The nameplate; the play control hangs after it without moving it. */}
       <div className="mt-3 grid grid-cols-[2.75rem_auto_2.75rem] items-center">
-        <p className="col-start-2 text-ui text-stone-dim" aria-hidden>Sample interview with Daniel, a hiring&nbsp;manager</p>
+        <p className="col-start-2 text-ui text-fg-subtle" aria-hidden>Sample interview with Daniel, a hiring&nbsp;manager</p>
         {/* Always laid out, so its arrival after hydration moves nothing; hidden (and unfocusable) without motion. */}
         <button type="button" onClick={() => setUserPaused((p) => !p)} aria-label={userPaused ? "Play the sample interview" : "Pause the sample interview"}
-          className={cn("grid size-11 place-items-center rounded-full text-stone transition-colors duration-[var(--dur-press)] hover:text-ivory", !motionOk && "invisible")}>
+          className={cn("grid size-11 place-items-center rounded-full text-fg-muted transition-colors duration-[var(--dur-press)] hover:text-fg", !motionOk && "invisible")}>
           <svg viewBox="0 0 12 12" className="size-3" aria-hidden>
             {userPaused ? <path d="M3.5 1.8v8.4l6.5-4.2z" fill="currentColor" /> : <path d="M3 2h2v8H3zM7 2h2v8H7z" fill="currentColor" />}
           </svg>

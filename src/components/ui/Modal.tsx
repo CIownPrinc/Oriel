@@ -13,7 +13,7 @@ export function Modal({ open, onClose, title, children, className, dismissible =
   }, [open]);
   return (
     <dialog ref={ref} aria-label={title} onCancel={(e) => { if (!dismissible) e.preventDefault(); else onClose(); }}
-      className={cn("m-auto w-[min(560px,calc(100vw-32px))] max-h-[calc(100dvh-48px)] overflow-hidden rounded-panel border-0 bg-surface-1 p-0 text-ivory shadow-sheet backdrop:bg-ink/85 open:animate-[enter_var(--dur-panel)_var(--ease-enter)]", className)}>
+      className={cn("m-auto w-[min(560px,calc(100vw-32px))] max-h-[calc(100dvh-48px)] overflow-hidden rounded-panel border-0 bg-surface p-0 text-fg shadow-sheet backdrop:bg-page/85 open:animate-[enter_var(--dur-panel)_var(--ease-enter)]", className)}>
       {open && children}
     </dialog>
   );
