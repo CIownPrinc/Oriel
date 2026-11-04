@@ -9,7 +9,7 @@ import { onboard, signUp } from "./helpers";
 test("voice interview with recording and audio-derived Read", async ({ page }) => {
   await signUp(page, `voice-${Date.now()}@oriel.test`);
   await onboard(page, { resume: false });
-  await page.getByRole("button", { name: "Enter the Room" }).click();
+  await page.getByRole("button", { name: "Start interview" }).click();
   const consent = page.getByRole("dialog");
   await consent.getByLabel("Type your full name to sign").fill("Jamie Park");
   await consent.getByRole("button", { name: "Agree and continue" }).click();

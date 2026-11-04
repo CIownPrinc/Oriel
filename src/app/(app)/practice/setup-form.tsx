@@ -197,7 +197,7 @@ export function SetupForm(p: Props) {
               {error.upgrade && <Link href="/profile#plan" className="mt-2 inline-block text-ui text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">See plans</Link>}
             </div>
           )}
-          <Button size="lg" className="mt-6 w-full" onClick={start} loading={busy} disabled={!!p.limits.canStart}>Enter the Room</Button>
+          <Button size="lg" className="mt-6 w-full" onClick={start} loading={busy} disabled={!!p.limits.canStart}>Start interview</Button>
           <p className="mt-3 text-center text-meta text-fg-subtle">You&apos;ll confirm camera and microphone consent first.</p>
         </div>
       </aside>
@@ -205,7 +205,7 @@ export function SetupForm(p: Props) {
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-page pb-[env(safe-area-inset-bottom)] lg:hidden">
         <div className="frame flex h-16 items-center justify-between gap-4">
           <p className="min-w-0 truncate text-ui text-fg-muted"><span className="text-fg">{rung ? rung.name : mode === "panel" ? `${panelSize}-person panel` : nameOf(persona)}</span> · {minutes} min</p>
-          <Button className="shrink-0" onClick={start} loading={busy} disabled={!!p.limits.canStart}>Enter the Room</Button>
+          <Button className="shrink-0" onClick={start} loading={busy} disabled={!!p.limits.canStart}>Start interview</Button>
         </div>
       </div>
       <div className="h-16 lg:hidden" aria-hidden />

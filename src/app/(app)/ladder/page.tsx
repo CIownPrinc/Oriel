@@ -24,7 +24,7 @@ export default async function LadderPage() {
           <p className="-mt-2 text-display-m text-fg">{current.name}</p>
           <p className="mt-2 text-ui text-fg-muted"><span className="text-fg">You&apos;re on rung {current.level} of {steps.length}.</span> {current.description}</p>
           {allowed.allowed ? <ButtonLink href={`/practice?ladder=${current.level}`} size="lg" className="mt-6">Practice this rung</ButtonLink> : (
-            <><p className="mt-4 text-ui text-fg-muted">{allowed.reason}</p><ButtonLink href="/profile#plan" variant="secondary" className="mt-4">See plans</ButtonLink></>
+            <><p className="mt-4 text-ui text-fg-muted">{allowed.reason}</p><ButtonLink href="/profile#plan" size="lg" className="mt-4">See plans that include it</ButtonLink></>
           )}
         </div>
       </div>

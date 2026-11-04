@@ -140,7 +140,7 @@ export default async function LessonPage({ params }: { params: Promise<{ key: st
               <h2 className="text-ui font-medium text-fg">The goal</h2>
               <p className="mt-2 text-body text-fg">{def.goal}</p>
               <p className="mt-2 text-ui text-fg-muted">{status === "mastered" && l?.masteredAt ? `Confirmed in your interview ${relPhrase(l.masteredAt)}.` : "Your next interview confirms it: lessons are only marked mastered when the skill shows up in a real interview."}</p>
-              {status !== "mastered" && <ButtonLink href="/practice" variant="secondary" size="sm" className="mt-4">Practice an interview</ButtonLink>}
+              {status !== "mastered" && <ButtonLink href="/practice" variant="secondary" size="sm" className="mt-4">New interview</ButtonLink>}
             </div>
           </div>
         </aside>

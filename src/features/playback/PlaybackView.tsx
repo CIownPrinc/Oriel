@@ -137,7 +137,7 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
           ) : <p className="mt-3 border-t border-line pt-3 text-ui text-fg-muted">{d.recommendedDrill.reason}</p>}
           <div className="mt-6 flex flex-wrap gap-2">
             <ButtonLink href={`/drills/${d.recommendedDrill.id}?from=${d.sessionId}`}>Drill: {d.recommendedDrill.title}</ButtonLink>
-            <ButtonLink href="/practice" variant="secondary">Practice again</ButtonLink>
+            <ButtonLink href="/practice" variant="secondary">New interview</ButtonLink>
           </div>
           {d.strengths.length > 0 && (
             <div className="mt-10">

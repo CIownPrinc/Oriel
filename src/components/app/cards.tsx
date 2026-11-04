@@ -34,7 +34,6 @@ export function DrillCard({ drill, recommended, lastValue }: { drill: { id: stri
     <Link href={`/drills/${drill.id}`} className={cn("group flex flex-col border-t pb-2 pt-4 transition-colors duration-press", "border-line-strong hover:border-fg-subtle")}>
       <div className="flex items-center justify-between gap-3">
         <span className="text-meta text-fg-subtle">{Math.round(drill.durationSec / 60) || 1} min{drill.requiresCamera ? " · camera" : ""}</span>
-        {recommended && <span className="text-meta font-medium text-accent">Recommended</span>}
       </div>
       <p className="mt-3 text-display-m text-fg">{drill.title}</p>
       <p className="mt-2 flex-1 text-ui text-fg-muted">{drill.objective}</p>

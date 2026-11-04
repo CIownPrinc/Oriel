@@ -8,6 +8,7 @@ import { CATEGORIES, type Category } from "@/lib/training/competencies";
 import type { Outcome } from "@/lib/training/engine";
 import { PracticeModes } from "@/components/app/PracticeModes";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { TextLink } from "@/components/ui/Button";
 
 export const metadata = { title: "Training" };
 
@@ -55,7 +56,7 @@ export default async function TrainPage() {
                   <p className="text-body text-fg">{l.kind === "review" ? "Review" : "Practice"} in progress</p>
                   <p className="text-meta text-fg-subtle">{CATEGORIES.find((c) => c.id === l.category)?.label} · started {day(l.createdAt.toISOString())}</p>
                 </div>
-                <Link href={`/train/${l.id}`} className="text-ui text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">Resume</Link>
+                <TextLink href={`/train/${l.id}`} className="inline-flex min-h-11 items-center text-ui">Resume</TextLink>
               </li>
             ))}
           </ul>
@@ -72,10 +73,10 @@ export default async function TrainPage() {
           <ol className="mt-3 border-t border-line text-ui">
             {[
               ["Answer", "One question, no hints."],
-              ["One note", "The single change that matters most, quoted from your answer."],
-              ["Try again", "Same question, in your own words. Up to two retries, with a little more help each time."],
-              ["A new question", "A different situation that needs the same skill. It isn't announced."],
-              ["Later", "A review on another day, with a different question again."],
+              ["One note", "The change that matters most, quoted from you."],
+              ["Try again", "Up to twice, with a little more help each time."],
+              ["A new question", "Same skill, new situation, unannounced."],
+              ["Later", "A review on another day."],
             ].map(([t, d], i) => (
               <li key={t} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-2 border-b border-line py-3">
                 <span className="text-fg-subtle">{i + 1}</span>
@@ -88,7 +89,7 @@ export default async function TrainPage() {
 
       <section aria-labelledby="history-title" className="mt-section">
         <h2 id="history-title" className="text-display-m text-fg">What you&apos;ve shown</h2>
-        <p className="mt-2 max-w-lead text-ui text-fg-muted">Three things are kept apart: improving on the same question, carrying it to a new one, and holding it after a delay. Each is based only on answers there was enough evidence to judge.</p>
+        <p className="mt-2 max-w-lead text-ui text-fg-muted">Improving on the same question, carrying it to a new one, and holding it later, judged only where there was enough to go on.</p>
         {assessed.length ? (
           <div className="mt-6 overflow-x-auto" tabIndex={0} role="region" aria-label="What you've shown, by skill">
             <table className="w-full min-w-[40rem] text-left text-ui">

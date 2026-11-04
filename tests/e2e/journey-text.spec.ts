@@ -22,7 +22,7 @@ test("text-mode journey from signup to deletion", async ({ page }) => {
   await studio.getByRole("button", { name: "Save" }).click();
   await expect(studio).toBeHidden();
   await expect(page.getByRole("radio", { name: /^Captain Byte, Hiring manager/ })).toHaveAttribute("aria-checked", "true");
-  await page.getByRole("button", { name: "Enter the Room" }).click();
+  await page.getByRole("button", { name: "Start interview" }).click();
   await expect(page).toHaveURL(/room\//);
 
   // Consent: decline microphone and camera → text mode.
