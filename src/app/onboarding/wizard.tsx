@@ -15,6 +15,7 @@ import type { ParsedJobDescription, ParsedResume } from "@/db/schema";
 import { DOMAIN_OPTIONS, DOMAIN_PACKS, type DomainId } from "@/lib/interview/domain-packs";
 import { PERSONAS } from "@/lib/interview/personas";
 import { PALETTE } from "@/lib/palette";
+import { InterviewerPicker } from "@/components/app/InterviewerPicker";
 
 type PersonaChoice = "warm_recruiter" | "hiring_manager" | "skeptic" | "executive";
 type Profile = {
@@ -28,11 +29,11 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 const STEPS = ["You", "Field", "Resume", "The role", "Interviewer"];
 const DONE = STEPS.length + 1;
 
-const INTERVIEWERS: { id: PersonaChoice; hint: string; line: string }[] = [
-  { id: "warm_recruiter", hint: "Friendly, checks fit and story", line: "I’ll keep it friendly, and still ask for specifics." },
-  { id: "hiring_manager", hint: "Neutral, wants what you actually did", line: "I’ll want to know what you actually did." },
-  { id: "skeptic", hint: "Tests every claim and number", line: "I’ll test every claim, and every number." },
-  { id: "executive", hint: "Few words, long pauses, big picture", line: "Few words. Long pauses. The big picture." },
+const INTERVIEWERS: { id: PersonaChoice; line: string }[] = [
+  { id: "warm_recruiter", line: "I’ll keep it friendly, and still ask for specifics." },
+  { id: "hiring_manager", line: "I’ll want to know what you actually did." },
+  { id: "skeptic", line: "I’ll test every claim, and every number." },
+  { id: "executive", line: "Few words. Long pauses. The big picture." },
 ];
 
 export function OnboardingWizard({ defaultName }: { defaultName: string }) {
@@ -209,21 +210,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
                 <StepShell title="Who sits across from you?" lead="Pick an interviewer and the kind of interview. You can change both before any session.">
                   <div className="mt-8">
                     <Label>Interviewer</Label>
-                    <div role="radiogroup" aria-label="Interviewer style" className="grid grid-cols-2 gap-x-3 gap-y-2">
-                      {INTERVIEWERS.map(({ id, hint }) => {
-                        const on = p.preferredPersona === id;
-                        const who = PERSONAS[id];
-                        return (
-                          <button key={id} type="button" role="radio" aria-checked={on} aria-label={`${who.name.split(" ")[0]}, ${who.title}: ${hint}`} onClick={() => set("preferredPersona", id)}
-                            className={cn("rounded-panel px-2 pb-4 pt-1 text-center transition-colors duration-state", on ? "bg-surface" : "hover:bg-surface/50")}>
-                            <BotStill personaId={id} className={cn("mx-auto aspect-square w-[min(100%,8rem)] transition-opacity duration-state", !on && "opacity-80")} />
-                            <span className={cn("-mt-1 block font-display text-body-l", on ? "text-fg" : "text-fg-muted")}>{who.name.split(" ")[0]}</span>
-                            <span className="mt-0.5 block text-meta text-fg-muted">{who.title}</span>
-                            <span className="mt-1 block text-meta text-fg-subtle">{hint}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                    <InterviewerPicker value={p.preferredPersona} onChange={(id) => set("preferredPersona", id)} />
                   </div>
                   <div className="mt-8">
                     <Label>Interview type</Label>

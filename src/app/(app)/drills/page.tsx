@@ -8,6 +8,8 @@ import { DrillCard } from "@/components/app/cards";
 import { TRACKS } from "@/lib/lessons/library";
 import type { Track } from "@/lib/lessons/types";
 import { relDate } from "@/lib/format";
+import { PracticeModes } from "@/components/app/PracticeModes";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export const metadata = { title: "Drills" };
 
@@ -33,10 +35,8 @@ export default async function DrillsPage() {
   const recommended = DRILLS.find((d) => d.id === rec.drillId);
   return (
     <div>
-      <header className="max-w-lead">
-        <h1 className="text-display-l text-fg">Five minutes on one thing<span className="text-accent">.</span></h1>
-        <p className="mt-5 text-body-l text-fg-muted">Each drill has one objective, one measurement and your own baseline to beat.</p>
-      </header>
+      <PracticeModes current="/drills" />
+      <PageHeader title="Five minutes on one thing." lead="One objective, one measurement, and your own baseline to beat." />
 
       {recommended && (
         <section className="page-grid mt-group gap-y-5 border-t border-line pt-10">

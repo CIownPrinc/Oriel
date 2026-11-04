@@ -3,6 +3,8 @@ import { progressSummary, listSessions } from "@/server/queries";
 import { PROGRESS_METRICS } from "@/lib/practice/progress";
 import { ButtonLink } from "@/components/ui/Button";
 import { Sparkline } from "@/components/app/Sparkline";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StartInterview } from "@/components/app/StartInterview";
 
 export const metadata = { title: "Progress" };
 
@@ -16,11 +18,10 @@ export default async function ProgressPage() {
   const sessions = await listSessions(user.id, 200);
   if (history.length === 0) {
     return (
-      <header className="max-w-lead">
-        <h1 className="text-display-l text-fg">Your baseline starts with your first session<span className="text-accent">.</span></h1>
-        <p className="mt-5 text-body-l text-fg-muted">Every session after that is measured against you, never against other people.</p>
-        <ButtonLink href="/practice" size="lg" className="mt-8">Start practice</ButtonLink>
-      </header>
+      <div>
+        <PageHeader title="Your baseline starts with your first session." lead="Every session after that is measured against you, never against other people." />
+        <div className="mt-8"><StartInterview userId={user.id} /></div>
+      </div>
     );
   }
   const rows = PROGRESS_METRICS.map((m) => {

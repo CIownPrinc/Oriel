@@ -5,16 +5,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/components/ui/cn";
+import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
 
 /**
- * Four sections, by what you came to do: start, interview, improve, look back. Each section's
- * pages appear as tabs beneath the bar, so the bar itself stays four words long.
+ * Four sections, by what you came to do: start, interview, practice, look back. Each section's
+ * pages appear as tabs beneath the bar, so the bar itself stays four words long. `key` is the
+ * letter that jumps there after "g" (g i: Interview).
  */
-const SECTIONS: { label: string; href: string; pages: [string, string][] }[] = [
-  { label: "Home", href: "/home", pages: [["/home", "Home"]] },
-  { label: "Interview", href: "/practice", pages: [["/practice", "Set up"], ["/ladder", "Ladder"]] },
-  { label: "Improve", href: "/train", pages: [["/train", "Train"], ["/lessons", "Lessons"], ["/drills", "Drills"]] },
-  { label: "Results", href: "/playback", pages: [["/playback", "Sessions"], ["/progress", "Progress"]] },
+const SECTIONS: { label: string; href: string; key: string; pages: [string, string][] }[] = [
+  { label: "Home", href: "/home", key: "h", pages: [["/home", "Home"]] },
+  { label: "Interview", href: "/practice", key: "i", pages: [["/practice", "Set up"], ["/ladder", "Ladder"]] },
+  { label: "Practice", href: "/train", key: "p", pages: [["/train", "Skill practice"], ["/lessons", "Lessons"], ["/drills", "Quick drills"]] },
+  { label: "Results", href: "/playback", key: "r", pages: [["/playback", "Sessions"], ["/progress", "Progress"]] },
 ];
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -50,6 +53,29 @@ export function AppNav({ isAdmin, name, mockProviders }: { isAdmin: boolean; nam
     wide.addEventListener("change", onWide);
     return () => { document.documentElement.style.overflow = ""; window.removeEventListener("keydown", esc); wide.removeEventListener("change", onWide); };
   }, [sheet]);
+
+  // Keyboard: "g" then a section's letter jumps there; "n" opens interview setup; "?" lists these.
+  const [help, setHelp] = useState(false);
+  useEffect(() => {
+    let g = 0;
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (e.metaKey || e.ctrlKey || e.altKey || t?.isContentEditable || (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      if (document.querySelector("dialog[open]") && e.key !== "?") return;
+      const k = e.key.toLowerCase();
+      if (Date.now() - g < 1200) {
+        g = 0;
+        const to = SECTIONS.find((x) => x.key === k);
+        if (to) { e.preventDefault(); router.push(to.href); }
+        return;
+      }
+      if (k === "g") { g = Date.now(); return; }
+      if (k === "n") { e.preventDefault(); router.push("/practice"); return; }
+      if (e.key === "?") { e.preventDefault(); setHelp((h) => !h); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [router]);
 
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -115,12 +141,26 @@ export function AppNav({ isAdmin, name, mockProviders }: { isAdmin: boolean; nam
               ))}
               <div className="mt-8 flex items-center justify-between gap-4">
                 <span className="text-ui text-fg-muted">{name ?? "Signed in"}</span>
-                <button type="button" onClick={signOut} className="h-11 rounded-button border border-control px-5 text-ui font-medium text-fg transition-colors duration-press hover:border-fg-muted">Sign out</button>
+                <Button variant="secondary" onClick={signOut}>Sign out</Button>
               </div>
             </nav>
           </motion.div>
         )}
       </AnimatePresence>
+      <Modal open={help} onClose={() => setHelp(false)} title="Keyboard shortcuts">
+        <div className="p-6 sm:p-8">
+        <h2 className="text-display-m text-fg">Keyboard shortcuts</h2>
+        <dl className="mt-4 divide-y divide-line border-y border-line text-ui">
+          {[["n", "Set up a new interview"], ...SECTIONS.map((x) => [`g ${x.key}`, `Go to ${x.label}`]), ["?", "Show or hide this list"]].map(([k, what]) => (
+            <div key={k} className="flex items-center justify-between gap-6 py-3">
+              <dt className="text-fg-muted">{what}</dt>
+              <dd className="flex gap-1">{k.split(" ").map((c) => <kbd key={c} className="grid h-7 min-w-7 place-items-center rounded-sm border border-control px-1.5 font-sans text-meta text-fg">{c}</kbd>)}</dd>
+            </div>
+          ))}
+        </dl>
+        <Button variant="secondary" className="mt-6" onClick={() => setHelp(false)}>Close</Button>
+        </div>
+      </Modal>
     </>
   );
 }

@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/Card";
 import { ButtonLink } from "@/components/ui/Button";
 import { relDate, TYPE_LABEL } from "@/lib/format";
 import { callName } from "@/lib/avatar/style";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { StartInterview } from "@/components/app/StartInterview";
 
 export const metadata = { title: "Playback" };
 
@@ -15,15 +18,10 @@ export default async function PlaybackIndex() {
   const ivs = await sessionInterviewers(sessions.map((s) => s.id));
   return (
     <div>
-      <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-6">
-        <div className="max-w-lead">
-          <h1 className="text-display-l text-fg">Every session, with evidence<span className="text-accent">.</span></h1>
-          <p className="mt-5 text-body-l text-fg-muted">Your recording, the moments that mattered and what to change, for every interview you finish.</p>
-        </div>
-        <ButtonLink href="/practice" size="lg">New session</ButtonLink>
-      </header>
-      <ul className="mt-group border-t border-line">
-        {sessions.length === 0 && <li className="border-b border-line py-8 text-ui text-fg-muted">No sessions yet. Your first one sets your baseline.</li>}
+      <PageHeader title="Every session, with evidence." lead="Your recording, the moments that mattered and what to change, for every interview you finish."
+        action={sessions.length > 0 ? <ButtonLink href="/practice" variant="secondary" size="lg">New interview</ButtonLink> : undefined} />
+      {sessions.length === 0 && <EmptyState className="mt-group" title="No sessions yet." body="Your first interview sets the baseline everything after is measured against." action={<StartInterview userId={user.id} />} />}
+      <ul className={sessions.length ? "mt-group border-t border-line" : "hidden"}>
         {sessions.map((s) => (
           <li key={s.id} className="border-b border-line">
             <Link href={s.status === "ended" ? `/playback/${s.id}` : `/room/${s.id}`} className="-mx-3 grid gap-2 rounded-control px-3 py-5 transition-colors duration-press hover:bg-surface sm:grid-cols-[minmax(0,1fr)_auto] sm:items-baseline sm:gap-x-8">

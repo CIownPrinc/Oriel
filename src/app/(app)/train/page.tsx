@@ -6,6 +6,8 @@ import { dueReviews, learningState, openLoops, type SkillState } from "@/server/
 import { StartPractice, StartReview } from "@/features/training/StartPractice";
 import { CATEGORIES, type Category } from "@/lib/training/competencies";
 import type { Outcome } from "@/lib/training/engine";
+import { PracticeModes } from "@/components/app/PracticeModes";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export const metadata = { title: "Training" };
 
@@ -31,10 +33,8 @@ export default async function TrainPage() {
 
   return (
     <div>
-      <header className="max-w-lead">
-        <h1 className="text-display-l text-fg">Practice one skill until it holds<span className="text-accent">.</span></h1>
-        <p className="mt-5 text-body-l text-fg-muted">Answer cold. Get one note. Try again on your own. Then face a question you haven&apos;t seen, and come back later to see if it stuck.</p>
-      </header>
+      <PracticeModes current="/train" />
+      <PageHeader title="Practice one skill until it holds." lead="Answer cold, get one note, try again. Later, a question you haven't seen checks that it stuck." />
 
       {(due.length > 0 || open.length > 0) && (
         <section aria-labelledby="due-title" className="mt-group">
