@@ -13,10 +13,11 @@ import { Modal } from "@/components/ui/Modal";
  * pages appear as tabs beneath the bar, so the bar itself stays four words long. `key` is the
  * letter that jumps there after "g" (g i: Interview).
  */
-const SECTIONS: { label: string; href: string; key: string; pages: [string, string][] }[] = [
+const SECTIONS: { label: string; href: string; key: string; pages: [string, string][]; ownSwitcher?: boolean }[] = [
   { label: "Home", href: "/home", key: "h", pages: [["/home", "Home"]] },
   { label: "Interview", href: "/practice", key: "i", pages: [["/practice", "Set up"], ["/ladder", "Ladder"]] },
-  { label: "Practice", href: "/train", key: "p", pages: [["/train", "Skill practice"], ["/lessons", "Lessons"], ["/drills", "Quick drills"]] },
+  // Practice pages carry their own switcher (each kind says when to use it), so no tab row here.
+  { label: "Practice", href: "/train", key: "p", pages: [["/train", "Skill practice"], ["/lessons", "Lessons"], ["/drills", "Quick drills"]], ownSwitcher: true },
   { label: "Results", href: "/playback", key: "r", pages: [["/playback", "Sessions"], ["/progress", "Progress"]] },
 ];
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -110,7 +111,7 @@ export function AppNav({ isAdmin, name, mockProviders }: { isAdmin: boolean; nam
           </div>
         </div>
         {/* The section's pages, as tabs; only for sections with more than one page. */}
-        {section && section.pages.length > 1 && (
+        {section && section.pages.length > 1 && !section.ownSwitcher && (
           <nav aria-label={section.label} className="frame hidden h-11 items-stretch gap-6 border-t border-line lg:flex">
             {section.pages.map(([href, label]) => {
               const on = isOn(href);

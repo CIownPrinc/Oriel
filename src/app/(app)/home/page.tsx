@@ -34,8 +34,9 @@ export default async function Home() {
     dueReviews(user.id),
     loadEntitlementContext(user.id),
   ]);
-  const firstRun = sessions.length === 0;
-  const quick = profile ? quickStartSetup(profile, ent, firstRun) : null;
+  // "First run" lasts until a session has actually been analyzed; an abandoned one doesn't count.
+  const firstRun = history.length === 0;
+  const quick = profile ? quickStartSetup(profile, ent, sessions.length === 0) : null;
   // The interviewer on Home is the one "Start interview" puts you in front of.
   const next: PersonaId = quick?.setup.persona ?? "hiring_manager";
   const rec = recommendDrill(latest?.metrics ?? {});
@@ -75,7 +76,7 @@ export default async function Home() {
 
       {/* After the greeting, only two things: the one thing to do next, and where you've been.
           Before the first interview there is neither, so the page is just the greeting and its action. */}
-      {!firstRun && <section className="page-grid gap-y-14 pt-16">
+      {(!firstRun || sessions.length > 0) && <section className="page-grid gap-y-14 pt-16">
         {upNext && <div className="col-span-4 sm:col-span-8 lg:col-span-6">
           <h2 className="text-ui font-medium text-fg">Up next</h2>
           <div className="mt-3 border-t border-line pt-5">
@@ -87,7 +88,7 @@ export default async function Home() {
         <div className="col-span-4 sm:col-span-8 lg:col-span-5 lg:col-start-8">
           <div className="flex items-baseline justify-between gap-4">
             <h2 className="text-ui font-medium text-fg">Recent sessions</h2>
-            {sessions.length > 0 && <TextLink href="/playback" className="text-meta">All results</TextLink>}
+            {sessions.length > 0 && <TextLink href="/playback" className="inline-flex min-h-11 items-center text-meta">All results</TextLink>}
           </div>
           <ul className="mt-3 border-t border-line">
             {sessions.length ? sessions.slice(0, 3).map((s) => (

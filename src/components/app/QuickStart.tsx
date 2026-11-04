@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { FieldError } from "@/components/ui/Field";
 import { api, ApiError } from "@/lib/client/api";
 
@@ -20,7 +20,7 @@ export type QuickStartSetup = {
 export function QuickStart({ setup, label = "Start interview", blocked }: { setup: QuickStartSetup; label?: string; blocked?: string | null }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(blocked ?? null);
+  const [error, setError] = useState<string | null>(null);
   async function start() {
     setError(null);
     setBusy(true);
@@ -35,9 +35,18 @@ export function QuickStart({ setup, label = "Start interview", blocked }: { setu
       setBusy(false);
     }
   }
+  // When the plan has no session left, the way forward is the plan, not a grey button.
+  if (blocked) {
+    return (
+      <div>
+        <ButtonLink href="/profile#plan" size="lg">See plans</ButtonLink>
+        <p className="mt-3 max-w-prose text-ui text-fg-muted">{blocked}</p>
+      </div>
+    );
+  }
   return (
     <div>
-      <Button size="lg" onClick={start} loading={busy} disabled={!!blocked}>{label}</Button>
+      <Button size="lg" onClick={start} loading={busy}>{label}</Button>
       <FieldError>{error}</FieldError>
     </div>
   );

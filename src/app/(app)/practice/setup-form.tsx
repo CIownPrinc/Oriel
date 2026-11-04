@@ -194,7 +194,7 @@ export function SetupForm(p: Props) {
           {error && (
             <div className="mt-5">
               <FieldError>{error.message}</FieldError>
-              {error.upgrade && <Link href="/profile#plan" className="mt-2 inline-block text-ui text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">See plans</Link>}
+              {error.upgrade && <Link href="/profile#plan" className="mt-1 inline-flex min-h-11 items-center text-ui text-fg-muted underline decoration-accent decoration-1 underline-offset-text hover:text-accent">See plans</Link>}
             </div>
           )}
           <Button size="lg" className="mt-6 w-full" onClick={start} loading={busy} disabled={!!p.limits.canStart}>Start interview</Button>
