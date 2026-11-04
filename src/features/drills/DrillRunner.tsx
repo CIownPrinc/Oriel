@@ -16,6 +16,7 @@ import { VisionTracker } from "@/features/room/engine/vision";
 import { readNdjson } from "@/features/room/engine/stream";
 import type { RoomEvent } from "@/server/interview/service";
 import type { VisionSample } from "@/lib/analysis/read";
+import { LinkButton } from "@/components/ui/Button";
 
 type Stage = "brief" | "calibrate" | "prompt" | "answer" | "scoring" | "result";
 type Result = {
@@ -196,7 +197,7 @@ export function DrillRunner({ drill, sourceSessionId, serverStt, lesson }: { dri
           <p className="mt-4 text-ui text-fg-muted">Target: {drill.passRule}</p>
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Button size="lg" onClick={begin}>Start drill</Button>
-            {!drill.requiresCamera && !voiceOnly && <button type="button" className="h-11 rounded-control text-ui text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg" onClick={() => setTextMode(!textMode)}>{textMode ? "Use my voice" : "Type instead"}</button>}
+            {!drill.requiresCamera && !voiceOnly && <LinkButton onClick={() => setTextMode(!textMode)}>{textMode ? "Use my voice" : "Type instead"}</LinkButton>}
             {voiceOnly && <span className="text-ui text-fg-muted">Spoken only: this is measured from your voice.</span>}
           </div>
           <FieldError>{error}</FieldError>

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, buttonClass } from "@/components/ui/Button";
+import { Button, buttonClass, LinkButton } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { cn } from "@/components/ui/cn";
 import { Badge } from "@/components/ui/Card";
@@ -154,8 +154,7 @@ export function ProfileClient(p: {
                   <BotStill personaId={id} style={styles[id]} className="aspect-square w-full max-w-[11rem]" />
                   <p className="-mt-1 max-w-full truncate text-display-m text-fg">{name}</p>
                   <p className="mt-1 text-meta text-fg-muted">{PERSONAS[id].label} · {voiceFor(id, styles[id])} voice</p>
-                  <button type="button" onClick={() => setEditing(id)} aria-label={`Customize ${name}`}
-                    className="mt-1 h-11 rounded-control px-3 text-ui text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg">Customize</button>
+                  <LinkButton onClick={() => setEditing(id)} aria-label={`Customize ${name}`}>Customize</LinkButton>
                 </div>
               );
             })}

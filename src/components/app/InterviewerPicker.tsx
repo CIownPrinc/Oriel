@@ -3,6 +3,7 @@ import { BotStill } from "@/components/avatar/BotStill";
 import type { SavedStyles } from "@/components/avatar/AvatarStudio";
 import { cn } from "@/components/ui/cn";
 import { PERSONAS, SOLO_INTERVIEWERS, type PersonaId, type SoloInterviewer } from "@/lib/interview/personas";
+import { LinkButton } from "@/components/ui/Button";
 
 /**
  * Choose an interviewer: the real avatars side by side, the chosen one lit. Used by onboarding and
@@ -32,8 +33,7 @@ export function InterviewerPicker({ value, onChange, styles, onCustomize, classN
               <span className="mt-1 line-clamp-2 block text-meta text-fg-subtle">{p.hint}</span>
             </button>
             {onCustomize && (
-              <button type="button" onClick={() => onCustomize(id)} aria-label={`Customize ${nameOf(id)}`}
-                className="mt-1 h-11 rounded-control px-3 text-meta text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg">Customize</button>
+              <LinkButton onClick={() => onCustomize(id)} aria-label={`Customize ${nameOf(id)}`} className="mt-1 px-3 text-meta">Customize</LinkButton>
             )}
           </div>
         );

@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
+import { Button, TextLink } from "@/components/ui/Button";
 
 /** A page that failed to render: say so plainly, offer to try again, and keep the way home open. */
 export default function RouteError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
@@ -15,8 +16,8 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
           <p className="mt-5 text-body-l text-fg-muted">Nothing you&apos;ve saved is lost. Try again, and if it keeps happening, come back in a few minutes.</p>
           {error.digest && <p className="mt-3 text-meta text-fg-subtle">Reference {error.digest}</p>}
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <button type="button" onClick={reset} className="inline-flex h-12 items-center rounded-button border border-transparent bg-accent px-6 text-ui font-medium text-on-accent transition-[background-color,transform] duration-press hover:bg-accent-hover active:bg-accent-press active:scale-97">Try again</button>
-            <Link href="/" className="text-ui text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg">Go to the home page</Link>
+            <Button size="lg" onClick={reset}>Try again</Button>
+            <TextLink href="/" className="text-ui">Go to the home page</TextLink>
           </div>
         </div>
       </main>

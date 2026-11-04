@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { Button, LinkButton } from "@/components/ui/Button";
 import { FieldError, Input, Segmented, Toggle } from "@/components/ui/Field";
 import { api, ApiError } from "@/lib/client/api";
 import { PRESSURE_DESCRIPTIONS, PRESSURE_LABELS, type PressureLevel } from "@/lib/interview/pressure";
@@ -118,8 +118,7 @@ export function SetupForm(p: Props) {
                       <BotStill personaId={id} style={styles[id]} className="aspect-square w-full max-w-[8.5rem]" />
                       <p className="-mt-1 max-w-full truncate text-display-m text-fg">{nameOf(id)}</p>
                       <p className="mt-0.5 text-meta text-fg-muted">{PANEL_ROLE_LABEL[role]}</p>
-                      <button type="button" onClick={() => setEditing(id)} aria-label={`Customize ${nameOf(id)}`}
-                        className="mt-1 h-11 rounded-control px-3 text-meta text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg">Customize</button>
+                      <LinkButton onClick={() => setEditing(id)} aria-label={`Customize ${nameOf(id)}`}>Customize</LinkButton>
                     </div>
                   );
                 })}

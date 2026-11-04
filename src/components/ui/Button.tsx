@@ -45,3 +45,12 @@ export function TextLink({ href, children, className, external }: { href: string
   const cls = cn("text-fg-muted underline decoration-accent decoration-1 underline-offset-text transition-colors duration-press hover:text-accent", className);
   return external ? <a href={href} className={cls}>{children}</a> : <Link href={href} className={cls}>{children}</Link>;
 }
+
+/** An action that reads like a link (Customize, Stop, Try without the camera): quiet text, an underline, a 44px target. */
+export function LinkButton({ className, children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button type="button" className={cn("inline-flex min-h-11 items-center rounded-control text-ui text-fg-muted underline decoration-accent decoration-1 underline-offset-text transition-colors duration-press hover:text-accent disabled:opacity-40", className)} {...rest}>
+      {children}
+    </button>
+  );
+}

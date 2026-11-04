@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import { Button, ButtonLink, LinkButton } from "@/components/ui/Button";
 import { FieldError } from "@/components/ui/Field";
 import { Thinking } from "@/components/ui/Logo";
 import { cn } from "@/components/ui/cn";
@@ -166,9 +166,9 @@ export function TrainingSession({ initial }: { initial: LoopView }) {
               <div className="pt-2">
                 <h1 id="question" key={view.question.text} className="text-display-m text-fg motion-safe:animate-enter">{view.question.text}</h1>
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
-                  <button type="button" onClick={() => { if (speaking) { voice.stopSpeaking(); setSpeaking(false); } else void hear(); }} className="text-ui text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg">
+                  <LinkButton onClick={() => { if (speaking) { voice.stopSpeaking(); setSpeaking(false); } else void hear(); }}>
                     {speaking ? "Stop" : "Hear the question"}
-                  </button>
+                  </LinkButton>
                   <label className="flex items-center gap-2 text-meta text-fg-subtle">
                     <input type="checkbox" checked={voiceOn} onChange={(e) => setVoicePref(e.target.checked)} className="size-4 accent-[var(--color-accent)]" />
                     Read new questions aloud
