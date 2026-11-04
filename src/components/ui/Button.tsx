@@ -20,6 +20,11 @@ const variants: Record<Variant, string> = {
 // Touch screens get 44px targets whatever the size; lg matches the landing page's primary action.
 const sizes: Record<Size, string> = { sm: "h-8 px-3 text-meta pointer-coarse:h-11", md: "h-10 px-4 text-ui pointer-coarse:h-11", lg: "h-12 px-6 text-ui" };
 
+/** Button styling for elements that can't be a <Button> or a <Link>: a download, a file label. */
+export function buttonClass(variant: Variant = "primary", size: Size = "md", className?: string) {
+  return cn(base, variants[variant], sizes[size], className);
+}
+
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> { variant?: Variant; size?: Size; loading?: boolean }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({ variant = "primary", size = "md", loading, className, children, disabled, ...rest }, ref) {

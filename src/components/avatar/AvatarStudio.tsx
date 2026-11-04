@@ -15,6 +15,7 @@ import { PERSONAS, type PersonaId } from "@/lib/interview/personas";
 import { BotAvatar } from "./BotAvatar";
 import { BotStill } from "./BotStill";
 import { PALETTE } from "@/lib/palette";
+import { useToast } from "@/components/ui/Toast";
 
 export type SavedStyles = Partial<Record<PersonaId, AvatarStyle>>;
 
@@ -107,6 +108,8 @@ function Studio({ personaId, saved, onClose, onSaved }: { personaId: PersonaId; 
 
   const seat = { seat: 0, personaId, name: shown, accent: PALETTE.accent, expressiveness: persona.expressiveness, warmth: persona.warmth, skepticism: persona.skepticism, style };
 
+  const toast = useToast();
+
   async function save() {
     if (problem) return;
     setBusy("save");
@@ -114,9 +117,10 @@ function Studio({ personaId, saved, onClose, onSaved }: { personaId: PersonaId; 
     try {
       const r = await api<{ styles: SavedStyles }>("/api/avatar/styles", { method: "PUT", json: { personaId, style } });
       onSaved(r.styles);
+      toast(`${shown} saved. You'll see the new look in your next interview.`);
       onClose();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Couldn't save");
+      setError(e instanceof ApiError ? e.message : "Couldn't save. Try again.");
       setBusy(null);
     }
   }
@@ -127,9 +131,10 @@ function Studio({ personaId, saved, onClose, onSaved }: { personaId: PersonaId; 
     try {
       const r = await api<{ styles: SavedStyles }>("/api/avatar/styles", { method: "DELETE", json: { personaId } });
       onSaved(r.styles);
+      toast(`${persona.name.split(" ")[0]} is back to the original look.`, "neutral");
       onClose();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Couldn't reset");
+      setError(e instanceof ApiError ? e.message : "Couldn't reset. Try again.");
       setBusy(null);
     }
   }

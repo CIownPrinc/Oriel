@@ -1,7 +1,9 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonClass } from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
+import { cn } from "@/components/ui/cn";
 import { Badge } from "@/components/ui/Card";
 import { FieldError, Input, Segmented, Textarea, Toggle } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
@@ -26,7 +28,8 @@ export function ProfileClient(p: {
   const [saving, setSaving] = useState<string | null>(null);
   const [jdText, setJdText] = useState("");
   const [resumeText, setResumeText] = useState("");
-  const [docError, setDocError] = useState<string | null>(null);
+  const [docError, setDocError] = useState<{ at: "resume" | "jd" | "plan" | "delete"; message: string } | null>(null);
+  const toast = useToast();
   const [busy, setBusy] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteWord, setDeleteWord] = useState("");
@@ -38,7 +41,13 @@ export function ProfileClient(p: {
     const next = { ...privacy, ...patch };
     setPrivacy(next);
     setSaving(Object.keys(patch)[0]);
-    try { await api("/api/privacy/settings", { method: "PATCH", json: patch }); } finally { setSaving(null); }
+    try {
+      await api("/api/privacy/settings", { method: "PATCH", json: patch });
+      toast("Privacy setting saved");
+    } catch {
+      setPrivacy(privacy); // put the switch back where it was
+      toast("Couldn't save that setting. Try again.", "danger");
+    } finally { setSaving(null); }
   }
 
   async function uploadResume(file?: File) {
@@ -49,40 +58,66 @@ export function ProfileClient(p: {
       if (file) form.set("file", file); else form.set("text", resumeText);
       await api("/api/resume", { method: "POST", body: form });
       setResumeText("");
+      toast("Resume saved. Your next interview will use it.");
       router.refresh();
-    } catch (e) { setDocError(e instanceof ApiError ? e.message : "Upload failed"); } finally { setBusy(null); }
+    } catch (e) { setDocError({ at: "resume", message: e instanceof ApiError ? e.message : "Upload failed. Try a PDF or DOCX under 5 MB." }); } finally { setBusy(null); }
   }
 
   async function saveJd() {
     setDocError(null);
     setBusy("jd");
-    try { await api("/api/job-description", { method: "POST", json: { text: jdText } }); setJdText(""); router.refresh(); }
-    catch (e) { setDocError(e instanceof ApiError ? e.message : "Couldn't save"); } finally { setBusy(null); }
+    try { await api("/api/job-description", { method: "POST", json: { text: jdText } }); setJdText(""); toast("Job description saved. Questions will follow it."); router.refresh(); }
+    catch (e) { setDocError({ at: "jd", message: e instanceof ApiError ? e.message : "Couldn't save the job description. Try again." }); } finally { setBusy(null); }
   }
 
   async function choosePlan(plan: PlanId) {
     setBusy(plan);
-    try { await api("/api/billing/checkout", { method: "POST", json: { plan } }); router.refresh(); }
-    catch (e) { setDocError(e instanceof ApiError ? e.message : "Checkout failed"); } finally { setBusy(null); }
+    try { await api("/api/billing/checkout", { method: "POST", json: { plan } }); toast(`You're on ${PLANS[plan].name}.`); router.refresh(); }
+    catch (e) { setDocError({ at: "plan", message: e instanceof ApiError ? e.message : "Couldn't change your plan. Try again." }); } finally { setBusy(null); }
   }
 
   async function deleteAccount() {
     setBusy("delete");
-    await api("/api/privacy/delete-account", { method: "POST", json: { confirm: "DELETE" } });
-    router.replace("/");
-    router.refresh();
+    try {
+      await api("/api/privacy/delete-account", { method: "POST", json: { confirm: "DELETE" } });
+      router.replace("/");
+      router.refresh();
+    } catch (e) {
+      setDocError({ at: "delete", message: e instanceof ApiError ? e.message : "Couldn't delete your account. Nothing was removed; try again." });
+      setBusy(null);
+    }
   }
 
-  const sections: [string, string][] = [["documents", "Resume & role"], ["interviewers", "Your interviewers"], ["privacy", "Privacy"], ["plan", "Plan"], ["data", "Your data"]];
+  const sections = [["documents", "Resume & role"], ["interviewers", "Interviewers"], ["privacy", "Privacy"], ["plan", "Plan"], ["data", "Your data"]] as const;
+  type Tab = (typeof sections)[number][0];
+  // One section at a time, named in the URL (/profile#plan), so links from elsewhere land on the right one.
+  const [tab, setTab] = useState<Tab>("documents");
+  useEffect(() => {
+    const read = () => { const h = window.location.hash.slice(1); if (sections.some(([id]) => id === h)) setTab(h as Tab); };
+    read();
+    window.addEventListener("hashchange", read);
+    return () => window.removeEventListener("hashchange", read);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- sections is a constant
+  const show = (id: Tab) => (tab === id ? undefined : true);
 
   return (
-    <div className="page-grid mt-group gap-y-12">
-      {/* The page's own contents in the margin, as a document's would be. */}
-      <nav aria-label="On this page" className="hidden lg:col-span-3 lg:block">
-        <ul className="sticky top-24 space-y-1 text-ui">{sections.map(([id, l]) => <li key={id}><a href={`#${id}`} className="-mx-2 block rounded-control px-2 py-1.5 text-fg-muted transition-colors duration-press hover:bg-surface hover:text-fg">{l}</a></li>)}</ul>
+    <div className="page-grid mt-group gap-y-10">
+      {/* Settings, as Stripe and Linear do them: the sections in the margin, one shown at a time. */}
+      <nav aria-label="Settings" className="col-span-4 sm:col-span-8 lg:col-span-3">
+        <ul className="flex flex-wrap gap-x-1 gap-y-1 border-b border-line pb-3 text-ui lg:sticky lg:top-24 lg:flex-col lg:border-b-0 lg:pb-0">
+          {sections.map(([id, l]) => (
+            <li key={id}>
+              <a href={`#${id}`} aria-current={tab === id ? "page" : undefined}
+                className={cn("relative flex min-h-11 items-center rounded-control px-3 transition-colors duration-press lg:-mx-3", tab === id ? "bg-surface text-fg" : "text-fg-muted hover:bg-surface/60 hover:text-fg")}>
+                {tab === id && <span className="absolute inset-y-2 left-0 hidden w-0.5 rounded-full bg-accent lg:block" aria-hidden />}
+                {l}
+              </a>
+            </li>
+          ))}
+        </ul>
       </nav>
-      <div className="col-span-4 space-y-20 sm:col-span-8 lg:col-span-9">
-        <section id="documents">
+      <div className="col-span-4 sm:col-span-8 lg:col-span-9">
+        <section id="documents" hidden={show("documents")}>
           <h2 className="text-display-m text-fg">Resume &amp; role</h2>
           <div className="mt-6 grid gap-x-6 gap-y-10 md:grid-cols-2">
             <div className="border-t border-line pt-5">
@@ -94,18 +129,20 @@ export function ProfileClient(p: {
               </div>
               <Textarea className="mt-3" rows={3} value={resumeText} onChange={(e) => setResumeText(e.target.value)} placeholder="…or paste resume text" aria-label="Resume text" />
               {resumeText.trim().length >= 40 && <Button size="sm" className="mt-2" onClick={() => uploadResume()} loading={busy === "resume"}>Save pasted resume</Button>}
+              <FieldError>{docError?.at === "resume" ? docError.message : null}</FieldError>
             </div>
             <div className="border-t border-line pt-5">
               <div className="flex items-center justify-between"><h3 className="text-ui font-medium text-fg">Job description</h3>{p.jd && <Badge>Active</Badge>}</div>
               {p.jd ? (<><p className="mt-3 text-body text-fg">{p.jd.title}</p><p className="mt-2 text-ui text-fg-muted">{p.jd.competencies.join(" · ") || "No specific competencies found"}</p></>) : <p className="mt-3 text-ui text-fg-muted">No job description yet.</p>}
               <Textarea className="mt-5" rows={4} value={jdText} onChange={(e) => setJdText(e.target.value)} placeholder="Paste a job description" aria-label="Job description text" />
               <Button size="sm" className="mt-2" onClick={saveJd} disabled={jdText.trim().length < 40} loading={busy === "jd"}>Save job description</Button>
+              {jdText.trim().length > 0 && jdText.trim().length < 40 && <p className="mt-2 text-meta text-fg-subtle">Paste the full description: at least a few sentences.</p>}
+              <FieldError>{docError?.at === "jd" ? docError.message : null}</FieldError>
             </div>
           </div>
-          <FieldError>{docError}</FieldError>
         </section>
 
-        <section id="interviewers">
+        <section id="interviewers" hidden={show("interviewers")}>
           <h2 className="text-display-m text-fg">Your interviewers</h2>
           <p className="mt-2 max-w-lead text-ui text-fg-muted">Give any of them a new shape, color, name and voice. They keep their interviewing style; the look and sound are yours.</p>
           {/* The whole cast, standing together: each the real avatar, as it appears in the Room. */}
@@ -118,7 +155,7 @@ export function ProfileClient(p: {
                   <p className="-mt-1 max-w-full truncate text-display-m text-fg">{name}</p>
                   <p className="mt-1 text-meta text-fg-muted">{PERSONAS[id].label} · {voiceFor(id, styles[id])} voice</p>
                   <button type="button" onClick={() => setEditing(id)} aria-label={`Customize ${name}`}
-                    className="mt-2 h-9 rounded-control px-3 text-ui text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg pointer-coarse:h-11">Customize</button>
+                    className="mt-1 h-11 rounded-control px-3 text-ui text-fg-muted underline decoration-1 underline-offset-text transition-colors duration-press hover:text-fg">Customize</button>
                 </div>
               );
             })}
@@ -126,7 +163,7 @@ export function ProfileClient(p: {
           <AvatarStudio personaId={editing} saved={styles} onClose={() => setEditing(null)} onSaved={setStyles} />
         </section>
 
-        <section id="privacy">
+        <section id="privacy" hidden={show("privacy")}>
           <h2 className="text-display-m text-fg">Privacy</h2>
           <p className="mt-2 max-w-lead text-ui text-fg-muted">Camera signals are computed on your device; only derived numbers are stored. We never sell biometric data or share individual results with employers.</p>
           <div className="mt-6 divide-y divide-line border-y border-line">
@@ -143,7 +180,7 @@ export function ProfileClient(p: {
           <p className="mt-2 h-5 text-meta text-fg-subtle" aria-live="polite">{saving ? "Saving…" : ""}</p>
         </section>
 
-        <section id="plan">
+        <section id="plan" hidden={show("plan")}>
           <h2 className="text-display-m text-fg">Plan</h2>
           <p className="mt-2 text-ui text-fg-muted">You&apos;re on <span className="text-fg">{p.plan.name}</span>{p.plan.periodEnd ? ` until ${longDate(new Date(p.plan.periodEnd))}` : ""}. {p.plan.sessionsThisWeek} session{p.plan.sessionsThisWeek === 1 ? "" : "s"} this week.</p>
           {/* Plans as ruled columns, as on the pricing page: the current one says so in words. */}
@@ -157,14 +194,15 @@ export function ProfileClient(p: {
               </div>
             ))}
           </div>
+          <FieldError>{docError?.at === "plan" ? docError.message : null}</FieldError>
           <p className="mt-4 text-meta text-fg-subtle">Development checkout: plan changes apply immediately with no charge. A payment processor plugs into the same endpoint for production.</p>
         </section>
 
-        <section id="data">
+        <section id="data" hidden={show("data")}>
           <h2 className="text-display-m text-fg">Your data</h2>
           <p className="mt-2 text-ui text-fg-muted">{p.storedRecordings} encrypted recording{p.storedRecordings === 1 ? "" : "s"} stored. Delete individual sessions from Playback.</p>
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            <a href="/api/privacy/export" className="inline-flex h-10 items-center rounded-button border border-control px-4 text-ui font-medium text-fg transition-colors duration-press hover:border-fg-muted hover:bg-surface pointer-coarse:h-11">Download my data (JSON)</a>
+            <a href="/api/privacy/export" className={buttonClass("secondary")}>Download my data (JSON)</a>
             <Button variant="danger" onClick={() => setConfirmDelete(true)}>Delete my account</Button>
           </div>
           <h3 className="mt-12 text-ui font-medium text-fg">Consent history</h3>
@@ -189,6 +227,7 @@ export function ProfileClient(p: {
           <p className="mt-3 text-ui text-fg-muted">This permanently deletes your profile, resume, every session, recording, transcript, metric and drill. It can&apos;t be undone.</p>
           <p className="mt-5 text-ui text-fg-muted">Type <span className="font-medium text-fg">DELETE</span> to confirm.</p>
           <Input className="mt-2" value={deleteWord} onChange={(e) => setDeleteWord(e.target.value)} aria-label="Type DELETE to confirm" />
+          <FieldError>{docError?.at === "delete" ? docError.message : null}</FieldError>
           <div className="mt-7 flex justify-end gap-2"><Button variant="ghost" onClick={() => setConfirmDelete(false)}>Cancel</Button><Button variant="danger" disabled={deleteWord !== "DELETE"} loading={busy === "delete"} onClick={deleteAccount}>Delete everything</Button></div>
         </div>
       </Modal>
