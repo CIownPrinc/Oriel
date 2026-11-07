@@ -19,8 +19,18 @@ export type Verdict = { allowed: true } | { allowed: false; reason: string; upgr
 const ok: Verdict = { allowed: true };
 const deny = (reason: string, upgradeTo?: PlanId): Verdict => ({ allowed: false, reason, upgradeTo });
 
+/**
+ * Plan limits are off until pricing is switched on: everyone gets everything. Set
+ * ORIEL_ENFORCE_LIMITS=1 to enforce each plan's limits; nothing else needs to change.
+ */
+export function limitsEnforced() {
+  return process.env.ORIEL_ENFORCE_LIMITS === "1";
+}
+
+const OPEN: (typeof PLANS)[PlanId]["limits"] = { ...PLANS.executive.limits, managedAvatarMinutes: Number.POSITIVE_INFINITY };
+
 function limits(ctx: EntitlementContext) {
-  return PLANS[ctx.planActive ? ctx.plan : "free"].limits;
+  return limitsEnforced() ? PLANS[ctx.planActive ? ctx.plan : "free"].limits : OPEN;
 }
 
 export function canStartSession(ctx: EntitlementContext): Verdict {
@@ -71,6 +81,10 @@ export function canStartDrill(ctx: EntitlementContext): Verdict {
     return deny(`Your plan includes ${l.drillsPerDay} drill${l.drillsPerDay === 1 ? "" : "s"} per day.`, "pro");
   }
   return ok;
+}
+
+export function maxPanelSize(ctx: EntitlementContext): number {
+  return limits(ctx).maxPanelSize;
 }
 
 export function maxSessionMinutes(ctx: EntitlementContext): number {

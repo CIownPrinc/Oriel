@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/db/client";
 import { ladderState } from "@/server/queries";
 import { loadEntitlementContext } from "@/lib/billing/entitlement-context";
-import { canStartSession, canUseLadder, canUsePanelMode, maxSessionMinutes } from "@/lib/billing/entitlements";
+import { canStartSession, canUseLadder, canUsePanelMode, maxPanelSize, maxSessionMinutes } from "@/lib/billing/entitlements";
 import { PLANS } from "@/lib/billing/plans";
 import { savedStyles } from "@/server/avatar-styles";
 import { SetupForm } from "./setup-form";
@@ -32,7 +32,7 @@ export default async function PracticePage({ searchParams }: { searchParams: Pro
       styles={await savedStyles(user.id)}
       limits={{
         plan: PLANS[ent.plan].name, canStart: start.allowed ? null : start.reason, panel: canUsePanelMode(ent, 2).allowed,
-        maxPanel: PLANS[ent.plan].limits.maxPanelSize, ladder: canUseLadder(ent).allowed, maxMinutes: maxSessionMinutes(ent),
+        maxPanel: maxPanelSize(ent), ladder: canUseLadder(ent).allowed, maxMinutes: maxSessionMinutes(ent),
       }}
     />
   );

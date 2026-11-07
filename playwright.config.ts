@@ -37,6 +37,6 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     timeout: 300_000,
     reuseExistingServer: false,
-    env: { DATABASE_PATH: "data/e2e/oriel.db", MEDIA_DIR: "data/e2e/media", ORIEL_PAYMENTS: "dev", ORIEL_SECRET: `e2e-${Date.now()}-0123456789abcdef0123456789abcdef` },
+    env: { DATABASE_PATH: "data/e2e/oriel.db", MEDIA_DIR: "data/e2e/media", ORIEL_PAYMENTS: "dev", ORIEL_ENFORCE_LIMITS: "1", ORIEL_SECRET: `e2e-${Date.now()}-0123456789abcdef0123456789abcdef` },
   },
 });

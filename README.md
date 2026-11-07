@@ -64,6 +64,8 @@ Serverless functions have no lasting disk, so a deployment keeps its data elsewh
 | `ORIEL_SECRET` | Long random string; signs sessions and derives the encryption keys. Keep it stable, or old recordings can't be read. |
 | `ORIEL_SITE_URL` | The deployment's public URL. |
 
+Plan limits are off for now, so everyone gets every feature. Set `ORIEL_ENFORCE_LIMITS=1` to enforce them.
+
 Analysis runs after the response with `after()`, and the routes that start it allow up to 300 seconds. Rate limits are kept in memory per instance, so they're looser on a serverless host than on a single server.
 
 Without the Turso and Blob variables the app falls back to `data/oriel.db` and `data/media/`, which is what local development uses.
