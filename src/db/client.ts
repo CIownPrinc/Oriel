@@ -23,8 +23,23 @@ export type DB = LibSQLDatabase<typeof schema>;
 
 const g = globalThis as unknown as { __orielDb?: DB; __orielReady?: Promise<void>; __orielClient?: Client };
 
+/**
+ * The deployed database. Named TURSO_DATABASE_URL / TURSO_AUTH_TOKEN when set by hand; when the
+ * Vercel Turso integration sets them, they carry its prefix instead (STORAGE_URL, STORAGE_AUTH_TOKEN…),
+ * so any variable holding a libsql:// address is accepted, with the token beside it.
+ */
+function remoteDatabase(): { url: string; authToken?: string } | null {
+  const env = process.env;
+  if (env.TURSO_DATABASE_URL) return { url: env.TURSO_DATABASE_URL, authToken: env.TURSO_AUTH_TOKEN };
+  const key = Object.keys(env).sort().find((k) => k.endsWith("_URL") && /^libsql:\/\//.test(env[k] ?? ""));
+  if (!key) return null;
+  const prefix = key.slice(0, -"_URL".length);
+  return { url: env[key]!, authToken: env[`${prefix}_AUTH_TOKEN`] ?? env[`${prefix}_TOKEN`] ?? env.TURSO_AUTH_TOKEN };
+}
+
 function url(): { url: string; authToken?: string; remote: boolean } {
-  if (process.env.TURSO_DATABASE_URL) return { url: process.env.TURSO_DATABASE_URL, authToken: process.env.TURSO_AUTH_TOKEN, remote: true };
+  const remote = remoteDatabase();
+  if (remote) return { ...remote, remote: true };
   const file = databasePath();
   if (file === ":memory:") {
     // Tests: an isolated file per process (an in-memory database can't be shared across a pool).
