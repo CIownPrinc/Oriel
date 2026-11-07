@@ -19,6 +19,9 @@ export class InterviewerAudio {
   /** Wall-clock (performance.now) when the first chunk of the current utterance started playing. */
   startedAt: number | null = null;
   synthetic: (() => number) | null = null;
+  /** The audio clock stopped during the last utterance, so it wasn't heard. */
+  stalled = false;
+  private stallTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -43,6 +46,7 @@ export class InterviewerAudio {
     this.streamOpen = true;
     this.started = false;
     this.startedAt = null;
+    this.stalled = false;
     this.nextTime = Math.max(this.ctx.currentTime + 0.04 + holdMs / 1000, this.nextTime);
   }
 
@@ -96,7 +100,30 @@ export class InterviewerAudio {
 
   waitForEnd(): Promise<void> {
     if (!this.streamOpen && this.sources.size === 0) return Promise.resolve();
+    this.watchForStall();
     return new Promise((r) => this.endWaiters.push(r));
+  }
+
+  /**
+   * "Ended" comes from the audio clock, and a browser can report a running context whose clock
+   * never moves (an audio device asleep or taken away). Without this the interview would wait
+   * forever, so a clock stopped for 4s ends the utterance and marks it as unheard.
+   */
+  private watchForStall() {
+    if (this.stallTimer) return;
+    let last = this.ctx.currentTime;
+    let movedAt = performance.now();
+    const clear = () => { if (this.stallTimer) clearInterval(this.stallTimer); this.stallTimer = null; };
+    this.stallTimer = setInterval(() => {
+      if (!this.streamOpen && this.sources.size === 0) return clear();
+      if (this.ctx.currentTime > last + 0.01) { last = this.ctx.currentTime; movedAt = performance.now(); return; }
+      void this.ctx.resume().catch(() => {});
+      if (performance.now() - movedAt > 4000) {
+        clear();
+        this.stalled = true;
+        this.stop();
+      }
+    }, 500);
   }
 
   /** Cut the interviewer off immediately (e.g. session ended). */
@@ -125,6 +152,8 @@ export class InterviewerAudio {
   }
 
   close() {
+    if (this.stallTimer) clearInterval(this.stallTimer);
+    this.stallTimer = null;
     this.stop();
     void this.ctx.close();
   }

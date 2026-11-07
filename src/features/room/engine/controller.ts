@@ -251,7 +251,14 @@ export class RoomController {
       browserVoice = speakWithBrowser(text, { audio: this.audio, onStart: () => this.onInterviewerStarts(seat, text, answerEnd, preSilence, t0) });
     }
     if (browserVoice) await browserVoice;
-    else await this.audio.waitForEnd();
+    else {
+      await this.audio.waitForEnd();
+      // The audio clock stalled, so the question went unheard: the browser's voice doesn't depend on it.
+      if (this.audio.stalled && text) {
+        this.set({ voice: "browser" });
+        await speakWithBrowser(text, { audio: this.audio });
+      }
+    }
     this.questionEnd = this.clock;
     const d = done as Extract<RoomEvent, { type: "done" }> | null;
     if (!d) return this.set({ phase: "error", error: { kind: "connection", message: "The interviewer stopped mid-sentence." } });
