@@ -159,6 +159,13 @@ export class GeminiLanguageModel implements LanguageModelProvider {
   }
 }
 
+/** How long to wait before retrying speech after a 429, or null if Gemini's wait is too long to sit through. */
+export function ttsRetryWaitMs(message: string, longest = 6000): number | null {
+  const m = /retry in ([\d.]+)\s*s/i.exec(message);
+  const ms = m ? Math.ceil(Number(m[1]) * 1000) + 100 : 2000;
+  return ms <= longest ? ms : null;
+}
+
 export class GeminiTextToSpeech implements TextToSpeechProvider {
   readonly id = "gemini-tts";
   readonly isMock = false;
@@ -179,7 +186,15 @@ export class GeminiTextToSpeech implements TextToSpeechProvider {
     } catch (err) {
       if (!(err instanceof ProviderError && err.status === 429) || GEMINI_MODELS.ttsFallback === model) throw err;
       model = GEMINI_MODELS.ttsFallback;
-      res = await call(model, body, this.key, req.timeoutMs ?? 15000, true);
+      try {
+        res = await call(model, body, this.key, req.timeoutMs ?? 15000, true);
+      } catch (second) {
+        // Both models are at their per-minute limit. A short silence beats the browser's robot voice.
+        const wait = second instanceof ProviderError && second.status === 429 ? ttsRetryWaitMs(second.message) : null;
+        if (wait === null) throw second;
+        await new Promise((r) => setTimeout(r, wait));
+        res = await call(model, body, this.key, req.timeoutMs ?? 15000, true);
+      }
     }
     const reader = res.body!.getReader();
     const dec = new TextDecoder();

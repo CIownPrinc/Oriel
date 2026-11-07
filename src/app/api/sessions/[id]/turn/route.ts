@@ -13,6 +13,9 @@ const Body = z.object({
   clientTimings: z.record(z.string(), z.number()).optional(),
 });
 
+// Streams speech, which can outlast a short default limit on serverless hosts.
+export const maxDuration = 60;
+
 export const POST = authed<IdParams>(async (req, { params, user }) => {
   const { id } = await params;
   const body = await parseBody(req, Body);

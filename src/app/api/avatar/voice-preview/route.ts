@@ -10,6 +10,9 @@ import { isCached, ttsBudgetRemaining } from "@/server/interview/speech";
  * served from the speech cache. Uncached previews never eat into the budget live
  * interviews rely on.
  */
+// Streams speech, which can outlast a short default limit on serverless hosts.
+export const maxDuration = 60;
+
 export const POST = authed(async (req, { user }) => {
   const { voice } = await parseBody(req, z.object({ voice: voiceSchema }));
   if (!isCached(voice, VOICE_SAMPLE) && ttsBudgetRemaining() <= 3) throw new HttpError(429, "Voice previews are busy. Try again in a few seconds.");

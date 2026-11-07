@@ -5,6 +5,9 @@ import { savedStyles } from "@/server/avatar-styles";
 import { speak, type RoomEvent } from "@/server/interview/service";
 
 /** Speak a drill's prompt in an interviewer voice (only fixed catalog prompts can be spoken). */
+// Streams speech, which can outlast a short default limit on serverless hosts.
+export const maxDuration = 60;
+
 export const POST = authed<IdParams>(async (_req, { params, user }) => {
   const { id } = await params;
   const drill = getDrill(id);

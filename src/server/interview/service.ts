@@ -9,7 +9,7 @@ import { recordTokenCost } from "@/lib/costs/record";
 import { analyzeAnswer } from "@/lib/analysis/text";
 import { analyzeAnswerWithModel } from "@/lib/ai/analyzers";
 import { ACK_BRIEF, ACK_WARM, TEMPLATE_INTENTS, cacheablePhrases, renderTemplate, streamUtterance, type RenderedUtterance } from "@/lib/ai/interviewer";
-import { isCached, prewarm, synth } from "./speech";
+import { isCached, prewarm, synth, wholeTurnWaitMs } from "./speech";
 import { getLanguageModel, getTextToSpeech } from "@/lib/ai/providers/registry";
 import {
   decide, initialState, listeningPolicy, openingDecision, recordAsked,
@@ -356,7 +356,7 @@ async function* deliver(p: {
   // speak the whole utterance in one request instead of sentence by sentence.
   // While the bridge is playing there is time to spare, so wait a little longer for the rest.
   let spoken = first;
-  if (spoken !== null && !finished) await Promise.race([pump, new Promise((r) => setTimeout(r, bridge ? 400 : 150))]);
+  if (spoken !== null && !finished) await Promise.race([pump, new Promise((r) => setTimeout(r, wholeTurnWaitMs(!!bridge)))]);
   if (spoken !== null && finished && sentences.length && (rendered as RenderedUtterance | null)?.source === "llm") {
     const rest = sentences.splice(0);
     said.push(...rest);
@@ -381,6 +381,7 @@ async function* deliver(p: {
       if (ttsFirstChunkMs === null) ttsFirstChunkMs = r.value.firstChunkMs;
       if (r.value.usage) await recordTokenCost({ userId: p.userId, sessionId: p.sessionId }, tts.id, "tts", "interviewer_speech", r.value.usage);
     } catch (err) {
+      console.error("[tts] turn fell back to the browser voice:", err instanceof Error ? err.message : err);
       logEvent("error", "tts_failed", { sessionId: p.sessionId, userId: p.userId, data: { error: err instanceof Error ? err.message : String(err), chunksSent: seq } });
       ttsFailed = true;
       break;
@@ -456,6 +457,7 @@ export async function* speak(sessionId: string | null, userId: string, text: str
     yield { type: "audio_end", chunks: seq };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
+    console.error("[tts] phrase fell back to the browser voice:", msg);
     logEvent("error", "tts_failed", { sessionId, userId, data: { error: msg, chunksSent: seq } });
     if (seq === 0) yield { type: "tts_fallback", reason: msg };
     else yield { type: "audio_end", chunks: seq };

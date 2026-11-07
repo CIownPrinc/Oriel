@@ -2,6 +2,9 @@ import { authed, ndjson, type IdParams } from "@/lib/api/http";
 import { runOpening, type RoomEvent } from "@/server/interview/service";
 import { HttpError } from "@/lib/api/http";
 
+// Streams speech, which can outlast a short default limit on serverless hosts.
+export const maxDuration = 60;
+
 export const POST = authed<IdParams>(async (_req, { params, user }) => {
   const { id } = await params;
   return ndjson<RoomEvent>(runOpening(id, user.id), (err) => ({

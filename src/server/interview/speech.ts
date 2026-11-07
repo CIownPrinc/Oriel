@@ -34,6 +34,24 @@ function note() {
   recent.push(Date.now());
 }
 
+/**
+ * On serverless hosts a function can freeze the moment its response ends and the next request may
+ * land on another instance, so audio prepared ahead is often cut off or never found, yet still
+ * spends quota. There, every request goes to the live turn.
+ */
+export function canPrewarm() {
+  return !process.env.VERCEL;
+}
+
+/**
+ * How long a turn waits for the model to finish before speaking its first sentence, to send the
+ * whole utterance as one TTS request. Without prewarming, requests are the scarcer thing, so wait longer.
+ */
+export function wholeTurnWaitMs(hasBridge: boolean) {
+  if (!canPrewarm()) return 1200;
+  return hasBridge ? 400 : 150;
+}
+
 export function ttsBudgetRemaining() {
   return TTS_RPM - spent();
 }
@@ -85,7 +103,7 @@ export async function* synth(voice: string, text: string): AsyncGenerator<Speech
 /** Synthesise phrases in the background so the next turn can start instantly. */
 export function prewarm(voice: string, texts: string[], onUsage?: (u: LlmUsage) => void, priority: "high" | "low" = "low") {
   const tts = getTextToSpeech();
-  if (tts.isMock) return;
+  if (tts.isMock || !canPrewarm()) return;
   for (const text of texts) {
     const k = key(voice, text);
     if (!text.trim() || cache.has(k) || inflight.has(k)) continue;
