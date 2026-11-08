@@ -25,6 +25,8 @@ import {
 import { loadEntitlementContext } from "@/lib/billing/entitlement-context";
 import { savedStyles } from "@/server/avatar-styles";
 import { voiceFor } from "@/lib/avatar/style";
+import { retentionDeadline } from "@/server/privacy/retention";
+import { assertWithinDailyCost } from "@/lib/security/shared-limits";
 
 // ─── Types sent to the Room ───────────────────────────────────────────────
 
@@ -58,6 +60,7 @@ export async function createInterview(userId: string, input: CreateInterviewInpu
   const db = getDb();
   const ent = await loadEntitlementContext(userId);
   const verdicts = [canStartSession(ent), canUseDomainPack(ent, input.domain)];
+  await assertWithinDailyCost(userId);
   const rung = input.ladderLevel ? LADDER.find((l) => l.level === input.ladderLevel) : undefined;
   if (input.ladderLevel && !rung) throw new HttpError(400, "Unknown ladder level");
   if (rung) verdicts.push(canUseLadder(ent));
@@ -68,7 +71,7 @@ export async function createInterview(userId: string, input: CreateInterviewInpu
 
   if (rung && input.ladderLevel! > 1) {
     const prog = await db.select().from(schema.ladderProgress).where(and(eq(schema.ladderProgress.userId, userId), eq(schema.ladderProgress.level, input.ladderLevel!))).get();
-    if (!prog?.unlockedAt) throw new HttpError(403, "This rung of the Ladder is still locked.");
+    if (!prog?.unlockedAt) throw new HttpError(403, "This Ladder level is still locked.");
   }
 
   const pressure = clampPressure(rung ? rung.pressure : input.pressure);
@@ -110,6 +113,7 @@ export async function createInterview(userId: string, input: CreateInterviewInpu
   const profile = await db.select().from(schema.profiles).where(eq(schema.profiles.userId, userId)).get();
   const cameraMetrics = input.cameraMetrics && (profile?.cameraMetricsEnabled ?? true);
   const retentionDays = profile?.videoRetentionDays ?? 30;
+  const createdAt = new Date();
 
   await db.transaction(async (tx) => {
     await tx.insert(schema.interviews).values({
@@ -120,7 +124,7 @@ export async function createInterview(userId: string, input: CreateInterviewInpu
     await tx.insert(schema.interviewSessions).values({
       id: sessionId, interviewId, userId, status: "created", phase: "INTRO", controllerState: state as unknown as Record<string, unknown>,
       cameraMetricsEnabled: cameraMetrics, llmProvider: getLanguageModel().id, ttsProvider: getTextToSpeech().id,
-      videoExpiresAt: new Date(Date.now() + retentionDays * 24 * 3600 * 1000),
+      createdAt, videoExpiresAt: retentionDeadline(createdAt, retentionDays),
     }).run();
     for (const s of seated) {
       await tx.insert(schema.interviewers).values({
@@ -199,6 +203,7 @@ export interface TurnInput {
   inputMode: "voice" | "text";
   prevQuestion: { questionId: string; startMs: number; endMs: number } | null;
   clientTimings?: Record<string, number>;
+  turnKey?: string;
 }
 
 export async function* runTurn(sessionId: string, userId: string, input: TurnInput): AsyncGenerator<RoomEvent> {
@@ -217,14 +222,27 @@ export async function* runTurn(sessionId: string, userId: string, input: TurnInp
         .where(and(eq(schema.transcriptSegments.sessionId, sessionId), eq(schema.transcriptSegments.questionId, input.prevQuestion.questionId), eq(schema.transcriptSegments.speaker, "interviewer"))).run();
     }
 
+    // A retry of a turn the server already received (same key): never store the answer twice.
+    const prior = input.turnKey
+      ? await db.select().from(schema.answers).where(and(eq(schema.answers.sessionId, sessionId), eq(schema.answers.turnKey, input.turnKey))).get()
+      : undefined;
+    if (prior && prior.questionId !== state.lastQuestion.questionId) {
+      // The reply was already asked; the client just didn't hear it. Ask it again.
+      const last = await db.select().from(schema.questions).where(eq(schema.questions.sessionId, sessionId)).orderBy(desc(schema.questions.seq)).get();
+      if (last) {
+        yield* speakExisting(sessionId, userId, state, last, interviewers);
+        return;
+      }
+    }
+
     const text = input.answerText.trim().slice(0, 8000) || "(no answer)";
     const durationSec = Math.max(1, (input.endMs - input.startMs) / 1000);
     const heur = analyzeAnswer(text, durationSec);
-    const answerId = newId("ans");
-    const seq = state.answerSeq + 1;
-    await db.transaction(async (tx) => {
+    const answerId = prior?.id ?? newId("ans");
+    const seq = prior?.seq ?? state.answerSeq + 1;
+    if (!prior) await db.transaction(async (tx) => {
       await tx.insert(schema.answers).values({
-        id: answerId, sessionId, questionId: state.lastQuestion!.questionId, seq, text,
+        id: answerId, sessionId, questionId: state.lastQuestion!.questionId, seq, text, turnKey: input.turnKey ?? null,
         startMs: Math.round(input.startMs), endMs: Math.round(input.endMs), firstWordLatencyMs: input.firstWordLatencyMs === null ? null : Math.round(input.firstWordLatencyMs),
         interrupted: input.interrupted, inputMode: input.inputMode,
         flags: { vague: heur.vagueness >= 0.6, hasNumbers: heur.quantified.length > 0, star: heur.star, hedges: heur.hedges, fillers: heur.fillers, wordCount: heur.wordCount, claims: heur.claims.map((c) => c.text) },
@@ -303,7 +321,9 @@ async function* deliver(p: {
   let rendered: RenderedUtterance | null = null;
   const waiter: { wake: (() => void) | null } = { wake: null };
   const gen = streamUtterance(ctx, llm);
-  const pump = await (async () => {
+  // Started, not awaited: the bridge and the first sentence are spoken while the model is still
+  // writing the rest. (Awaiting here held every word back until generation had finished.)
+  const pump = (async () => {
     try {
       let r = await gen.next();
       while (!r.done) { sentences.push(r.value); waiter.wake?.(); r = await gen.next(); }
@@ -321,112 +341,117 @@ async function* deliver(p: {
     return sentences.shift() ?? null;
   };
 
-  const questionId = newId("qst");
-  let seq = 0;
-  let firstAudioMs: number | null = null;
-  let ttsFailed = tts.isMock;
-  let ttsFirstChunkMs: number | null = null;
-  let cacheHits = 0;
-  // What has been sent to the voice so far; the client's caption follows it sentence by sentence.
-  const said: string[] = [];
-  if (bridge) {
-    said.push(bridge);
-    yield { type: "text", questionId, text: bridge, source: "template", seat: iv.seat };
-    try {
-      const sg = synth(voice, bridge);
-      let r = await sg.next();
-      while (!r.done) {
-        if (firstAudioMs === null) firstAudioMs = performance.now() - p.t0;
-        yield { type: "audio", seq: seq++, sampleRate: r.value.sampleRate, pcm: r.value.pcm.toString("base64") };
-        r = await sg.next();
+  // If the client goes away mid-turn, stop reading the model instead of letting it run on.
+  try {
+    const questionId = newId("qst");
+    let seq = 0;
+    let firstAudioMs: number | null = null;
+    let ttsFailed = tts.isMock;
+    let ttsFirstChunkMs: number | null = null;
+    let cacheHits = 0;
+    // What has been sent to the voice so far; the client's caption follows it sentence by sentence.
+    const said: string[] = [];
+    if (bridge) {
+      said.push(bridge);
+      yield { type: "text", questionId, text: bridge, source: "template", seat: iv.seat };
+      try {
+        const sg = synth(voice, bridge);
+        let r = await sg.next();
+        while (!r.done) {
+          if (firstAudioMs === null) firstAudioMs = performance.now() - p.t0;
+          yield { type: "audio", seq: seq++, sampleRate: r.value.sampleRate, pcm: r.value.pcm.toString("base64") };
+          r = await sg.next();
+        }
+        cacheHits++;
+      } catch {
+        // A cached phrase cannot fail to synthesise; if it somehow does, the follow-up still comes.
       }
-      cacheHits++;
-    } catch {
-      // A cached phrase cannot fail to synthesise; if it somehow does, the follow-up still comes.
     }
-  }
-  const bridgeChunks = seq;
+    const bridgeChunks = seq;
 
-  const first = await next();
-  const tFirstText = performance.now() - p.t0;
-  if (first !== null) said.push(first);
-  yield { type: "text", questionId, text: said.join(" "), source: "llm", seat: iv.seat };
+    const first = await next();
+    const tFirstText = performance.now() - p.t0;
+    if (first !== null) said.push(first);
+    yield { type: "text", questionId, text: said.join(" "), source: "llm", seat: iv.seat };
 
-  // Fewer TTS requests: if the model finishes within a beat of the first sentence,
-  // speak the whole utterance in one request instead of sentence by sentence.
-  // While the bridge is playing there is time to spare, so wait a little longer for the rest.
-  let spoken = first;
-  if (spoken !== null && !finished) await Promise.race([pump, new Promise((r) => setTimeout(r, wholeTurnWaitMs(!!bridge)))]);
-  if (spoken !== null && finished && sentences.length && (rendered as RenderedUtterance | null)?.source === "llm") {
-    const rest = sentences.splice(0);
-    said.push(...rest);
-    spoken = [spoken, ...rest].join(" ");
-  }
-  let firstSpoken = true;
-  while (spoken !== null && !ttsFailed) {
-    if (!firstSpoken) {
-      said.push(spoken);
-      yield { type: "text", questionId, text: said.join(" "), source: "llm", seat: iv.seat };
+    // Fewer TTS requests: if the model finishes within a beat of the first sentence,
+    // speak the whole utterance in one request instead of sentence by sentence.
+    // While the bridge is playing there is time to spare, so wait a little longer for the rest.
+    let spoken = first;
+    if (spoken !== null && !finished) await Promise.race([pump, new Promise((r) => setTimeout(r, wholeTurnWaitMs(!!bridge)))]);
+    if (spoken !== null && finished && sentences.length && (rendered as RenderedUtterance | null)?.source === "llm") {
+      const rest = sentences.splice(0);
+      said.push(...rest);
+      spoken = [spoken, ...rest].join(" ");
     }
-    firstSpoken = false;
-    try {
-      const sg = synth(voice, spoken);
-      let r = await sg.next();
-      while (!r.done) {
-        if (firstAudioMs === null) firstAudioMs = performance.now() - p.t0;
-        yield { type: "audio", seq: seq++, sampleRate: r.value.sampleRate, pcm: r.value.pcm.toString("base64") };
-        r = await sg.next();
+    let firstSpoken = true;
+    while (spoken !== null && !ttsFailed) {
+      if (!firstSpoken) {
+        said.push(spoken);
+        yield { type: "text", questionId, text: said.join(" "), source: "llm", seat: iv.seat };
       }
-      if (r.value.cached) cacheHits++;
-      if (ttsFirstChunkMs === null) ttsFirstChunkMs = r.value.firstChunkMs;
-      if (r.value.usage) await recordTokenCost({ userId: p.userId, sessionId: p.sessionId }, tts.id, "tts", "interviewer_speech", r.value.usage);
-    } catch (err) {
-      console.error("[tts] turn fell back to the browser voice:", err instanceof Error ? err.message : err);
-      logEvent("error", "tts_failed", { sessionId: p.sessionId, userId: p.userId, data: { error: err instanceof Error ? err.message : String(err), chunksSent: seq } });
-      ttsFailed = true;
-      break;
+      firstSpoken = false;
+      try {
+        const sg = synth(voice, spoken);
+        let r = await sg.next();
+        while (!r.done) {
+          if (firstAudioMs === null) firstAudioMs = performance.now() - p.t0;
+          yield { type: "audio", seq: seq++, sampleRate: r.value.sampleRate, pcm: r.value.pcm.toString("base64") };
+          r = await sg.next();
+        }
+        if (r.value.cached) cacheHits++;
+        if (ttsFirstChunkMs === null) ttsFirstChunkMs = r.value.firstChunkMs;
+        if (r.value.usage) await recordTokenCost({ userId: p.userId, sessionId: p.sessionId }, tts.id, "tts", "interviewer_speech", r.value.usage);
+      } catch (err) {
+        console.error("[tts] turn fell back to the browser voice:", err instanceof Error ? err.message : err);
+        logEvent("error", "tts_failed", { sessionId: p.sessionId, userId: p.userId, data: { error: err instanceof Error ? err.message : String(err), chunksSent: seq } });
+        ttsFailed = true;
+        break;
+      }
+      spoken = await next();
     }
-    spoken = await next();
+    await pump;
+    const r = rendered as RenderedUtterance | null;
+    const fullText = [bridge, r?.text ?? first ?? ""].filter(Boolean).join(" ");
+    if (r?.usage) await recordTokenCost({ userId: p.userId, sessionId: p.sessionId }, llm.id, "llm", "interviewer_turn", r.usage);
+    logEvent("llm_output", "interviewer", { sessionId: p.sessionId, userId: p.userId, durationMs: r?.latencyMs, data: { text: fullText, source: r?.source, intent: p.decision.intent, firstTokenMs: r?.firstTokenMs ?? null, error: r?.error ?? null } });
+    if (r?.error) logEvent("fallback", "interviewer_template", { sessionId: p.sessionId, userId: p.userId, data: { error: r.error } });
+
+    // Persist before telling the client we're done, so the next turn can reference it.
+    const qCount = (await db.select({ id: schema.questions.id }).from(schema.questions).where(eq(schema.questions.sessionId, p.sessionId)).all()).length;
+    const bankDifficulty = p.state.plan.find((q) => q.text === p.decision.baseQuestion)?.difficulty ?? (p.decision.kind === "follow_up" ? 2 : 3);
+    await db.insert(schema.questions).values({
+      id: questionId, sessionId: p.sessionId, interviewerId: iv.id, seq: qCount + 1, kind: p.decision.kind,
+      competency: p.decision.competency, text: fullText, difficulty: p.decision.kind === "intro" ? 1 : bankDifficulty,
+      parentQuestionId: p.state.currentPrimary?.questionId || null, decisionReason: p.decision.reason, askedAtMs: Math.round(p.askedAtMs),
+    }).run();
+    await db.insert(schema.transcriptSegments).values({
+      id: newId("seg"), sessionId: p.sessionId, speaker: "interviewer", interviewerId: iv.id, questionId, text: fullText,
+      startMs: Math.round(p.askedAtMs), endMs: Math.round(p.askedAtMs + fullText.length * 60), source: "tts",
+    }).run();
+    const finalState = recordAsked(p.state, p.decision, questionId);
+    await saveState(p.sessionId, finalState);
+
+    if (fullText !== said.join(" ")) yield { type: "text", questionId, text: fullText, source: r?.source ?? "template", seat: iv.seat };
+    if (ttsFailed && seq === bridgeChunks) {
+      // Nothing past the bridge was voiced: close the bridge's audio, and let the client speak the rest.
+      if (seq > 0) yield { type: "audio_end", chunks: seq };
+      yield { type: "tts_fallback", reason: tts.isMock ? "server TTS not configured" : "speech synthesis failed", text: bridge ? (r?.text ?? first ?? "") : undefined };
+    } else yield { type: "audio_end", chunks: seq };
+
+    // Get the next planned question's voice ready while the candidate answers.
+    prewarmNext(p.sessionId, p.userId, finalState);
+
+    const timings = {
+      ...(p.extraTimings ?? {}), bridged: bridge ? 1 : 0, firstSentenceMs: Math.round(tFirstText), llmFirstTokenMs: Math.round(r?.firstTokenMs ?? -1),
+      llmMs: Math.round(r?.latencyMs ?? -1), ttsFirstChunkMs: Math.round(ttsFirstChunkMs ?? -1), ttsCacheHits: cacheHits,
+      serverToFirstAudioMs: firstAudioMs === null ? -1 : Math.round(firstAudioMs), serverTotalMs: Math.round(performance.now() - p.t0),
+    };
+    logEvent("latency", "turn_server", { sessionId: p.sessionId, userId: p.userId, durationMs: timings.serverToFirstAudioMs, data: timings });
+    yield { type: "done", phase: finalState.phase, complete: p.decision.action === "COMPLETE", listening: listeningPolicy(finalState), timings };
+  } finally {
+    if (!finished) void gen.return(undefined as never).catch(() => {});
   }
-  await pump;
-  const r = rendered as RenderedUtterance | null;
-  const fullText = [bridge, r?.text ?? first ?? ""].filter(Boolean).join(" ");
-  if (r?.usage) await recordTokenCost({ userId: p.userId, sessionId: p.sessionId }, llm.id, "llm", "interviewer_turn", r.usage);
-  logEvent("llm_output", "interviewer", { sessionId: p.sessionId, userId: p.userId, durationMs: r?.latencyMs, data: { text: fullText, source: r?.source, intent: p.decision.intent, firstTokenMs: r?.firstTokenMs ?? null, error: r?.error ?? null } });
-  if (r?.error) logEvent("fallback", "interviewer_template", { sessionId: p.sessionId, userId: p.userId, data: { error: r.error } });
-
-  // Persist before telling the client we're done, so the next turn can reference it.
-  const qCount = (await db.select({ id: schema.questions.id }).from(schema.questions).where(eq(schema.questions.sessionId, p.sessionId)).all()).length;
-  const bankDifficulty = p.state.plan.find((q) => q.text === p.decision.baseQuestion)?.difficulty ?? (p.decision.kind === "follow_up" ? 2 : 3);
-  await db.insert(schema.questions).values({
-    id: questionId, sessionId: p.sessionId, interviewerId: iv.id, seq: qCount + 1, kind: p.decision.kind,
-    competency: p.decision.competency, text: fullText, difficulty: p.decision.kind === "intro" ? 1 : bankDifficulty,
-    parentQuestionId: p.state.currentPrimary?.questionId || null, decisionReason: p.decision.reason, askedAtMs: Math.round(p.askedAtMs),
-  }).run();
-  await db.insert(schema.transcriptSegments).values({
-    id: newId("seg"), sessionId: p.sessionId, speaker: "interviewer", interviewerId: iv.id, questionId, text: fullText,
-    startMs: Math.round(p.askedAtMs), endMs: Math.round(p.askedAtMs + fullText.length * 60), source: "tts",
-  }).run();
-  const finalState = recordAsked(p.state, p.decision, questionId);
-  await saveState(p.sessionId, finalState);
-
-  if (fullText !== said.join(" ")) yield { type: "text", questionId, text: fullText, source: r?.source ?? "template", seat: iv.seat };
-  if (ttsFailed && seq === bridgeChunks) {
-    // Nothing past the bridge was voiced: close the bridge's audio, and let the client speak the rest.
-    if (seq > 0) yield { type: "audio_end", chunks: seq };
-    yield { type: "tts_fallback", reason: tts.isMock ? "server TTS not configured" : "speech synthesis failed", text: bridge ? (r?.text ?? first ?? "") : undefined };
-  } else yield { type: "audio_end", chunks: seq };
-
-  // Get the next planned question's voice ready while the candidate answers.
-  prewarmNext(p.sessionId, p.userId, finalState);
-
-  const timings = {
-    ...(p.extraTimings ?? {}), bridged: bridge ? 1 : 0, firstSentenceMs: Math.round(tFirstText), llmFirstTokenMs: Math.round(r?.firstTokenMs ?? -1),
-    llmMs: Math.round(r?.latencyMs ?? -1), ttsFirstChunkMs: Math.round(ttsFirstChunkMs ?? -1), ttsCacheHits: cacheHits,
-    serverToFirstAudioMs: firstAudioMs === null ? -1 : Math.round(firstAudioMs), serverTotalMs: Math.round(performance.now() - p.t0),
-  };
-  logEvent("latency", "turn_server", { sessionId: p.sessionId, userId: p.userId, durationMs: timings.serverToFirstAudioMs, data: timings });
-  yield { type: "done", phase: finalState.phase, complete: p.decision.action === "COMPLETE", listening: listeningPolicy(finalState), timings };
 }
 
 function prewarmNext(sessionId: string, userId: string, state: InterviewState) {

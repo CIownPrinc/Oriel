@@ -1,13 +1,9 @@
 import { z } from "zod";
-import { count, eq } from "drizzle-orm";
-import { getDb, schema } from "@/db/client";
-import { newId } from "@/lib/id";
-import { hashPassword } from "@/lib/security/password";
-import { rateLimit } from "@/lib/security/rate-limit";
+import { sharedRateLimit } from "@/lib/security/shared-limits";
 import { audit } from "@/lib/security/audit";
 import { createSession } from "@/lib/auth/session";
 import { clientIp, errorResponse, json, parseBody } from "@/lib/api/http";
-import { CONSENT_VERSION } from "@/lib/privacy/consent";
+import { registerAccount } from "@/server/accounts";
 
 const Body = z.object({
   email: z.string().trim().toLowerCase().email().max(200),
@@ -18,21 +14,11 @@ const Body = z.object({
 export async function POST(req: Request) {
   try {
     const ip = await clientIp();
-    if (!rateLimit(`signup:${ip}`, 10, 60 * 60_000).ok) return json({ error: "Too many sign-ups from this network. Try again later." }, { status: 429 });
+    if (!(await sharedRateLimit(`signup:${ip}`, 10, 60 * 60_000)).ok) return json({ error: "Too many sign-ups from this network. Try again later." }, { status: 429 });
     const body = await parseBody(req, Body);
-    const db = getDb();
-    if (await db.select().from(schema.users).where(eq(schema.users.email, body.email)).get()) {
-      return json({ error: "An account with that email already exists" }, { status: 409 });
-    }
-    const admins = (process.env.ORIEL_ADMIN_EMAILS ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
-    const isFirst = ((await db.select({ n: count() }).from(schema.users).get())?.n ?? 0) === 0;
-    const role = admins.includes(body.email) || (isFirst && process.env.NODE_ENV !== "production") ? "admin" : "user";
-    const id = newId("usr");
-    await db.insert(schema.users).values({ id, email: body.email, passwordHash: await hashPassword(body.password), role }).run();
-    await db.insert(schema.consentRecords).values({ id: newId("cns"), userId: id, kind: "terms", version: CONSENT_VERSION, granted: true, userAgent: req.headers.get("user-agent")?.slice(0, 200) ?? null }).run();
-    await db.insert(schema.subscriptions).values({ id: newId("sub"), userId: id, plan: "free", periodStart: new Date() }).run();
+    const id = await registerAccount(body.email, body.password, req.headers.get("user-agent"));
     await createSession(id);
-    await audit("auth.signup", { userId: id, ip, data: { role } });
+    await audit("auth.signup", { userId: id, ip });
     return json({ ok: true });
   } catch (err) {
     return errorResponse(err);

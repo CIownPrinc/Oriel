@@ -12,6 +12,7 @@ import { evaluate, evaluateCode } from "@/lib/training/evaluate";
 import { asResponse, validResults, type CodeSpec, type CodeSubmission } from "@/lib/training/code";
 import { generateExercise } from "@/lib/training/generate";
 import type { Exercise } from "@/lib/training/questions";
+import { assertWithinDailyCost } from "@/lib/security/shared-limits";
 
 /*
  * The practice loop on the server. The engine (lib/training/engine) decides; this file loads,
@@ -42,6 +43,7 @@ const seedOf = (s: string) => [...s].reduce((a, ch) => (a * 31 + ch.charCodeAt(0
 
 export async function startPractice(userId: string, input: { category: string; competencyId?: string | null }): Promise<string> {
   if (!isCategory(input.category)) throw new HttpError(400, "Unknown interview type");
+  await assertWithinDailyCost(userId);
   const category = input.category;
   const competencyId = input.competencyId ?? chooseCompetency(category, await history(userId));
   const c = COMPETENCY[competencyId];

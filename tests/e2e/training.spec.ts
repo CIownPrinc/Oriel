@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { onboard, signUp } from "./helpers";
 
 /**
@@ -9,7 +9,7 @@ test("training: an answer too short to judge is asked for again, not scored", as
   await signUp(page, `train-${Date.now()}@oriel.test`);
   await onboard(page, { resume: false });
   await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Practice", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Practice one skill until it holds." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Practice one skill until it sticks." })).toBeVisible();
   await expect(page.getByText("Nothing assessed yet.")).toBeVisible();
   await page.getByRole("radio", { name: /^Explaining your own contribution/ }).click();
   await page.getByRole("button", { name: "Start practice" }).click();

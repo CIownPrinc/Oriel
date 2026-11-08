@@ -55,7 +55,7 @@ export function measureDrill(drill: DrillDef, input: DrillInput, baseline: numbe
     }
     case "camera_engagement": {
       const v = input.cameraEngagement === null ? null : Math.round(input.cameraEngagement * 100);
-      return { value: v, unit: "% (estimated)", label: "Camera engagement", passed: v === null ? null : baseline !== null ? v >= baseline + 10 : v >= 60, details: {} };
+      return { value: v, unit: "% (estimated)", label: "Eye contact", passed: v === null ? null : baseline !== null ? v >= baseline + 10 : v >= 60, details: {} };
     }
     case "structure_score": {
       const v = Math.round(h.starScore * 100);

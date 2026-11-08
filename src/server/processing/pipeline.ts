@@ -1,11 +1,11 @@
 import "server-only";
 import { after } from "next/server";
-import { and, asc, desc, eq, isNotNull, ne } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db/client";
 import { newId } from "@/lib/id";
 import { logEvent } from "@/lib/costs/events";
 import { recordTokenCost, recordUnitCost } from "@/lib/costs/record";
-import { computeRead, candidateMoments, selectMoments, type AudioSample, type VisionSample, type SetupSample, type AnswerInputRow, type MetricResult } from "@/lib/analysis/read";
+import { computeRead, candidateMoments, interviewTypeOf, selectMoments, type AudioSample, type VisionSample, type SetupSample, type AnswerInputRow, type MetricResult } from "@/lib/analysis/read";
 import { generateCoaching, type MomentForCoaching } from "@/lib/ai/analyzers";
 import { getLanguageModel } from "@/lib/ai/providers/registry";
 import { canUsePlayback } from "@/lib/billing/entitlements";
@@ -29,22 +29,29 @@ export const PIPELINE_STEPS = [
   "competency_analysis", "weak_moment_detection", "playback_selection", "coaching_generation", "progress_update", "lesson_planning",
 ] as const;
 
-const running = new Set<string>();
+/** A run that hasn't finished in this long is presumed dead; another worker may take the job over. */
+export const ANALYSIS_LEASE_MS = 6 * 60_000;
+/** Automatic recovery gives up after this many attempts; the person can still retry by hand. */
+export const MAX_AUTO_ATTEMPTS = 3;
 
-export async function enqueueAnalysis(sessionId: string): Promise<string> {
+/**
+ * Queue analysis for a session. One job row per session (unique index), so concurrent calls,
+ * from two tabs or two instances, share it. A job that is running under a live lease is left
+ * alone and asked to run once more when it ends, so new input is never lost.
+ */
+export async function enqueueAnalysis(sessionId: string, now = new Date()): Promise<string> {
   const db = getDb();
-  const existing = await db.select().from(schema.processingJobs).where(eq(schema.processingJobs.sessionId, sessionId)).orderBy(desc(schema.processingJobs.createdAt)).get();
-  let jobId: string;
-  if (existing && existing.status !== "complete") {
-    jobId = existing.id;
-    await db.update(schema.processingJobs).set({ status: "queued", error: null, updatedAt: new Date() }).where(eq(schema.processingJobs.id, jobId)).run();
-  } else {
-    jobId = newId("job");
-    await db.insert(schema.processingJobs).values({ id: jobId, sessionId, status: "queued" }).run();
+  await db.insert(schema.processingJobs).values({ id: newId("job"), sessionId, status: "queued" }).onConflictDoNothing().run();
+  const job = (await db.select().from(schema.processingJobs).where(eq(schema.processingJobs.sessionId, sessionId)).get())!;
+  const liveRun = job.status === "running" && job.leaseExpiresAt !== null && job.leaseExpiresAt > now;
+  if (liveRun) {
+    await db.update(schema.processingJobs).set({ rerunRequested: true, updatedAt: now }).where(eq(schema.processingJobs.id, job.id)).run();
+    return job.id;
   }
+  await db.update(schema.processingJobs).set({ status: "queued", error: null, attempts: 0, leaseExpiresAt: null, updatedAt: now }).where(eq(schema.processingJobs.id, job.id)).run();
   await db.update(schema.interviewSessions).set({ analysisStatus: "queued", analysisError: null }).where(eq(schema.interviewSessions.id, sessionId)).run();
-  if (process.env.ORIEL_SYNC_PIPELINE !== "1") runAfterResponse(() => runJob(jobId));
-  return jobId;
+  if (process.env.ORIEL_SYNC_PIPELINE !== "1") runAfterResponse(() => runJob(job.id));
+  return job.id;
 }
 
 /**
@@ -59,15 +66,29 @@ function runAfterResponse(work: () => Promise<void>) {
   }
 }
 
-export async function runJob(jobId: string): Promise<void> {
-  if (running.has(jobId)) return;
-  running.add(jobId);
+/**
+ * Take the job if nobody else holds it: it's queued, or failed, or its last run's lease ran out.
+ * The claim is one conditional update, so two workers can never both win it.
+ */
+async function claimJob(jobId: string, now: Date): Promise<boolean> {
   const db = getDb();
-  const job = await db.select().from(schema.processingJobs).where(eq(schema.processingJobs.id, jobId)).get();
-  if (!job) return void running.delete(jobId);
+  const claimable = or(
+    inArray(schema.processingJobs.status, ["queued", "failed"]),
+    and(eq(schema.processingJobs.status, "running"), or(isNull(schema.processingJobs.leaseExpiresAt), lt(schema.processingJobs.leaseExpiresAt, now))),
+  );
+  const r = await db.update(schema.processingJobs)
+    .set({ status: "running", attempts: sql`${schema.processingJobs.attempts} + 1`, leaseExpiresAt: new Date(now.getTime() + ANALYSIS_LEASE_MS), rerunRequested: false, updatedAt: now })
+    .where(and(eq(schema.processingJobs.id, jobId), claimable)).run();
+  return r.rowsAffected === 1;
+}
+
+export async function runJob(jobId: string): Promise<void> {
+  const db = getDb();
+  if (!(await claimJob(jobId, new Date()))) return;
+  const job = (await db.select().from(schema.processingJobs).where(eq(schema.processingJobs.id, jobId)).get())!;
   const timings: Record<string, number> = {};
-  const setStep = async (step: string) => await db.update(schema.processingJobs).set({ step, updatedAt: new Date() }).where(eq(schema.processingJobs.id, jobId)).run();
-  await db.update(schema.processingJobs).set({ status: "running", attempts: job.attempts + 1, updatedAt: new Date() }).where(eq(schema.processingJobs.id, jobId)).run();
+  const setStep = async (step: string) => await db.update(schema.processingJobs)
+    .set({ step, leaseExpiresAt: new Date(Date.now() + ANALYSIS_LEASE_MS), updatedAt: new Date() }).where(eq(schema.processingJobs.id, jobId)).run();
   await db.update(schema.interviewSessions).set({ analysisStatus: "running" }).where(eq(schema.interviewSessions.id, job.sessionId)).run();
   const t0 = performance.now();
   let ctx: PipelineCtx | null = null;
@@ -80,17 +101,50 @@ export async function runJob(jobId: string): Promise<void> {
       ctx = await STEP_IMPL[step](job.sessionId, ctx);
       timings[step] = Math.round(performance.now() - ts);
     }
-    await db.update(schema.processingJobs).set({ status: "complete", step: null, stepTimings: timings, updatedAt: new Date() }).where(eq(schema.processingJobs.id, jobId)).run();
+    await db.update(schema.processingJobs).set({ status: "complete", step: null, stepTimings: timings, leaseExpiresAt: null, updatedAt: new Date() }).where(eq(schema.processingJobs.id, jobId)).run();
     await db.update(schema.interviewSessions).set({ analysisStatus: "complete" }).where(eq(schema.interviewSessions.id, job.sessionId)).run();
     logEvent("pipeline", "analysis_complete", { sessionId: job.sessionId, durationMs: performance.now() - t0, data: timings });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    await db.update(schema.processingJobs).set({ status: "failed", error: msg, stepTimings: timings, updatedAt: new Date() }).where(eq(schema.processingJobs.id, jobId)).run();
+    await db.update(schema.processingJobs).set({ status: "failed", error: msg, stepTimings: timings, leaseExpiresAt: null, updatedAt: new Date() }).where(eq(schema.processingJobs.id, jobId)).run();
     await db.update(schema.interviewSessions).set({ analysisStatus: "failed", analysisError: msg }).where(eq(schema.interviewSessions.id, job.sessionId)).run();
     logEvent("error", "analysis_failed", { sessionId: job.sessionId, durationMs: performance.now() - t0, data: { error: msg, timings } });
-  } finally {
-    running.delete(jobId);
   }
+  // A late transcript arrived during this run: analyse once more so it is reflected.
+  const ended = await db.select({ rerun: schema.processingJobs.rerunRequested }).from(schema.processingJobs).where(eq(schema.processingJobs.id, jobId)).get();
+  if (ended?.rerun) await runJob(await enqueueAnalysis(job.sessionId));
+}
+
+/** Analysis that is queued or running but hasn't moved for this long is treated as stuck. */
+export const STALE_JOB_MS = 2 * 60_000;
+
+export function isJobStale(job: { status: string; updatedAt: Date | null; createdAt: Date; leaseExpiresAt: Date | null }, now = new Date()): boolean {
+  if (job.status === "queued") return now.getTime() - (job.updatedAt ?? job.createdAt).getTime() > STALE_JOB_MS;
+  if (job.status === "running") return job.leaseExpiresAt === null || job.leaseExpiresAt <= now;
+  return false;
+}
+
+/**
+ * Restart analysis that a dead worker left queued or running (the scheduled cleanup calls this).
+ * Gives up after MAX_AUTO_ATTEMPTS, marking the job failed so the person sees a retry button.
+ */
+export async function recoverStaleJobs(now = new Date()): Promise<{ restarted: number; gaveUp: number }> {
+  const db = getDb();
+  const open = await db.select().from(schema.processingJobs).where(inArray(schema.processingJobs.status, ["queued", "running"])).all();
+  let restarted = 0;
+  let gaveUp = 0;
+  for (const job of open.filter((j) => isJobStale(j, now))) {
+    if (job.attempts >= MAX_AUTO_ATTEMPTS) {
+      const msg = `Analysis stopped after ${job.attempts} attempts. Retry it from the session page.`;
+      await db.update(schema.processingJobs).set({ status: "failed", error: msg, leaseExpiresAt: null, updatedAt: now }).where(eq(schema.processingJobs.id, job.id)).run();
+      await db.update(schema.interviewSessions).set({ analysisStatus: "failed", analysisError: msg }).where(eq(schema.interviewSessions.id, job.sessionId)).run();
+      gaveUp++;
+      continue;
+    }
+    await runJob(job.id);
+    restarted++;
+  }
+  return { restarted, gaveUp };
 }
 
 // ─── Steps ────────────────────────────────────────────────────────────────
@@ -178,7 +232,7 @@ const STEP_IMPL: Record<(typeof PIPELINE_STEPS)[number], Step> = {
 
   async competency_analysis(sessionId, ctx) {
     const pack = getPack(ctx!.interview.domain);
-    const opts = { cameraMetrics: ctx!.session.cameraMetricsEnabled, gaze: ctx!.profile?.gazeMetricEnabled ?? true, posture: ctx!.profile?.postureMetricEnabled ?? true };
+    const opts = { cameraMetrics: ctx!.session.cameraMetricsEnabled, gaze: ctx!.profile?.gazeMetricEnabled ?? true, posture: ctx!.profile?.postureMetricEnabled ?? true, interviewType: interviewTypeOf(ctx!.interview.type) };
     const read = computeRead(ctx!.rows!, ctx!.audio!, ctx!.vision!, ctx!.setup ?? null, opts);
     const qById = new Map(ctx!.questions!.map((q) => [q.id, q]));
     const comp: Record<string, { label: string; answers: number; avgQuality: number }> = {};
@@ -194,7 +248,7 @@ const STEP_IMPL: Record<(typeof PIPELINE_STEPS)[number], Step> = {
   },
 
   async weak_moment_detection(_sessionId, ctx) {
-    const opts = { cameraMetrics: ctx!.session.cameraMetricsEnabled, gaze: ctx!.profile?.gazeMetricEnabled ?? true, posture: ctx!.profile?.postureMetricEnabled ?? true };
+    const opts = { cameraMetrics: ctx!.session.cameraMetricsEnabled, gaze: ctx!.profile?.gazeMetricEnabled ?? true, posture: ctx!.profile?.postureMetricEnabled ?? true, interviewType: interviewTypeOf(ctx!.interview.type) };
     return { ...ctx!, moments: candidateMoments(ctx!.read!.per, opts) };
   },
 
@@ -265,11 +319,14 @@ const STEP_IMPL: Record<(typeof PIPELINE_STEPS)[number], Step> = {
     await db.delete(schema.progressSnapshots).where(eq(schema.progressSnapshots.sessionId, sessionId)).run();
     await db.insert(schema.progressSnapshots).values({ id: newId("prg"), userId, sessionId, metrics: current, baseline }).run();
 
-    // Ladder: qualifying sessions on the current rung unlock the next one.
+    // Ladder: qualifying sessions on the current level unlock the next one, each session counted once.
     const level = c.interview.ladderLevel;
     if (level && prior.length) {
       const { above } = aboveBaseline(compare(current, baseline));
-      if (above) {
+      // Claim the session's credit first: a reanalysis of the same session finds it taken.
+      const credited = above && (await db.update(schema.interviewSessions).set({ ladderCreditedAt: new Date() })
+        .where(and(eq(schema.interviewSessions.id, sessionId), isNull(schema.interviewSessions.ladderCreditedAt))).run()).rowsAffected === 1;
+      if (credited) {
         const prog = await db.select().from(schema.ladderProgress).where(and(eq(schema.ladderProgress.userId, userId), eq(schema.ladderProgress.level, level))).get();
         const qualifying = (prog?.qualifyingSessions ?? 0) + 1;
         if (prog) await db.update(schema.ladderProgress).set({ qualifyingSessions: qualifying, completedAt: qualifying >= LADDER_QUALIFYING_SESSIONS ? prog.completedAt ?? new Date() : null }).where(and(eq(schema.ladderProgress.userId, userId), eq(schema.ladderProgress.level, level))).run();

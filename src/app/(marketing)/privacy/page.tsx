@@ -1,23 +1,25 @@
 import Link from "next/link";
 import { CONSENT_COPY, CONSENT_VERSION } from "@/lib/privacy/consent";
+import { contactEmail } from "@/lib/site";
 
 export const metadata = { title: "Privacy and biometric policy" };
 
 const RETENTION: [string, string, string][] = [
-  ["Raw session recording (your video and audio, plus the interviewer's voice)", "Your setting: 1, 7, 30 (default) or 90 days", "Deleted automatically at the end of the period, or immediately when you delete the session"],
-  ["Frame-level derived signals (camera engagement estimates, posture numbers, loudness/pitch timelines)", "Same as the raw recording", "Deleted with the raw recording; deleted at once if you withdraw camera consent"],
+  ["Raw session recording (your video and audio, plus the interviewer's voice)", "Your setting: 1, 7, 30 (default) or 90 days", "Can't be played after the period ends and is deleted within a day after that, or immediately when you delete the session"],
+  ["Frame-level derived signals (eye-contact estimates, posture numbers, loudness/pitch timelines)", "Same as the raw recording", "Deleted with the raw recording; deleted at once if you withdraw camera consent"],
   ["Face and body landmarks", "Never stored", "Computed in your browser, reduced to a few numbers, and discarded frame by frame"],
   ["Answer audio sent for transcription", "Not stored by Oriel", "Transcribed by our speech provider and discarded"],
-  ["Transcript, the Read (aggregate metrics), Playback coaching", "Until you delete the session or your account", "Session delete or account delete"],
+  ["Transcript, feedback (summary metrics) and coaching", "Until you delete the session or your account", "Session delete or account delete"],
   ["Resume and job description", "Until you replace or delete them, or delete your account", "Account delete"],
   ["Account", "While active; deleted after 3 years without sign-in", "One-click account deletion in Profile"],
-  ["Consent records and security audit log", "As required to demonstrate consent (no interview content)", "Kept after account deletion without personal content"],
+  ["Consent records and security audit log", "As required to demonstrate consent (no interview content)", "On account deletion, a copy of each consent without your name, signature or device is kept in the audit log"],
 ];
 
 const PROCESSORS: [string, string, string][] = [
   ["Google (Gemini API)", "Interviewer language, voice synthesis, answer transcription, document parsing, coaching", "Your answers' text and answer audio (for transcription); resume and job description text"],
   ["Your browser's speech service (Chrome)", "Live captions during the interview, when your browser provides them", "Microphone audio, processed by the browser vendor"],
   ["Google (MediaPipe model files)", "Download of the on-device face and pose models", "None: no user data is sent"],
+  ["Resend (email delivery)", "Password reset emails, only when you ask for one", "Your email address and the reset link"],
 ];
 
 const CONTENTS: [string, string][] = [
@@ -26,6 +28,7 @@ const CONTENTS: [string, string][] = [
 ];
 
 export default function PrivacyPage() {
+  const contact = contactEmail();
   return (
     <main id="content" tabIndex={-1} className="frame pb-section pt-[calc(var(--header-h)+var(--spacing-hero))] focus:outline-none">
       <header className="max-w-column">
@@ -102,7 +105,7 @@ export default function PrivacyPage() {
 
       <Section title="Your choices and rights" id="rights">
         <ul className="list-disc space-y-2 pl-5">
-          <li>Download everything we store about you (Profile → Your data → Download).</li>
+          <li>Download everything we store about you, including interviews, practice, lessons and consent records (Profile → Your data → Download).</li>
           <li>Delete a session (Playback) or your account (Profile). Deletion is immediate and permanent.</li>
           <li>Change retention, recording, and camera-signal settings at any time (Profile → Privacy). Changes are logged as consent records.</li>
         </ul>
@@ -112,7 +115,7 @@ export default function PrivacyPage() {
         <p>Where a school or organization provides Oriel seats, they see aggregate reporting only. Individual results are never shared without your explicit, separate consent.</p>
       </Section>
 
-      <p className="mt-16 text-ui text-fg-subtle">Questions: privacy@oriel.example. This policy is a working draft prepared for review by privacy counsel and is not legal advice.</p>
+      <p className="mt-16 text-ui text-fg-subtle">{contact ? <>Questions: <a href={`mailto:${contact}?subject=Privacy`} className="underline decoration-1 underline-offset-text hover:text-fg">{contact}</a>. </> : null}This policy is a working draft prepared for review by privacy counsel and is not legal advice.</p>
         </article>
       </div>
     </main>

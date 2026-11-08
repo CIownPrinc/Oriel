@@ -22,8 +22,23 @@ export async function deleteSession(userId: string, sessionId: string): Promise<
 export async function deleteAccount(userId: string, emailDomain: string | null) {
   await deleteAllMediaForUser(userId);
   const db = getDb();
+  await archiveConsentRecords(userId);
   await db.delete(schema.costRecords).where(eq(schema.costRecords.userId, userId)).run();
   await db.delete(schema.providerEvents).where(eq(schema.providerEvents.userId, userId)).run();
   await db.delete(schema.users).where(eq(schema.users.id, userId)).run();
   await audit("privacy.account_deleted", { userId, data: { email_domain: emailDomain } });
+}
+
+/**
+ * Consent records cascade away with the account, but proof of what was agreed to is kept
+ * (privacy policy, retention table): one audit entry per record, with no name, signature or device.
+ */
+async function archiveConsentRecords(userId: string) {
+  const records = await getDb().select().from(schema.consentRecords).where(eq(schema.consentRecords.userId, userId)).all();
+  for (const r of records) {
+    await audit("privacy.consent_archived", {
+      userId, target: r.id,
+      data: { kind: r.kind, version: r.version, granted: r.granted, textHash: r.textHash, signed: r.signature !== null, source: r.source, sessionId: r.sessionId, recordedAt: r.createdAt.toISOString() },
+    });
+  }
 }

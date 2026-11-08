@@ -35,6 +35,8 @@ export interface RoomUiState {
   complete: boolean;
   recording: boolean;
   hint: string | null;
+  /** Set when recording stopped partway; stays on screen, unlike `hint`. */
+  recordingIssue: string | null;
 }
 
 type Listening = Extract<RoomEvent, { type: "done" }>["listening"];
@@ -49,6 +51,11 @@ export interface RoomControllerOptions {
   vision: VisionTracker | null;
   videoEl: HTMLVideoElement | null;
   sttMode: "browser" | "server" | "none";
+  /**
+   * Where the session clock is when this controller starts: 0 for a new session, and the
+   * time since the session started when rejoining, so timestamps keep counting up.
+   */
+  clockStartMs: number;
   onState: (s: RoomUiState) => void;
   onEnded: () => void;
 }
@@ -79,7 +86,7 @@ export class RoomController {
   constructor(private o: RoomControllerOptions) {
     this.state = {
       phase: "starting", activeSeat: 0, caption: null, questionKey: 0, transcript: "", inputMode: o.micStream ? "voice" : "text",
-      sttMode: o.sttMode, voice: "server", error: null, complete: false, recording: false, hint: null,
+      sttMode: o.sttMode, voice: "server", error: null, complete: false, recording: false, hint: null, recordingIssue: null,
     };
   }
 
@@ -99,7 +106,7 @@ export class RoomController {
   // ─── Lifecycle ─────────────────────────────────────────────────────────
 
   async start() {
-    this.t0 = performance.now();
+    this.t0 = performance.now() - this.o.clockStartMs;
     const ctx = this.audio.ctx;
     if (this.o.micStream) {
       this.mic = new MicAnalyzer(ctx, this.o.micStream, () => this.clock);
@@ -112,7 +119,10 @@ export class RoomController {
       this.audio.out.connect(mix);
       const video = this.o.cameraStream?.getVideoTracks()[0];
       const stream = new MediaStream([...(video ? [video] : []), ...mix.stream.getAudioTracks()]);
-      this.recorder = new SessionRecorder(this.o.sessionId, stream, !!video);
+      this.recorder = new SessionRecorder(this.o.sessionId, stream, !!video, this.clock, (status) => this.set({
+        recording: false,
+        recordingIssue: status === 403 ? "Recording is turned off in your privacy settings. Your answers are still saved." : "Recording stopped and couldn't be saved. Your answers and transcript are still saved.",
+      }));
       this.set({ recording: this.recorder.start() });
     }
     if (this.o.vision && this.o.videoEl) {
@@ -404,6 +414,8 @@ export class RoomController {
   private async sendTurn(a: { text: string; start: number; end: number; firstWord: number | null; interrupted: boolean; mode: "voice" | "text" }) {
     this.set({ transcript: a.text });
     const body = {
+      // One key per answer; `request` resends this same body on a retry.
+      turnKey: crypto.randomUUID(),
       answerText: a.text, startMs: Math.round(a.start), endMs: Math.round(Math.max(a.end, a.start + 1)),
       firstWordLatencyMs: a.firstWord === null ? null : Math.max(0, Math.round(a.firstWord)), interrupted: a.interrupted, inputMode: a.mode,
       prevQuestion: this.questionId ? { questionId: this.questionId, startMs: Math.round(this.questionStart), endMs: Math.round(this.questionEnd) } : null,

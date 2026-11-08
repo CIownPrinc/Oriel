@@ -17,4 +17,4 @@ export const POST = authed(async (req, { user }) => {
   const { voice } = await parseBody(req, z.object({ voice: voiceSchema }));
   if (!isCached(voice, VOICE_SAMPLE) && ttsBudgetRemaining() <= 3) throw new HttpError(429, "Voice previews are busy. Try again in a few seconds.");
   return ndjson<RoomEvent>(speak(null, user.id, VOICE_SAMPLE, voice, 2));
-}, { limit: 30, name: "voice-preview" });
+}, { limit: 30, name: "voice-preview", shared: true });

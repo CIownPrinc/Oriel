@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import type { z } from "zod";
 import { getCurrentUser, type CurrentUser } from "@/lib/auth/session";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { sharedRateLimit } from "@/lib/security/shared-limits";
 
 import { HttpError } from "./errors";
 export { HttpError };
@@ -33,9 +34,10 @@ type Handler<C> = (req: Request, ctx: C & { user: CurrentUser }) => Promise<Resp
 
 /**
  * Wrap an authenticated route handler: auth, per-user rate limiting, uniform errors.
- * `limit` is requests per minute for this route for this user.
+ * `limit` is requests per minute for this route for this user. `shared` keeps the count in the
+ * database so it holds across server instances: use it for routes that spend money on AI calls.
  */
-export function authed<C>(handler: Handler<C>, opts: { limit?: number; name?: string; admin?: boolean } = {}) {
+export function authed<C>(handler: Handler<C>, opts: { limit?: number; name?: string; admin?: boolean; shared?: boolean } = {}) {
   return async (req: Request, ctx: C): Promise<Response> => {
     try {
       // Defence in depth on top of SameSite cookies: mutating requests must come from our own origin.
@@ -48,7 +50,8 @@ export function authed<C>(handler: Handler<C>, opts: { limit?: number; name?: st
       const user = await getCurrentUser();
       if (!user) return json({ error: "Not signed in" }, { status: 401 });
       if (opts.admin && user.role !== "admin") return json({ error: "Forbidden" }, { status: 403 });
-      const rl = rateLimit(`${opts.name ?? new URL(req.url).pathname}:${user.id}`, opts.limit ?? 60, 60_000);
+      const key = `${opts.name ?? new URL(req.url).pathname}:${user.id}`;
+      const rl = opts.shared ? await sharedRateLimit(key, opts.limit ?? 60, 60_000) : rateLimit(key, opts.limit ?? 60, 60_000);
       if (!rl.ok) return json({ error: "Too many requests" }, { status: 429, headers: { "retry-after": String(Math.ceil(rl.retryAfterMs / 1000)) } });
       return await handler(req, { ...ctx, user });
     } catch (err) {

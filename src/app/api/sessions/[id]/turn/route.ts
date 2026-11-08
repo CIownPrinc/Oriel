@@ -11,6 +11,8 @@ const Body = z.object({
   inputMode: z.enum(["voice", "text"]),
   prevQuestion: z.object({ questionId: z.string(), startMs: z.number(), endMs: z.number() }).nullable(),
   clientTimings: z.record(z.string(), z.number()).optional(),
+  /** Same key on a retried request, so the answer is stored once. Optional for older clients. */
+  turnKey: z.string().regex(/^[\w-]{8,64}$/).optional(),
 });
 
 // Streams speech, which can outlast a short default limit on serverless hosts.
@@ -22,4 +24,4 @@ export const POST = authed<IdParams>(async (req, { params, user }) => {
   return ndjson<RoomEvent>(runTurn(id, user.id, body), (err) => ({
     type: "error", message: err instanceof HttpError ? err.message : "The interviewer lost the thread", recoverable: true,
   }));
-}, { limit: 60, name: "session-turn" });
+}, { limit: 60, name: "session-turn", shared: true });

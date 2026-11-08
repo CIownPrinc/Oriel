@@ -16,4 +16,4 @@ export const POST = authed<IdParams>(async (req, { params, user }) => {
   const r = await stt.transcribe({ audio: buf, mimeType: mime });
   if (r.usage) await recordTokenCost({ userId: user.id }, stt.id, "stt", "training_transcription", r.usage);
   return json({ text: r.text });
-}, { limit: 30, name: "training-transcribe" });
+}, { limit: 30, name: "training-transcribe", shared: true });

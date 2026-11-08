@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
+import { contactEmail } from "@/lib/site";
 
 const linkCls = "inline-block py-1 text-fg-muted transition-colors duration-press hover:text-fg";
 
 /** The colophon, on the page grid: what Oriel is and how to reach it, then the directory from the spine. */
 export function SiteFooter({ signedIn }: { signedIn: boolean }) {
+  const contact = contactEmail();
   const columns: [string, [string, string][]][] = [
-    ["Product", [["/#how", "Interviewers"], ["/#read", "The Read"], ["/#practice", "Lessons and drills"], ["/#pricing", "Pricing"]]],
+    ["Product", [["/#how", "Interviewers"], ["/#read", "Feedback"], ["/#practice", "Lessons and drills"], ["/#pricing", "Pricing"]]],
     ["Practice", signedIn
       ? [["/home", "Open Oriel"], ["/practice", "Practice an interview"], ["/progress", "Your progress"]]
       : [["/signup", "Start practicing"], ["/login", "Sign in"]]],
-    ["Trust", [["/#privacy", "How your data is handled"], ["/trust", "How accurate is the Read"], ["/privacy", "Privacy and biometric policy"]]],
+    ["Trust", [["/#privacy", "How your data is handled"], ["/trust", "How accurate is the feedback"], ["/privacy", "Privacy and biometric policy"], ["/terms", "Terms"]]],
   ];
   return (
     <footer className="border-t border-line text-ui">
@@ -19,10 +21,12 @@ export function SiteFooter({ signedIn }: { signedIn: boolean }) {
           <div className="col-span-4 sm:col-span-8 lg:col-span-6">
             <Link href="/" aria-label="Oriel home" className="-ml-1 inline-flex rounded-control p-1"><Logo /></Link>
             <p className="mt-4 max-w-[32ch] text-fg-muted">Practice only. Your interviewer is an AI, and every session says so.</p>
-            <ul className="mt-5">
-              <li><a href="mailto:hello@oriel.example" className={linkCls}>hello@oriel.example</a></li>
-              <li><a href="mailto:hello@oriel.example?subject=Campus" className={linkCls}>Career centers</a></li>
-            </ul>
+            {contact && (
+              <ul className="mt-5">
+                <li><a href={`mailto:${contact}`} className={linkCls}>{contact}</a></li>
+                <li><a href={`mailto:${contact}?subject=Campus`} className={linkCls}>Career centers</a></li>
+              </ul>
+            )}
           </div>
           <nav aria-label="Footer" className="col-span-4 grid grid-cols-2 gap-x-4 gap-y-8 sm:col-span-8 sm:grid-cols-3 sm:gap-x-6 lg:col-span-6 lg:col-start-7">
             {columns.map(([title, links]) => (

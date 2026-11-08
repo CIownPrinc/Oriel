@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { getDb, schema } from "@/db/client";
 import { newId } from "@/lib/id";
 import { authed, json, parseBody, type IdParams } from "@/lib/api/http";
@@ -26,9 +26,13 @@ export const POST = authed<IdParams>(async (req, { params, user }) => {
   const { session } = await loadSession(id, user.id);
   const body = await parseBody(req, Body);
   const db = getDb();
-  if (session.status !== "ended") {
+  // Two completions can race (a retry, two tabs, two instances): the one whose update ends the
+  // session records the usage, so minutes are never counted twice.
+  const ended = session.status === "ended" ? null : await db.update(schema.interviewSessions)
+    .set({ status: "ended", endedAt: new Date(), avatarProvider: body.avatarProvider, degradedMode: body.degradedMode, phase: "COMPLETE" })
+    .where(and(eq(schema.interviewSessions.id, id), ne(schema.interviewSessions.status, "ended"))).run();
+  if (ended?.rowsAffected === 1) {
     const minutes = body.durationMs / 60000;
-    await db.update(schema.interviewSessions).set({ status: "ended", endedAt: new Date(), avatarProvider: body.avatarProvider, degradedMode: body.degradedMode, phase: "COMPLETE" }).where(eq(schema.interviewSessions.id, id)).run();
     const avatarKey = body.avatarProvider === "local" ? "avatar-local" : "avatar-managed-premium";
     await recordUnitCost({ userId: user.id, sessionId: id }, body.avatarProvider, "avatar", "interviewer_minutes", minutes, "minutes", minutes * avatarMinuteRate(avatarKey));
     if (body.avatarProvider !== "local") await db.insert(schema.usageRecords).values({ id: newId("use"), userId: user.id, sessionId: id, kind: "managed_avatar_minutes", quantity: minutes }).run();

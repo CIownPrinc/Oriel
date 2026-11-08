@@ -133,7 +133,7 @@ export function ProfileClient(p: {
             </div>
             <div className="border-t border-line pt-5">
               <div className="flex items-center justify-between"><h3 className="text-ui font-medium text-fg">Job description</h3>{p.jd && <Badge>Active</Badge>}</div>
-              {p.jd ? (<><p className="mt-3 text-body text-fg">{p.jd.title}</p><p className="mt-2 text-ui text-fg-muted">{p.jd.competencies.join(" · ") || "No specific competencies found"}</p></>) : <p className="mt-3 text-ui text-fg-muted">No job description yet.</p>}
+              {p.jd ? (<><p className="mt-3 text-body text-fg">{p.jd.title}</p><p className="mt-2 text-ui text-fg-muted">{p.jd.competencies.join(" · ") || "No specific skills found"}</p></>) : <p className="mt-3 text-ui text-fg-muted">No job description yet.</p>}
               <Textarea className="mt-5" rows={4} value={jdText} onChange={(e) => setJdText(e.target.value)} placeholder="Paste a job description" aria-label="Job description text" />
               <Button size="sm" className="mt-2" onClick={saveJd} disabled={jdText.trim().length < 40} loading={busy === "jd"}>Save job description</Button>
               {jdText.trim().length > 0 && jdText.trim().length < 40 && <p className="mt-2 text-meta text-fg-subtle">Paste the full description: at least a few sentences.</p>}
@@ -166,10 +166,10 @@ export function ProfileClient(p: {
           <h2 className="text-display-m text-fg">Privacy</h2>
           <p className="mt-2 max-w-lead text-ui text-fg-muted">Camera signals are computed on your device; only derived numbers are stored. We never sell biometric data or share individual results with employers.</p>
           <div className="mt-6 divide-y divide-line border-y border-line">
-            <Toggle checked={privacy.cameraMetricsEnabled} onChange={(v) => savePrivacy({ cameraMetricsEnabled: v })} label="Camera-based signals" description="Estimate camera engagement and posture. Off: you still see yourself and can record, but no camera measurements are made." />
-            <Toggle checked={privacy.gazeMetricEnabled} disabled={!privacy.cameraMetricsEnabled} onChange={(v) => savePrivacy({ gazeMetricEnabled: v })} label="Camera engagement (gaze)" description="Turn off if you avoid eye contact for cultural, neurological or personal reasons; nothing is penalized." />
+            <Toggle checked={privacy.cameraMetricsEnabled} onChange={(v) => savePrivacy({ cameraMetricsEnabled: v })} label="Camera-based signals" description="Estimate eye contact and posture. Off: you still see yourself and can record, but no camera measurements are made." />
+            <Toggle checked={privacy.gazeMetricEnabled} disabled={!privacy.cameraMetricsEnabled} onChange={(v) => savePrivacy({ gazeMetricEnabled: v })} label="Eye contact" description="Turn off if you avoid eye contact for cultural, neurological or personal reasons; nothing is penalized." />
             <Toggle checked={privacy.postureMetricEnabled} disabled={!privacy.cameraMetricsEnabled} onChange={(v) => savePrivacy({ postureMetricEnabled: v })} label="Posture and movement" description="Lean, slouch, sway and fidgeting, shown as a timeline." />
-            <Toggle checked={privacy.recordVideo} onChange={(v) => savePrivacy({ recordVideo: v })} label="Record sessions" description="Needed for video Playback. Off: you still get the transcript and the Read." />
+            <Toggle checked={privacy.recordVideo} onChange={(v) => savePrivacy({ recordVideo: v })} label="Record sessions" description="Needed to watch your interview back. If this is off, you still get the transcript and feedback." />
             <div className="py-4">
               <p className="text-ui font-medium text-fg">Keep raw video for</p>
               <p className="mt-1 max-w-lead text-ui text-fg-muted">Recordings are encrypted and deleted automatically after this period. Shortening it applies to existing recordings too.</p>
@@ -194,7 +194,7 @@ export function ProfileClient(p: {
             ))}
           </div>
           <FieldError>{docError?.at === "plan" ? docError.message : null}</FieldError>
-          <p className="mt-4 text-meta text-fg-subtle">Development checkout: plan changes apply immediately with no charge. A payment processor plugs into the same endpoint for production.</p>
+          <p className="mt-4 text-meta text-fg-subtle">Payments aren&apos;t live yet, so changing plans is free for now.</p>
         </section>
 
         <section id="data" hidden={show("data")}>

@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getDb, schema } from "@/db/client";
 import { newId } from "@/lib/id";
 import { authed, HttpError, json } from "@/lib/api/http";
@@ -8,9 +8,11 @@ import { getLanguageModel } from "@/lib/ai/providers/registry";
 import { recordTokenCost } from "@/lib/costs/record";
 import { logEvent } from "@/lib/costs/events";
 import { audit } from "@/lib/security/audit";
+import { assertWithinDailyCost } from "@/lib/security/shared-limits";
 
 /** Upload (multipart "file") or paste (multipart "text") a resume; returns the parsed structure. */
 export const POST = authed(async (req, { user }) => {
+  await assertWithinDailyCost(user.id);
   const form = await req.formData().catch(() => { throw new HttpError(400, "Expected a form upload"); });
   const file = form.get("file");
   const pasted = form.get("text");
@@ -33,9 +35,10 @@ export const POST = authed(async (req, { user }) => {
   const db = getDb();
   const id = newId("res");
   await db.transaction(async (tx) => {
-    await tx.update(schema.resumes).set({ isActive: false }).where(and(eq(schema.resumes.userId, user.id), eq(schema.resumes.isActive, true))).run();
+    // Replacing a document deletes the old version (privacy policy: kept until replaced or deleted).
+    await tx.delete(schema.resumes).where(eq(schema.resumes.userId, user.id)).run();
     await tx.insert(schema.resumes).values({ id, userId: user.id, fileName, mimeType, rawText, parsed: parsed.data }).run();
   });
   await audit("resume.upload", { userId: user.id, target: id, data: { fileName, chars: rawText.length } });
   return json({ id, parsed: parsed.data, chars: rawText.length });
-}, { limit: 10 });
+}, { limit: 10, shared: true });

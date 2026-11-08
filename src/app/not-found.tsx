@@ -13,7 +13,7 @@ export default function NotFound() {
       <main id="content" className="frame flex flex-1 items-center pb-section">
         <div className="page-grid w-full items-center gap-y-6">
           <div className="col-span-4 sm:col-span-8 lg:col-span-6">
-            <h1 className="text-display-l text-fg">That page isn&apos;t in the room<span className="text-accent">.</span></h1>
+            <h1 className="text-display-l text-fg">We can&apos;t find that page<span className="text-accent">.</span></h1>
             <p className="mt-5 max-w-prose text-body-l text-fg-muted">The link may be old, or the page may have moved (error 404). Everything else is where you left it.</p>
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
               <ButtonLink href="/" size="lg">Go to the home page</ButtonLink>

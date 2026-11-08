@@ -19,4 +19,4 @@ export const POST = authed<IdParams>(async (req, { params, user }) => {
   if (r.usage) await recordTokenCost({ userId: user.id, sessionId: id }, stt.id, "stt", "live_turn_transcription", r.usage);
   logEvent("latency", "stt_live_turn", { sessionId: id, userId: user.id, durationMs: r.latencyMs, data: { bytes: buf.length } });
   return json({ text: r.text });
-}, { limit: 60, name: "live-transcribe" });
+}, { limit: 60, name: "live-transcribe", shared: true });

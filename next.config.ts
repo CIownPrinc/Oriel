@@ -34,7 +34,7 @@ const nextConfig: NextConfig = {
   // Runtime data (SQLite, encrypted media) and tests must never be traced into a deployment bundle.
   outputFileTracingExcludes: { "*": ["data/**", "tests/**", "playwright-report/**", "test-results/**"] },
   // Published validation results are read at request time by /trust; migrations run on first query.
-  outputFileTracingIncludes: { "/trust": ["docs/validation/*.json"], "*": ["drizzle/**"] },
+  outputFileTracingIncludes: { "/trust": ["docs/validation/*.json"], "/trust/reports/[report]": ["docs/validation/*.md"], "*": ["drizzle/**"] },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 /**
  * The landing page, signed out: one headline, a call to action that leads to sign-up, no sideways

@@ -18,7 +18,7 @@ const TRACK_ORDER: Track[] = ["responses", "delivery", "presence"];
 const NOT_MEASURED: Record<Track, string> = {
   responses: "Not measured: your last interview had too few full answers.",
   delivery: "Not measured: speak your answers so we can hear your delivery.",
-  presence: "Not measured in your last interview: allow camera signals in the Room for presence lessons.",
+  presence: "Not measured in your last interview: turn on camera signals when you start an interview to get presence lessons.",
 };
 
 export default async function LessonsPage() {

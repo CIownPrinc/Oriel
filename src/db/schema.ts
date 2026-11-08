@@ -36,6 +36,15 @@ export const authSessions = sqliteTable("auth_sessions", {
   createdAt: createdAt(),
 }, (t) => [index("auth_sessions_user_idx").on(t.userId)]);
 
+/** Password reset links: the token's SHA-256 is the id (the token itself is only in the email). */
+export const passwordResets = sqliteTable("password_resets", {
+  id: id(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+  usedAt: integer("used_at", { mode: "timestamp_ms" }),
+  createdAt: createdAt(),
+}, (t) => [index("password_resets_user_idx").on(t.userId)]);
+
 export type ExperienceLevel = "early" | "mid" | "senior" | "executive";
 
 export const profiles = sqliteTable("profiles", {
@@ -166,6 +175,8 @@ export const interviewSessions = sqliteTable("interview_sessions", {
   analysisError: text("analysis_error"),
   summary: json<SessionSummary>("summary"),
   videoExpiresAt: integer("video_expires_at", { mode: "timestamp_ms" }),
+  /** Set once when this session counted toward its Ladder level, so reanalysis can't count it again. */
+  ladderCreditedAt: integer("ladder_credited_at", { mode: "timestamp_ms" }),
   createdAt: createdAt(),
 }, (t) => [index("sessions_user_idx").on(t.userId), index("sessions_interview_idx").on(t.interviewId)]);
 
@@ -230,7 +241,9 @@ export const answers = sqliteTable("answers", {
   inputMode: text("input_mode", { enum: ["voice", "text"] }).notNull().default("voice"),
   flags: json<AnswerFlags>("flags"),
   analysis: json<Record<string, unknown>>("analysis"), // LLM answer-analyzer output (validated)
-}, (t) => [index("answers_session_idx").on(t.sessionId)]);
+  /** Chosen by the Room for each answer it sends; a retried turn carries the same key and isn't stored twice. */
+  turnKey: text("turn_key"),
+}, (t) => [index("answers_session_idx").on(t.sessionId), uniqueIndex("answers_turn_key_idx").on(t.sessionId, t.turnKey)]);
 
 /** Memory ledger: things the candidate said that the interviewer may return to. */
 export const claims = sqliteTable("claims", {
@@ -318,8 +331,15 @@ export const mediaObjects = sqliteTable("media_objects", {
   status: text("status", { enum: ["recording", "complete", "deleted"] }).notNull().default("recording"),
   durationMs: integer("duration_ms"),
   expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
+  /**
+   * A session recording can come in parts: every time the Room (re)starts recording, say after a
+   * reload, it opens a new part, because a fresh MediaRecorder stream can't be appended to the old
+   * one. The part key is chosen by that recorder; the offset is when it started on the session clock.
+   */
+  partKey: text("part_key"),
+  startOffsetMs: integer("start_offset_ms").notNull().default(0),
   createdAt: createdAt(),
-}, (t) => [index("media_user_idx").on(t.userId), index("media_session_idx").on(t.sessionId)]);
+}, (t) => [index("media_user_idx").on(t.userId), index("media_session_idx").on(t.sessionId), uniqueIndex("media_session_part_idx").on(t.sessionId, t.partKey)]);
 
 // ─── Practice ────────────────────────────────────────────────────────────────
 
@@ -522,7 +542,7 @@ export const costRecords = sqliteTable("cost_records", {
   unitName: text("unit_name").notNull(), // input_tokens | output_tokens | seconds | minutes | bytes
   usd: real("usd").notNull(),
   createdAt: createdAt(),
-}, (t) => [index("cost_session_idx").on(t.sessionId)]);
+}, (t) => [index("cost_session_idx").on(t.sessionId), index("cost_user_time_idx").on(t.userId, t.createdAt)]);
 
 /** Structured event log for the admin console: decisions, latency, errors, AI outputs. */
 export const providerEvents = sqliteTable("provider_events", {
@@ -544,9 +564,13 @@ export const processingJobs = sqliteTable("processing_jobs", {
   attempts: integer("attempts").notNull().default(0),
   error: text("error"),
   stepTimings: json<Record<string, number>>("step_timings"),
+  /** While running, the worker holding the job; a lease that passes means the worker died. */
+  leaseExpiresAt: integer("lease_expires_at", { mode: "timestamp_ms" }),
+  /** New input (a late transcript) arrived while running: run once more when this run ends. */
+  rerunRequested: integer("rerun_requested", { mode: "boolean" }).notNull().default(false),
   createdAt: createdAt(),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }),
-}, (t) => [index("jobs_status_idx").on(t.status)]);
+}, (t) => [index("jobs_status_idx").on(t.status), uniqueIndex("jobs_session_idx").on(t.sessionId)]);
 
 export const auditLogs = sqliteTable("audit_logs", {
   id: id(),
@@ -557,3 +581,28 @@ export const auditLogs = sqliteTable("audit_logs", {
   data: json<Record<string, unknown>>("data"),
   createdAt: createdAt(),
 }, (t) => [index("audit_user_idx").on(t.userId)]);
+
+export type CleanupCounts = { mediaDeleted: number; signalTimelinesDeleted: number; sessionsFinalized: number; accountsDeleted: number; analysisRestarted: number; analysisGaveUp: number };
+export type CleanupFailure = { task: string; target?: string; error: string };
+
+/**
+ * One row per run of the scheduled cleanup job, so we can see when it last succeeded and what it
+ * removed. At most one run holds the lease at a time (partial unique index on `running`).
+ */
+export const cleanupRuns = sqliteTable("cleanup_runs", {
+  id: id(),
+  trigger: text("trigger", { enum: ["cron", "timer", "manual"] }).notNull(),
+  status: text("status", { enum: ["running", "succeeded", "partial", "failed"] }).notNull().default("running"),
+  leaseExpiresAt: integer("lease_expires_at", { mode: "timestamp_ms" }).notNull(),
+  finishedAt: integer("finished_at", { mode: "timestamp_ms" }),
+  counts: json<CleanupCounts>("counts"),
+  failures: json<CleanupFailure[]>("failures"),
+  createdAt: createdAt(),
+}, (t) => [uniqueIndex("cleanup_runs_one_running_idx").on(t.status).where(sql`${t.status} = 'running'`), index("cleanup_runs_created_idx").on(t.createdAt)]);
+
+/** Fixed-window request counters shared by every server instance (expensive and sign-in routes). */
+export const rateLimits = sqliteTable("rate_limits", {
+  key: text("key").primaryKey(),
+  windowStart: integer("window_start").notNull(),
+  count: integer("count").notNull(),
+}, (t) => [index("rate_limits_window_idx").on(t.windowStart)]);

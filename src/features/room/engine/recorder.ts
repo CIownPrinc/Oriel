@@ -2,6 +2,10 @@
  * Session recording: MediaRecorder chunks are uploaded as they are produced, so a
  * crash or closed tab never loses what was already said. Uploads are sequential,
  * idempotent (by sequence number) and retried with backoff.
+ *
+ * Each recorder uploads its own part of the session recording, keyed by a random id and
+ * placed at `offsetMs` on the session clock. After a reload the Room starts a new recorder,
+ * so the new footage becomes a new part instead of colliding with the old sequence numbers.
  */
 export function pickMime(video: boolean): string {
   const opts = video
@@ -20,7 +24,16 @@ export class SessionRecorder {
   failures = 0;
   mime = "";
 
-  constructor(private sessionId: string, private stream: MediaStream, private video: boolean) {}
+  private readonly partKey = crypto.randomUUID();
+
+  constructor(
+    private sessionId: string,
+    private stream: MediaStream,
+    private video: boolean,
+    private offsetMs: number,
+    /** Called once if recording can't continue (turned off, deleted or rejected by the server). */
+    private onAbandoned: (status: number) => void = () => {},
+  ) {}
 
   start() {
     this.mime = pickMime(this.video);
@@ -44,7 +57,7 @@ export class SessionRecorder {
       const item = this.queue[0];
       let status = 0;
       try {
-        const res = await fetch(`/api/sessions/${this.sessionId}/media?seq=${item.seq}`, { method: "POST", headers: { "x-media-type": this.mime }, body: item.blob });
+        const res = await fetch(`/api/sessions/${this.sessionId}/media?part=${this.partKey}&offset=${Math.round(this.offsetMs)}&seq=${item.seq}`, { method: "POST", headers: { "x-media-type": this.mime }, body: item.blob });
         status = res.status;
       } catch { /* network: retry */ }
       if (status >= 200 && status < 300) {
@@ -56,6 +69,7 @@ export class SessionRecorder {
         // Recording disabled, deleted or rejected: stop uploading rather than loop.
         this.abandoned = true;
         this.queue = [];
+        this.onAbandoned(status);
         break;
       }
       // Transient (network, 5xx, 409, 429): never drop a chunk — a WebM without its

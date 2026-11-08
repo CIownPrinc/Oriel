@@ -44,7 +44,7 @@ export default async function Home() {
   // One suggestion, in order of what matters most: a review that's due, the next lesson, a drill.
   // Before the first interview there is nothing to suggest: the interview is the next step.
   const upNext = reviews.length
-    ? { title: `Review: ${reviews[0].label}`, why: "A new question, answered cold, to see whether what you practiced has held.", href: "/train", action: "Start the review" }
+    ? { title: `Review: ${reviews[0].label}`, why: "A question you haven't seen, with no hints, to check that what you practiced stuck.", href: "/train", action: "Start the review" }
     : lesson
       ? { title: LESSONS[lesson.lessonKey as LessonKey].title, why: LESSONS[lesson.lessonKey as LessonKey].promise, href: `/lessons/${lesson.lessonKey}`, action: "Open the lesson" }
       : firstRun ? null : { title: drill.title, why: rec.reason, href: `/drills/${drill.id}`, action: "Start the drill" };
@@ -54,7 +54,7 @@ export default async function Home() {
       {/* The promise of the page, and the interviewer it promises: standing on the page, not boxed. */}
       <section className="page-grid items-center gap-y-6 pb-group">
         <div className="col-span-4 sm:col-span-8 lg:col-span-6">
-          <h1 className="text-display-l text-fg">Ready for the room{profile?.name ? `, ${profile.name.split(" ")[0]}` : ""}?</h1>
+          <h1 className="text-display-l text-fg">Ready for your next interview{profile?.name ? `, ${profile.name.split(" ")[0]}` : ""}?</h1>
           <p className="mt-5 max-w-prose text-body-l text-fg-muted">
             {firstRun
               ? `${quick?.setup.targetMinutes ?? 15} minutes, ${TYPE_LABEL[quick?.setup.type ?? "behavioral"]?.toLowerCase() ?? "behavioral"} questions for ${quick?.setup.role ?? "your role"}. Your first session sets the baseline everything after is measured against.`
@@ -98,7 +98,7 @@ export default async function Home() {
                     <p className="truncate text-ui text-fg">{s.role} · {TYPE_LABEL[s.type] ?? s.type}{s.mode === "panel" ? " · panel" : ""}</p>
                     <p className="mt-0.5 text-meta text-fg-subtle">{relDate(s.createdAt)} · pressure {s.pressure} of 5</p>
                   </div>
-                  {s.status !== "ended" ? <Badge tone="warn">Unfinished</Badge> : s.analysisStatus === "complete" ? <Badge>Read ready</Badge> : s.analysisStatus === "failed" ? <Badge tone="bad">Needs retry</Badge> : <Badge>Analyzing</Badge>}
+                  {s.status !== "ended" ? <Badge tone="warn">Unfinished</Badge> : s.analysisStatus === "complete" ? <Badge>Feedback ready</Badge> : s.analysisStatus === "failed" ? <Badge tone="bad">Needs retry</Badge> : <Badge>Analyzing</Badge>}
                 </Link>
               </li>
             )) : null}

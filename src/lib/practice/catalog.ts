@@ -79,7 +79,7 @@ export const DRILLS: DrillDef[] = [
     instructions: "Put a small sticker by your camera. Answer while returning to the lens whenever you finish a thought. Looking away to think is fine; just come back.",
     prompt: "Tell me about a mistake you made that affected other people.",
     targetMetric: "camera_engagement", durationSec: 75, requiresCamera: true, direction: "higher",
-    passRule: "Estimated camera engagement at least 10 points above your baseline.",
+    passRule: "Estimated eye contact at least 10 points above your baseline.",
   },
   {
     id: "star_structure", title: "Land the result",

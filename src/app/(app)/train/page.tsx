@@ -35,7 +35,7 @@ export default async function TrainPage() {
   return (
     <div>
       <PracticeModes current="/train" />
-      <PageHeader title="Practice one skill until it holds." lead="Answer cold, get one note, try again. Later, a question you haven't seen checks that it stuck." />
+      <PageHeader title="Practice one skill until it sticks." lead="Answer with no hints, get one note, and try again. Later, a question you haven't seen checks that it stuck." />
 
       {(due.length > 0 || open.length > 0) && (
         <section aria-labelledby="due-title" className="mt-group">
@@ -45,7 +45,7 @@ export default async function TrainPage() {
               <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-line py-4">
                 <div>
                   <p className="text-body text-fg">Review: {r.label}</p>
-                  <p className="text-meta text-fg-subtle">Due {day(r.dueAt)} · a new question, answered cold</p>
+                  <p className="text-meta text-fg-subtle">Due {day(r.dueAt)} · a new question, no hints</p>
                 </div>
                 <StartReview id={r.id} label={r.label} />
               </li>
@@ -89,7 +89,7 @@ export default async function TrainPage() {
 
       <section aria-labelledby="history-title" className="mt-section">
         <h2 id="history-title" className="text-display-m text-fg">What you&apos;ve shown</h2>
-        <p className="mt-2 max-w-lead text-ui text-fg-muted">Improving on the same question, carrying it to a new one, and holding it later, judged only where there was enough to go on.</p>
+        <p className="mt-2 max-w-lead text-ui text-fg-muted">Whether you improved on the same question, did it again on a new one, and still did it days later. Only judged when your answer gave enough to go on.</p>
         {assessed.length ? (
           <div className="mt-6 overflow-x-auto" tabIndex={0} role="region" aria-label="What you've shown, by skill">
             <table className="w-full min-w-[40rem] text-left text-ui">

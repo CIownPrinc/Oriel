@@ -36,6 +36,48 @@
       "when": 1791691796203,
       "tag": "0004_training",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1794093489447,
+      "tag": "0005_cleanup_runs",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1794096238843,
+      "tag": "0006_drop_replaced_documents",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1794096445215,
+      "tag": "0007_recording_parts",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1794096931893,
+      "tag": "0008_durable_analysis",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1794097737383,
+      "tag": "0009_password_resets",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1794100016038,
+      "tag": "0010_shared_limits",
+      "breakpoints": true
     }
   ]
 }

@@ -18,12 +18,12 @@ export default async function LadderPage() {
     <div className="page-grid gap-y-12">
       <div className="col-span-4 sm:col-span-8 lg:sticky lg:top-24 lg:col-span-5 lg:self-start">
         <h1 className="text-display-l text-fg">From friendly recruiter to curveball panel<span className="text-accent">.</span></h1>
-        <p className="mt-5 text-body-l text-fg-muted">Each rung is a harder room. You unlock the next after two sessions above your own baseline, measured against you, never against anyone else.</p>
+        <p className="mt-5 text-body-l text-fg-muted">Each level is a harder interview. Beat your own baseline in two sessions to unlock the next one. You&apos;re only compared with yourself.</p>
         <div className="mt-10 rounded-panel bg-surface px-6 pb-6 pt-4 sm:px-8 sm:pb-8">
           <InterviewerStage personaIds={current.personaIds} styles={await savedStyles(user.id)} className="mx-auto h-[clamp(10rem,7rem+8vw,14rem)] w-full" />
           <p className="-mt-2 text-display-m text-fg">{current.name}</p>
-          <p className="mt-2 text-ui text-fg-muted"><span className="text-fg">You&apos;re on rung {current.level} of {steps.length}.</span> {current.description}</p>
-          {allowed.allowed ? <ButtonLink href={`/practice?ladder=${current.level}`} size="lg" className="mt-6">Practice this rung</ButtonLink> : (
+          <p className="mt-2 text-ui text-fg-muted"><span className="text-fg">You&apos;re on level {current.level} of {steps.length}.</span> {current.description}</p>
+          {allowed.allowed ? <ButtonLink href={`/practice?ladder=${current.level}`} size="lg" className="mt-6">Practice this level</ButtonLink> : (
             <><p className="mt-4 text-ui text-fg-muted">{allowed.reason}</p><ButtonLink href="/profile#plan" size="lg" className="mt-4">See plans that include it</ButtonLink></>
           )}
         </div>

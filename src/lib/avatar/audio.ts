@@ -3,6 +3,8 @@
  * exposes a smoothed level for lip-sync, and taps the output into the recording mix
  * so Playback contains both voices.
  */
+import { loadBrowserVoices, pickBrowserVoice } from "./browser-voice";
+
 export class InterviewerAudio {
   readonly ctx: AudioContext;
   readonly analyser: AnalyserNode;
@@ -164,14 +166,13 @@ export class InterviewerAudio {
  * or is not configured). Drives a synthetic mouth level from word boundaries.
  */
 export function speakWithBrowser(text: string, opts: { rateBias?: number; onStart?: () => void; audio?: InterviewerAudio | null }): Promise<void> {
-  return new Promise((resolve) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return resolve();
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return Promise.resolve();
+  return loadBrowserVoices().then((voices) => new Promise<void>((resolve) => {
     const u = new SpeechSynthesisUtterance(text);
     u.rate = 1.0 + (opts.rateBias ?? 0);
-    u.pitch = 0.95;
-    const voices = window.speechSynthesis.getVoices().filter((v) => v.lang.startsWith("en"));
-    const preferred = voices.find((v) => /natural|premium|enhanced|samantha|daniel|google uk english/i.test(v.name)) ?? voices[0];
-    if (preferred) u.voice = preferred;
+    // Pitch shifts make neural voices sound processed; leave them at their natural pitch.
+    const preferred = pickBrowserVoice(voices);
+    if (preferred) { u.voice = preferred; u.lang = preferred.lang; }
     let pulse = 0;
     let speaking = false;
     const t0 = performance.now();
@@ -186,5 +187,5 @@ export function speakWithBrowser(text: string, opts: { rateBias?: number; onStar
     setTimeout(done, 3000 + (text.split(/\s+/).length / 2.3) * 1000);
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
-  });
+  }));
 }

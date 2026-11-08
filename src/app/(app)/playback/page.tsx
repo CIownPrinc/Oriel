@@ -18,7 +18,7 @@ export default async function PlaybackIndex() {
   const ivs = await sessionInterviewers(sessions.map((s) => s.id));
   return (
     <div>
-      <PageHeader title="Every session, with evidence." lead="Your recording, the moments that mattered and what to change, for every interview you finish."
+      <PageHeader title="Your interviews" lead="Your recording, the key moments and what to change, for every interview you finish."
         action={sessions.length > 0 ? <ButtonLink href="/practice" variant="secondary" size="lg">New interview</ButtonLink> : undefined} />
       {sessions.length === 0 && <EmptyState className="mt-group" title="No sessions yet." body="Your first interview sets the baseline everything after is measured against." action={<StartInterview userId={user.id} />} />}
       <ul className={sessions.length ? "mt-group border-t border-line" : "hidden"}>
@@ -29,7 +29,7 @@ export default async function PlaybackIndex() {
                 <p className="font-display text-body-l text-fg">{s.summary?.headline ?? `${s.role} · ${TYPE_LABEL[s.type] ?? s.type}`}</p>
                 <p className="mt-1 text-ui text-fg-subtle">{relDate(s.createdAt)} · {s.role} · {TYPE_LABEL[s.type] ?? s.type} · with {(ivs.get(s.id) ?? []).map((i) => callName(i.name, i.style)).join(", ")} · pressure {s.pressure} of 5{s.ladderLevel ? ` · Ladder ${s.ladderLevel}` : ""}</p>
               </div>
-              <div>{s.status !== "ended" ? <Badge tone="warn">Unfinished: rejoin</Badge> : s.analysisStatus === "complete" ? <Badge>Read ready</Badge> : s.analysisStatus === "failed" ? <Badge tone="bad">Analysis failed: retry</Badge> : <Badge>Analyzing</Badge>}</div>
+              <div>{s.status !== "ended" ? <Badge tone="warn">Unfinished: rejoin</Badge> : s.analysisStatus === "complete" ? <Badge>Feedback ready</Badge> : s.analysisStatus === "failed" ? <Badge tone="bad">Analysis failed: retry</Badge> : <Badge>Analyzing</Badge>}</div>
             </Link>
           </li>
         ))}

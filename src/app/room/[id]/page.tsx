@@ -8,7 +8,7 @@ import { getSpeechToText } from "@/lib/ai/providers/registry";
 import { Room } from "@/features/room/Room";
 import { PALETTE } from "@/lib/palette";
 
-export const metadata = { title: "The Room" };
+export const metadata = { title: "Interview" };
 
 export default async function RoomPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
@@ -34,6 +34,7 @@ export default async function RoomPage({ params }: { params: Promise<{ id: strin
     <Room
       sessionId={id}
       resuming={ctx.session.status === "live"}
+      sessionElapsedMs={ctx.session.status === "live" && ctx.session.startedAt ? elapsedSince(ctx.session.startedAt) : null}
       seats={seats}
       pressure={pressure}
       stillness={pressurePolicy(pressure, lead).stillness}
@@ -43,4 +44,9 @@ export default async function RoomPage({ params }: { params: Promise<{ id: strin
       serverStt={!getSpeechToText().isMock}
     />
   );
+}
+
+/** Server time since the session started, so a rejoined Room continues the same clock. */
+function elapsedSince(startedAt: Date) {
+  return Math.max(0, Date.now() - startedAt.getTime());
 }

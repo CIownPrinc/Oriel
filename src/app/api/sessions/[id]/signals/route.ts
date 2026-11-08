@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { getDb, schema } from "@/db/client";
 import { newId } from "@/lib/id";
-import { authed, json, parseBody, type IdParams } from "@/lib/api/http";
+import { authed, HttpError, json, parseBody, type IdParams } from "@/lib/api/http";
 import { loadSession } from "@/server/interview/service";
+import { isPastRetention } from "@/server/privacy/retention";
 
 // Only derived numbers are accepted — the schema has no field that could carry an image or landmarks.
 const Audio = z.object({ t: z.number(), rms: z.number().min(0).max(1), voiced: z.boolean(), pitch: z.number().nullable() });
@@ -20,6 +21,7 @@ const Body = z.discriminatedUnion("kind", [
 export const POST = authed<IdParams>(async (req, { params, user }) => {
   const { id } = await params;
   const { session } = await loadSession(id, user.id);
+  if (isPastRetention(session)) throw new HttpError(410, "This session is past its retention period, so it no longer accepts new data", "retention_expired");
   const body = await parseBody(req, Body);
   if (body.kind !== "audio" && !session.cameraMetricsEnabled) return json({ ok: true, ignored: "camera metrics disabled" });
   await getDb().insert(schema.signalTimelines).values({ id: newId("sig"), sessionId: id, kind: body.kind, startMs: Math.round(body.startMs), samples: body.samples }).run();

@@ -85,7 +85,7 @@ export function SetupForm(p: Props) {
     <div className="page-grid gap-y-12">
       <div className="col-span-4 sm:col-span-8 lg:col-span-7">
         <header>
-          <h1 className="text-display-l text-fg"><Title>{p.firstRun ? "Your first interview." : "Set up the room."}</Title></h1>
+          <h1 className="text-display-l text-fg"><Title>{p.firstRun ? "Your first interview." : "Set up your interview."}</Title></h1>
           {p.firstRun && <p className="mt-5 max-w-prose text-body-l text-fg-muted">We&apos;ve started you at Realistic pressure. Speak naturally: the interviewer can hear pauses, follow-ups adapt to what you say, and nothing is scored until afterwards.</p>}
         </header>
 
@@ -102,7 +102,7 @@ export function SetupForm(p: Props) {
           </Group>
           {rung ? (
             <Group label="Interviewer">
-              <p className="max-w-prose text-ui text-fg-muted"><span className="text-fg">Rung {rung.level}, {rung.name}</span> sets who you face and the pressure. Turn the Ladder off under More options to choose yourself.</p>
+              <p className="max-w-prose text-ui text-fg-muted"><span className="text-fg">Level {rung.level}, {rung.name}</span> picks your interviewer and the pressure. To choose them yourself, turn the Ladder off under More options.</p>
             </Group>
           ) : mode === "single" ? (
             <Group label="Interviewer" hint="Choose one, then make it yours.">
@@ -135,7 +135,7 @@ export function SetupForm(p: Props) {
             className="flex min-h-12 w-full items-center justify-between gap-4 border-b border-line pb-3 text-left text-display-m text-fg">
             More options
             <span className="flex items-center gap-3 text-ui text-fg-muted">
-              <span className="hidden sm:inline">{STAGES.find((x) => x.value === level)?.label} · {rung ? `rung ${rung.level}` : PRESSURE_LABELS[pressure]}{mode === "panel" ? " · panel" : ""}</span>
+              <span className="hidden sm:inline">{STAGES.find((x) => x.value === level)?.label} · {rung ? `level ${rung.level}` : PRESSURE_LABELS[pressure]}{mode === "panel" ? " · panel" : ""}</span>
               <svg width="12" height="8" viewBox="0 0 12 8" aria-hidden className={cn("transition-transform duration-state", more && "rotate-180")}><path d="M1 1.5 6 6.5l5-5" stroke="currentColor" fill="none" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </span>
           </button>
@@ -144,12 +144,12 @@ export function SetupForm(p: Props) {
               <Segmented name="Interview stage" value={level} onChange={setLevel} options={STAGES} />
             </Group>
             {p.limits.ladder && (
-              <Group label="The Ladder" hint="A rung sets the interviewer and pressure for you.">
+              <Group label="The Ladder" hint="Each level picks the interviewer and pressure for you.">
                 {/* Rungs by number; the chosen rung is said in words beneath, so seven options take one line. */}
-                <Segmented name="Ladder rung" value={ladderLevel ? String(ladderLevel) : "custom"} onChange={(v) => setLadderLevel(v === "custom" ? null : Number(v))}
-                  options={[{ value: "custom", label: "Off" }, ...p.ladder.map((l) => ({ value: String(l.level), label: String(l.level), spoken: `Rung ${l.level}, ${l.name}${l.unlocked ? "" : ", locked"}`, disabled: !l.unlocked }))]} />
+                <Segmented name="Ladder level" value={ladderLevel ? String(ladderLevel) : "custom"} onChange={(v) => setLadderLevel(v === "custom" ? null : Number(v))}
+                  options={[{ value: "custom", label: "Off" }, ...p.ladder.map((l) => ({ value: String(l.level), label: String(l.level), spoken: `Level ${l.level}, ${l.name}${l.unlocked ? "" : ", locked"}`, disabled: !l.unlocked }))]} />
                 <p className="mt-3 max-w-prose text-ui text-fg-muted" aria-live="polite">
-                  {rung ? <><span className="text-fg">Rung {rung.level}, {rung.name}.</span> {rung.description}</> : "Off. You choose the interviewer and pressure."}
+                  {rung ? <><span className="text-fg">Level {rung.level}, {rung.name}.</span> {rung.description}</> : "Off. You choose the interviewer and pressure."}
                 </p>
               </Group>
             )}
@@ -174,7 +174,7 @@ export function SetupForm(p: Props) {
               </>
             )}
             <div className="border-t border-line">
-              <Toggle checked={cameraMetrics} onChange={setCameraMetrics} label="Camera-based signals" description="Estimate camera engagement and posture on your device. Off means no gaze or posture in your Read; you can still see yourself and record." />
+              <Toggle checked={cameraMetrics} onChange={setCameraMetrics} label="Camera-based signals" description="Estimate eye contact and posture on your device. If this is off, your feedback won't include them, but you can still see yourself and record." />
             </div>
           </div>
         </section>
@@ -188,7 +188,7 @@ export function SetupForm(p: Props) {
           <p className="mt-2 text-ui text-fg-muted">{role || "Your role"} · {TYPE_LABELS[type]} · {rung ? `pressure ${rung.pressure} of 5` : PRESSURE_LABELS[pressure]} · about {minutes} min</p>
           <dl className="mt-6 divide-y divide-line border-y border-line text-ui">
             <div className="flex items-center justify-between py-2.5"><dt className="text-fg-muted">Resume</dt><dd>{p.resume ? <span className="text-fg">{roles ? `${roles} role${roles === 1 ? "" : "s"}` : "Added"}</span> : <Link href="/profile#documents" className="-my-2 inline-flex min-h-11 items-center px-2 text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">Add</Link>}</dd></div>
-            <div className="flex items-center justify-between py-2.5"><dt className="text-fg-muted">Job description</dt><dd>{p.jd ? <span className="text-fg">{p.jd.competencies.length} competencies</span> : <Link href="/profile#documents" className="-my-2 inline-flex min-h-11 items-center px-2 text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">Add</Link>}</dd></div>
+            <div className="flex items-center justify-between py-2.5"><dt className="text-fg-muted">Job description</dt><dd>{p.jd ? <span className="text-fg">{p.jd.competencies.length} skills</span> : <Link href="/profile#documents" className="-my-2 inline-flex min-h-11 items-center px-2 text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">Add</Link>}</dd></div>
             <div className="flex items-center justify-between py-2.5"><dt className="text-fg-muted">Plan</dt><dd className="text-fg">{p.limits.plan}</dd></div>
           </dl>
           {error && (

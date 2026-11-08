@@ -99,11 +99,11 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
   const line = [
     `Hi, I’m ${first}. I’ll be your interviewer.`,
     greet ? `Nice to meet you, ${greet}.` : "First, what should I call you?",
-    "Where are you headed? I’ll ask what that field asks.",
+    "What role are you going for? I’ll ask the questions that field asks.",
     resume ? "Got it. I’ll only ask about what’s really there." : "I’ll ask about what you’ve actually done. Nothing invented.",
-    jd ? "Now I know what they’ll probe. So will I." : "Paste the job, and I’ll probe what they’ll probe.",
+    jd ? "Got it. I’ll ask about what this job needs." : "Paste the job description, and I’ll ask what they’re likely to ask.",
     INTERVIEWERS.find((x) => x.id === p.preferredPersona)!.line,
-    `See you in the room${greet ? `, ${greet}` : ""}.`,
+    `See you in the interview${greet ? `, ${greet}` : ""}.`,
   ][step];
 
   return (
@@ -124,9 +124,9 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
             <motion.div key={step} custom={dir} variants={slide} initial="enter" animate="center" exit="exit" transition={{ duration: 0.32, ease: EASE }}>
               <Leaving>
               {step === 0 && (
-                <StepShell title={<>Let’s get you ready <br className="hidden sm:block" />for the room.</>} lead="Five short steps, about two minutes, and your first interview is set. Your resume and the job description are optional, but they make the questions yours." autoFocus={false}>
+                <StepShell title={<>Let’s get you ready <br className="hidden sm:block" />for the interview.</>} lead="Five short steps, about two minutes, and your first interview is set. Your resume and the job description are optional, but they make the questions yours." autoFocus={false}>
                   <ol className="mt-9 border-t border-line">
-                    {[["About you", "Your name, the role you want"], ["Your field", "Sets what gets probed"], ["Your resume", "Optional"], ["The role", "Optional"], ["Your interviewer", "Who sits across from you"]].map(([t, d], i) => (
+                    {[["About you", "Your name, the role you want"], ["Your field", "Shapes the questions"], ["Your resume", "Optional"], ["The role", "Optional"], ["Your interviewer", "Who sits across from you"]].map(([t, d], i) => (
                       <li key={t} className="flex items-baseline gap-4 border-b border-line py-3">
                         <span className="w-5 shrink-0 font-display text-body-l leading-none text-accent">{i + 1}</span>
                         <span className="flex-1 text-ui font-medium text-fg">{t}</span>
@@ -144,7 +144,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
               {step === 1 && <StepYou p={p} set={set} onBack={() => go(0)} onNext={() => go(2)} />}
 
               {step === 2 && (
-                <StepShell title="Where are you headed?" lead="Your field sets what the interviewer probes. Your level sets how deep it goes.">
+                <StepShell title="Where are you headed?" lead="Your field sets what the interviewer asks about. Your level sets how deep it goes.">
                   <div className="mt-8">
                     <Label>Field</Label>
                     <Segmented name="Field" value={p.domain} onChange={(v) => set("domain", v)} className="grid-cols-2 [&>button]:py-3"
@@ -168,7 +168,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
                       <div className="my-5 flex items-center gap-4 text-meta text-fg-subtle"><span className="h-px flex-1 bg-line" />or paste it<span className="h-px flex-1 bg-line" /></div>
                       <Textarea aria-label="Resume text" value={resumeText} onChange={(e) => setResumeText(e.target.value)} rows={6} placeholder="Paste your resume text" />
                       <FieldError>{error}</FieldError>
-                      <Nav onBack={() => go(2)} onNext={() => uploadResume()} nextLabel="Read resume" nextDisabled={resumeText.trim().length < 40} busy={busy} onSkip={() => go(4)} />
+                      <Nav onBack={() => go(2)} onNext={() => uploadResume()} nextLabel="Use this resume" nextDisabled={resumeText.trim().length < 40} busy={busy} onSkip={() => go(4)} />
                     </>
                   ) : (
                     <>
@@ -180,17 +180,17 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
               )}
 
               {step === 4 && (
-                <StepShell title="The job you’re going for." lead="Paste the job description. We pull out the competencies the interviewer should probe.">
+                <StepShell title="The job you’re going for." lead="Paste the job description. We pull out the skills it asks for, and the interviewer asks about them.">
                   {!jd ? (
                     <>
                       <Textarea aria-label="Job description" className="mt-8" value={jdText} onChange={(e) => setJdText(e.target.value)} rows={10} placeholder="Paste the job description" />
                       <FieldError>{error}</FieldError>
-                      <Nav onBack={() => go(3)} onNext={submitJd} nextLabel="Read job description" nextDisabled={jdText.trim().length < 40} busy={busy} onSkip={() => go(5)} />
+                      <Nav onBack={() => go(3)} onNext={submitJd} nextLabel="Use this job description" nextDisabled={jdText.trim().length < 40} busy={busy} onSkip={() => go(5)} />
                     </>
                   ) : (
                     <>
                       <Parsed title={jd.title ?? "Job description"} ai={jd.source === "llm"}>
-                        <p className="text-ui font-medium text-fg">What they&apos;ll probe</p>
+                        <p className="text-ui font-medium text-fg">What they&apos;ll ask about</p>
                         <ul className="mt-3 space-y-2.5">
                           {jd.competencies.map((c, i) => (
                             <motion.li key={c.key} className="text-ui" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.07, duration: 0.5, ease: EASE }}>
@@ -198,7 +198,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
                             </motion.li>
                           ))}
                         </ul>
-                        {!jd.competencies.length && <p className="mt-2 text-ui text-fg-subtle">No clear competencies found. The interviewer will use the standard set for your field.</p>}
+                        {!jd.competencies.length && <p className="mt-2 text-ui text-fg-subtle">No clear skills found. The interviewer will use the usual ones for your field.</p>}
                       </Parsed>
                       <Nav onBack={() => setJd(null)} backLabel="Replace" onNext={() => go(5)} />
                     </>
@@ -345,7 +345,7 @@ function StepYou({ p, set, onBack, onNext }: { p: Profile; set: <K extends keyof
   const nameRef = useRef<HTMLInputElement>(null);
   const roleRef = useRef<HTMLInputElement>(null);
   return (
-    <StepShell title="Who’s walking into the room?" lead="Only what the first interview needs. You can change all of it later.">
+    <StepShell title="First, a little about you." lead="Only what the first interview needs. You can change all of it later.">
       <form noValidate className="mt-8 space-y-5" onSubmit={(e) => {
         e.preventDefault();
         if (nameErr || roleErr) { setTried(true); (nameErr ? nameRef : roleRef).current?.focus(); return; }
@@ -402,7 +402,7 @@ function Parsed({ title, ai, children }: { title: string; ai: boolean; children:
     <motion.div className="mt-8 border-t border-line pt-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, ease: EASE }}>
       <div className="mb-5 flex items-baseline justify-between gap-3">
         <p className="text-display-m text-fg">{title}</p>
-        <p className="text-meta text-fg-subtle">{ai ? "Read by the AI" : "Read by pattern matching"}</p>
+        <p className="text-meta text-fg-subtle">{ai ? "Pulled out by AI" : "Pulled out without AI (pattern matching)"}</p>
       </div>
       {children}
     </motion.div>

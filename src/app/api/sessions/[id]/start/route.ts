@@ -10,4 +10,4 @@ export const POST = authed<IdParams>(async (_req, { params, user }) => {
   return ndjson<RoomEvent>(runOpening(id, user.id), (err) => ({
     type: "error", message: err instanceof HttpError ? err.message : "The interviewer couldn't start", recoverable: !(err instanceof HttpError && err.status === 404),
   }));
-}, { limit: 20, name: "session-start" });
+}, { limit: 20, name: "session-start", shared: true });

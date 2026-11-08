@@ -4,6 +4,7 @@ import { InterviewerStage } from "@/components/avatar/InterviewerStage";
 import { cn } from "@/components/ui/cn";
 import { PLANS, type PlanId } from "@/lib/billing/plans";
 import { PERSONAS, type PersonaId } from "@/lib/interview/personas";
+import { contactEmail, paymentsLive } from "@/lib/site";
 
 /*
  * The landing page after the hero: one idea per section, each said in a headline and shown once,
@@ -76,10 +77,10 @@ export function Feedback() {
   return (
     <section id="read" aria-labelledby="read-title" className="mt-section bg-surface py-section">
       <div className="frame">
-        <Statement id="read-title" title="Evidence, not adjectives." sub="After every interview: the moments that mattered, and one change for each." />
+        <Statement id="read-title" title="Feedback you can check." sub="After every interview, see the key moments in your own words, with one change for each." />
 
         <figure className={gap}>
-          <figcaption className="sr-only">A sample Read</figcaption>
+          <figcaption className="sr-only">Sample feedback</figcaption>
           <div className="page-grid gap-y-10">
             <blockquote className="col-span-4 sm:col-span-8 lg:col-span-7">
               <p className="hang-sans text-body-l leading-relaxed text-fg-muted">
@@ -89,7 +90,7 @@ export function Feedback() {
                 <mark className={markCls}>I think in the end we kept parts of both</mark>
                 <sup className={`${noteNo} ml-0.5`}>2</sup>.”
               </p>
-              <p className="mt-4 text-meta text-fg-subtle">From a sample Read</p>
+              <p className="mt-4 text-meta text-fg-subtle">From sample feedback</p>
             </blockquote>
             <ol className="col-span-4 space-y-6 sm:col-span-8 lg:col-span-4 lg:col-start-9">
               <li className="grid grid-cols-[1.25rem_minmax(0,1fr)] items-baseline">
@@ -117,7 +118,7 @@ export function Feedback() {
 
         <p className="mt-10 text-ui text-fg-subtle">
           Never measured: appearance, age, race, emotion or accent.{" "}
-          <Link href="/trust" className={`${linkCls} whitespace-nowrap`}>How accurate is the Read</Link>
+          <Link href="/trust" className={`${linkCls} whitespace-nowrap`}>How accurate is the feedback?</Link>
         </p>
       </div>
     </section>
@@ -164,7 +165,7 @@ export function Privacy() {
   return (
     <section id="privacy" aria-labelledby="privacy-title" className="pt-section">
       <div className="frame">
-        <Statement id="privacy-title" title="Private by default. Practice only." />
+        <Statement id="privacy-title" title="Private by default." />
         <ul className={cn(gap, "grid gap-x-6 gap-y-4 border-t border-line pt-8 sm:grid-cols-2 lg:grid-cols-4")}>
           {PRIVACY.map((t) => <li key={t} className="text-body-l text-fg">{t}</li>)}
         </ul>
@@ -181,10 +182,13 @@ const TIERS: PlanId[] = ["free", "sprint", "pro", "executive"];
 const CADENCE: Partial<Record<PlanId, string>> = { sprint: "once, for 14 days", pro: "a month", executive: "add-on" };
 
 export function Pricing({ cta }: { cta: string }) {
+  const contact = contactEmail();
+  const beta = !paymentsLive();
   return (
     <section id="pricing" aria-labelledby="pricing-title" className="pt-section">
       <div className="frame">
-        <Statement id="pricing-title" title={<>Pay for the interview you have coming&nbsp;up.</>} />
+        <Statement id="pricing-title" title={<>Pay for the interview you have coming&nbsp;up.</>}
+          sub={beta ? "Oriel is in beta. Payments aren't live yet, so every feature below is free for now." : undefined} />
         <ul className={cn(gap, "grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4")}>
           {TIERS.map((id) => {
             const p = PLANS[id];
@@ -200,14 +204,16 @@ export function Pricing({ cta }: { cta: string }) {
                 <ul className="mt-6 flex-1 space-y-2 text-ui text-fg-muted">
                   {p.features.slice(0, 3).map((f) => <li key={f}>{f}</li>)}
                 </ul>
-                <ButtonLink href={id === "executive" ? "mailto:hello@oriel.example" : cta} variant={featured ? "primary" : "secondary"} className="mt-8 self-start">
-                  {id === "free" ? "Start free" : id === "executive" ? "Talk to us" : `Choose ${p.name}`}
-                </ButtonLink>
+                {id === "executive" && !contact ? null : (
+                  <ButtonLink href={id === "executive" ? `mailto:${contact}?subject=Executive` : cta} variant={featured ? "primary" : "secondary"} className="mt-8 self-start">
+                    {id === "free" ? "Start free" : id === "executive" ? "Talk to us" : beta ? `Try ${p.name} free` : `Choose ${p.name}`}
+                  </ButtonLink>
+                )}
               </li>
             );
           })}
         </ul>
-        <p className="mt-12 text-ui text-fg-subtle">Career centers: <a href="mailto:hello@oriel.example?subject=Campus" className={linkCls}>ask about campus seats</a>.</p>
+        {contact && <p className="mt-12 text-ui text-fg-subtle">Career centers: <a href={`mailto:${contact}?subject=Campus`} className={linkCls}>ask about campus seats</a>.</p>}
       </div>
     </section>
   );

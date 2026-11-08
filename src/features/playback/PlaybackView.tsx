@@ -13,6 +13,7 @@ import { mmss } from "@/lib/format";
 import { LessonCard, type LessonSummary } from "@/components/app/lessons";
 import { POSTURE_LABEL, type PostureKind } from "@/lib/analysis/posture";
 import type { Confidence } from "@/db/schema";
+import { partAt } from "@/lib/playback/parts";
 
 export interface PlaybackData {
   sessionId: string;
@@ -24,7 +25,8 @@ export interface PlaybackData {
   focus: string[];
   rewrite: { question: string; original: string; rewritten: string; note: string } | null;
   comparison: { question: string; first: string; latest: string; firstDate: string } | null;
-  media: { url: string; mimeType: string; expiresAt: string | null } | null;
+  /** The recording, in parts on the session clock (a new part starts each time the Room was rejoined). */
+  media: { parts: { url: string; mimeType: string; startMs: number }[]; expiresAt: string | null } | null;
   mediaDeleted: boolean;
   durationMs: number;
   clips: { id: string; startMs: number; endMs: number; title: string; observed: string; suggestion: string; confidence: Confidence; questionText: string; transcript: string; signal: string }[];
@@ -56,14 +58,29 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [mediaError, setMediaError] = useState(false);
+  const parts = useMemo(() => d.media?.parts ?? [], [d.media]);
+  const [partIndex, setPartIndex] = useState(0);
+  const part = parts[partIndex] ?? null;
+  // A seek into another part waits for that part's metadata before setting the position.
+  const pendingSeek = useRef<{ ms: number; play: boolean } | null>(null);
+
+  const placeInPart = useCallback((v: HTMLVideoElement, startMs: number, ms: number, play: boolean) => {
+    v.currentTime = Math.max(0, (ms - startMs) / 1000);
+    if (play) void v.play().catch(() => {});
+  }, []);
 
   const seek = useCallback((ms: number, play = true) => {
     const v = video.current;
-    if (!v) return;
-    v.currentTime = Math.max(0, ms / 1000);
-    if (play) void v.play().catch(() => {});
+    if (!v || !parts.length) return;
+    const target = partAt(parts, ms);
     v.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, []);
+    if (target !== partIndex) {
+      pendingSeek.current = { ms, play };
+      setPartIndex(target);
+      return;
+    }
+    placeInPart(v, parts[target].startMs, ms, play);
+  }, [parts, partIndex, placeInPart]);
 
   useEffect(() => {
     const v = video.current;
@@ -76,7 +93,18 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
   // MediaRecorder WebM files have no duration header; fall back to the session length.
   const onMeta = () => {
     const v = video.current;
-    if (v && Number.isFinite(v.duration) && v.duration > 0) setDuration(v.duration);
+    if (!v || !part) return;
+    if (parts.length === 1 && Number.isFinite(v.duration) && v.duration > 0) setDuration(v.duration);
+    const pending = pendingSeek.current;
+    pendingSeek.current = null;
+    if (pending) placeInPart(v, part.startMs, pending.ms, pending.play);
+  };
+
+  // When one part ends, carry on with the next, as one continuous recording.
+  const onEnded = () => {
+    if (partIndex >= parts.length - 1) return;
+    pendingSeek.current = { ms: parts[partIndex + 1].startMs, play: true };
+    setPartIndex(partIndex + 1);
   };
 
   const metrics = useMemo(() => [...d.metrics].sort((a, b) => METRIC_ORDER.indexOf(a.key) - METRIC_ORDER.indexOf(b.key)), [d.metrics]);
@@ -96,7 +124,7 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
     <article>
       {/* The assessment as the title; the session it describes as its byline. */}
       <header className="pb-group">
-        <h1 className="max-w-[28ch] text-display-l text-fg">{d.headline ?? "Now you know what happened."}</h1>
+        <h1 className="max-w-[28ch] text-display-l text-fg">{d.headline ?? "Your feedback"}</h1>
         <p className="mt-5 max-w-column text-ui text-fg-muted">{d.subtitle}</p>
         {d.summarySource === "heuristic" && <p className="mt-2 text-meta text-fg-subtle">Coaching generated from measurements (no language model configured).</p>}
       </header>
@@ -151,20 +179,21 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
       {/* The recording, and the moments in it worth watching. */}
       <section className="pt-20">
         <div className="mb-6 flex items-baseline justify-between gap-4">
-          <h2 className="text-display-m text-fg">The moments that mattered</h2>
+          <h2 className="text-display-m text-fg">Key moments</h2>
           {d.playbackLevel === "basic" && <Badge>Basic Playback</Badge>}
         </div>
         <div className="page-grid gap-y-8">
           <div className="col-span-4 sm:col-span-8 lg:col-span-7">
-            {d.media && !mediaError ? (
+            {part && !mediaError ? (
               <div className="relative overflow-hidden rounded-panel bg-surface">
-                <video ref={video} src={d.media.url} controls playsInline preload="metadata" onLoadedMetadata={onMeta} onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)} onError={() => setMediaError(true)}
-                  className={cn("aspect-video w-full bg-page", d.media.mimeType.startsWith("audio") && "h-24 aspect-auto")} />
+                <video ref={video} src={part.url} controls playsInline preload="metadata" onLoadedMetadata={onMeta} onEnded={onEnded}
+                  onTimeUpdate={(e) => setTime(part.startMs / 1000 + e.currentTarget.currentTime)} onError={() => setMediaError(true)}
+                  className={cn("aspect-video w-full bg-page", part.mimeType.startsWith("audio") && "h-24 aspect-auto")} />
               </div>
             ) : (
               <p className="border-t border-line pt-4 text-ui text-fg-muted">
                 <span className="text-fg">{d.mediaDeleted ? "The recording was deleted." : mediaError ? "The recording couldn't be loaded." : "No recording for this session."}</span>{" "}
-                {d.mediaDeleted ? "Raw video is removed after your retention period; your transcript and Read remain." : "The timeline still shows when each question and moment came; your transcript and Read are below."}
+                {d.mediaDeleted ? "Raw video is removed after your retention period; your transcript and feedback remain." : "The timeline still shows when each question and moment came; your transcript and feedback are below."}
               </p>
             )}
             {/* Timeline: questions, moments and posture shifts on the session clock. */}
@@ -226,7 +255,7 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
         ))}
         {d.competencies.length > 0 && (
           <div className="mt-10">
-            <h3 className="text-ui font-medium text-fg">By competency</h3>
+            <h3 className="text-ui font-medium text-fg">By skill</h3>
             <ul className="mt-2 border-t border-line">
               {d.competencies.map((c) => (
                 <li key={c.key} className="grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)_5rem] items-center gap-4 border-b border-line py-3">
@@ -256,7 +285,7 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
           {d.comparison && (
             <div className={cn(d.rewrite && "mt-16")}>
               <h2 className="text-display-m text-fg">First session vs. now</h2>
-              <p className="mt-3 text-ui text-fg-muted">A {d.comparison.question.toLowerCase().startsWith("tell") ? "similar question" : "question in the same competency"}, {d.comparison.firstDate} vs. today.</p>
+              <p className="mt-3 text-ui text-fg-muted">A {d.comparison.question.toLowerCase().startsWith("tell") ? "similar question" : "question on the same skill"}, {d.comparison.firstDate} vs. today.</p>
               <div className="page-grid mt-6 gap-y-6">
                 <figure className="col-span-4 border-t border-line pt-4 sm:col-span-8 lg:col-span-6"><figcaption className="text-meta font-medium text-fg-subtle">Then</figcaption><blockquote className="mt-2 text-body-l text-fg-muted">{d.comparison.first}</blockquote></figure>
                 <figure className="col-span-4 border-t border-fg-subtle pt-4 sm:col-span-8 lg:col-span-6"><figcaption className="text-meta font-medium text-fg">Now</figcaption><blockquote className="mt-2 text-body-l text-fg">{d.comparison.latest}</blockquote></figure>
@@ -282,7 +311,7 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
       </section>
 
       <footer className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-8 text-meta text-fg-muted">
-        <p>{d.media?.expiresAt ? `Raw video is deleted automatically on ${new Date(d.media.expiresAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}.` : "Transcript and Read are kept until you delete them."}</p>
+        <p>{d.media?.expiresAt ? `Raw video is deleted automatically on ${new Date(d.media.expiresAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}.` : "Transcript and feedback are kept until you delete them."}</p>
         <div className="flex items-center gap-6">
           <Link href="/playback" className="hover:text-fg">All sessions</Link>
           <Button variant="danger" size="sm" onClick={() => setConfirmDelete(true)}>Delete this session</Button>
@@ -291,7 +320,7 @@ export function PlaybackView({ d }: { d: PlaybackData }) {
       <Modal open={confirmDelete} onClose={() => setConfirmDelete(false)} title="Delete session">
         <div className="p-8">
           <h2 className="text-display-m text-fg">Delete this session?</h2>
-          <p className="mt-3 text-ui text-fg-muted">The recording, transcript, Read and Playback are permanently removed. This can&apos;t be undone.</p>
+          <p className="mt-3 text-ui text-fg-muted">The recording, transcript and feedback are permanently removed. This can&apos;t be undone.</p>
           <div className="mt-7 flex justify-end gap-2"><Button variant="ghost" onClick={() => setConfirmDelete(false)}>Cancel</Button><Button variant="danger" loading={deleting} onClick={del}>Delete permanently</Button></div>
         </div>
       </Modal>

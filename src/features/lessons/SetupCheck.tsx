@@ -95,7 +95,7 @@ export function SetupCheck({ passes, needed, inPlan }: { passes: number; needed:
       )}
       {stage === "passed" && <Button variant="secondary" size="sm" className="mt-3" onClick={start}>Check again</Button>}
       <FieldError>{error}</FieldError>
-      <p className="mt-3 text-meta text-fg-subtle">Sound is checked in the Room&apos;s setup screen before each interview.</p>
+      <p className="mt-3 text-meta text-fg-subtle">Your sound is checked on the setup screen before each interview.</p>
     </div>
   );
 }

@@ -51,7 +51,7 @@ export default async function PlaybackPage({ params, searchParams }: { params: P
     focus: summary?.focus ?? [],
     rewrite: summary?.rewrittenAnswer && rewriteQ ? { question: rewriteQ.text, original: summary.rewrittenAnswer.original, rewritten: summary.rewrittenAnswer.rewritten, note: summary.rewrittenAnswer.note } : null,
     comparison: primary && first && firstIsEarlier ? { question: primary.q!.text, first: first.answer, latest: primary.a.text, firstDate: longDate(first.createdAt) } : null,
-    media: d.media ? { url: d.media.url, mimeType: d.media.mimeType, expiresAt: d.media.expiresAt?.toISOString() ?? null } : null,
+    media: d.media ? { parts: d.media.parts.map(({ url, mimeType, startMs }) => ({ url, mimeType, startMs })), expiresAt: d.media.expiresAt?.toISOString() ?? null } : null,
     mediaDeleted: d.mediaDeleted,
     durationMs: d.session.startedAt && d.session.endedAt ? d.session.endedAt.getTime() - d.session.startedAt.getTime() : Math.max(0, ...d.segments.map((s) => s.endMs)),
     clips: d.clips.map((c) => ({ id: c.id, startMs: c.startMs, endMs: c.endMs, title: c.title, observed: c.observed, suggestion: c.suggestion, confidence: c.confidence, questionText: c.questionText, transcript: c.transcript, signal: c.signal })),

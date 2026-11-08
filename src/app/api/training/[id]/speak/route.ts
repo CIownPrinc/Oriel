@@ -13,4 +13,4 @@ export const POST = authed<IdParams>(async (_req, { params, user }) => {
   const text = await currentQuestion(user.id, id);
   const voice = voiceFor("hiring_manager", (await savedStyles(user.id)).hiring_manager);
   return ndjson<RoomEvent>(speak(null, user.id, text, voice, 2));
-}, { limit: 30, name: "training-speak" });
+}, { limit: 30, name: "training-speak", shared: true });

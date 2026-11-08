@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import Link from "next/link";
 
-export const metadata = { title: "How accurate is the Read?" };
+export const metadata = { title: "How accurate is the feedback?" };
 
 type SpeechRow = { accentLabel: string; script: string; truth: Record<string, number>; measured: Record<string, number | string | null>; error: Record<string, number | null> };
 type CameraRow = { file: string; skinTone: string; eyewear: string; headCovering: string; lighting: string; ageBand: string; gaze: string; faceDetected: boolean; engagement: number | null; classifiedAs: string };
@@ -33,7 +33,7 @@ export default function TrustPage() {
   const portraits = [...new Set(p.map((r) => r.file))];
   return (
     <main id="content" tabIndex={-1} className="frame pb-section pt-[calc(var(--header-h)+var(--spacing-hero))] focus:outline-none">
-      <h1 className="text-display-l text-fg">How accurate is the Read?</h1>
+      <h1 className="text-display-l text-fg">How accurate is the feedback?</h1>
       <p className="mt-6 max-w-2xl text-body-l text-fg-muted">We test every measurement against known ground truth and across accents, skin tones, eyewear, head coverings and lighting, and publish the results, including what failed and what we changed. These are early, synthetic tests; testing with real people is still owed and will be published here.</p>
 
       <section className="mt-20">
@@ -60,7 +60,7 @@ export default function TrustPage() {
             <ul className="mt-4 list-disc space-y-1.5 pl-5 text-ui text-fg-muted">
               <li><span className="text-fg">Pace</span> read ~20% slow in the first run (speaking time was estimated as voiced time × 1.25). It is now the answer span minus pauses of 0.7 s or more.</li>
               <li><span className="text-fg">Pauses</span> were measured ~170 ms short because of the voice detector&apos;s on/off delay; the measurement now corrects for it.</li>
-              <li><span className="text-fg">Fillers</span>: for Indian, Spanish- and Mandarin-accented speech, transcription dropped short &ldquo;uh&rdquo;/&ldquo;um&rdquo; sounds (4 of 6 found). The Read now presents filler counts as a minimum, and progress compares you only with yourself, so a consistent undercount does not distort improvement. An acoustic filler detector is next.</li>
+              <li><span className="text-fg">Fillers</span>: for Indian, Spanish- and Mandarin-accented speech, transcription dropped short &ldquo;uh&rdquo;/&ldquo;um&rdquo; sounds (4 of 6 found). Feedback now shows filler counts as a minimum, and progress compares you only with yourself, so a consistent undercount does not distort improvement. An acoustic filler detector is next.</li>
               <li>Pitch is no longer computed on the quiet frames at the end of speech.</li>
             </ul>
           </>
@@ -69,7 +69,7 @@ export default function TrustPage() {
 
       <section className="mt-20">
         <h2 className="text-display-m text-fg">Camera signals</h2>
-        <p className="mt-2 max-w-column text-ui text-fg-muted">{c.length} synthetic webcam portraits, labelled &ldquo;looking at the lens&rdquo; or &ldquo;looking away&rdquo;, run through the Room&apos;s on-device face tracker without calibration. {camera ? `Run ${camera.generatedAt.slice(0, 10)}.` : "Not run yet."}</p>
+        <p className="mt-2 max-w-column text-ui text-fg-muted">{c.length} synthetic webcam portraits, labelled &ldquo;looking at the lens&rdquo; or &ldquo;looking away&rdquo;, run through the interview&apos;s on-device face tracker without calibration. {camera ? `Run ${camera.generatedAt.slice(0, 10)}.` : "Not run yet."}</p>
         {c.length > 0 && (
           <>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -114,7 +114,7 @@ export default function TrustPage() {
           <li>One or two images per condition: enough to catch gross failures, not to certify fairness.</li>
           <li>Still owed: validation against human-coded recordings of real sessions, and testing with real people across skin tones, lighting, glasses, head coverings, accents and disabilities.</li>
         </ul>
-        <p className="mt-6">Full reports: <code>docs/validation/speech-report.md</code> and <code>docs/validation/camera-report.md</code> in the source. See also the <Link href="/privacy" className="underline underline-offset-2">privacy &amp; biometric policy</Link>.</p>
+        <p className="mt-6">Full reports: <Link href="/trust/reports/speech" className="underline underline-offset-2">speech measurements</Link> and <Link href="/trust/reports/camera" className="underline underline-offset-2">camera signals</Link>. See also the <Link href="/privacy" className="underline underline-offset-2">privacy &amp; biometric policy</Link>.</p>
       </section>
     </main>
   );

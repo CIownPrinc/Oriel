@@ -208,7 +208,7 @@ export function assess(input: PlannerInput): Assessment[] {
       key: "eye_contact", metricKey: "camera_engagement", value: v, need: v < 55 ? (55 - v) / 55 : 0,
       evidence: {
         value: v, unit: "%", display: `${v}% at the lens (estimated)`, target: "55% or more", confidence: eyes.confidence,
-        facts: [`estimated camera engagement ${v}% while you spoke`],
+        facts: [`estimated eye contact ${v}% while you spoke`],
         quotes: lowest ? [quoteOf(sessionId, lowest, sentences(lowest.answer.text).slice(0, 1).join(" "), `about ${Math.round(lowest.engagement! * 100)}% at the lens during this answer`)] : [],
       },
       focus: null,

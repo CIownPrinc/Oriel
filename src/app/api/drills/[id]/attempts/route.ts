@@ -66,4 +66,4 @@ export const POST = authed<IdParams>(async (req, { params, user }) => {
   await db.insert(schema.usageRecords).values({ id: newId("use"), userId: user.id, kind: "drills", quantity: 1 }).run();
   const lesson = recordLessonPractice(user.id, id, m.passed);
   return json({ attemptId, measurement: m, baseline, feedback: fb.data, source: fb.source, lesson });
-}, { limit: 20, name: "drill-attempt" });
+}, { limit: 20, name: "drill-attempt", shared: true });

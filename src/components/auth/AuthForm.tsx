@@ -52,7 +52,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         <FieldError id="email-error">{emailError}</FieldError>
       </div>
       <div>
-        <Label htmlFor="password" hint={mode === "signup" ? "8 or more characters" : undefined}>Password</Label>
+        {mode === "signup" ? <Label htmlFor="password" hint="8 or more characters">Password</Label> : (
+          <div className="flex items-baseline justify-between gap-4">
+            <Label htmlFor="password">Password</Label>
+            <Link href="/forgot-password" className="text-meta text-fg-muted underline decoration-1 underline-offset-text hover:text-fg">Forgot password?</Link>
+          </div>
+        )}
         <div className="relative">
           <Input id="password" type={show ? "text" : "password"} autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => setTouched((t) => ({ ...t, password: true }))}
             aria-invalid={passwordError ? true : undefined} aria-describedby={passwordError ? "password-error" : undefined} className="pr-20" />
@@ -68,7 +73,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
               className="peer size-[18px] cursor-pointer appearance-none rounded-sm border border-control bg-surface transition-colors checked:border-accent checked:bg-accent" />
             <svg viewBox="0 0 12 12" className="pointer-events-none absolute size-3 text-on-accent opacity-0 transition-opacity peer-checked:opacity-100" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m2.5 6.2 2.3 2.3 4.7-5" /></svg>
           </span>
-          <span>I understand Oriel is a practice tool with an AI interviewer, and I agree to the terms and the <a href="/privacy" target="_blank" className="text-fg underline decoration-1 underline-offset-text">privacy and biometric policy</a>. Camera and microphone are only used after I consent in the Room.</span>
+          <span>I understand Oriel is a practice tool with an AI interviewer, and I agree to the <a href="/terms" target="_blank" className="text-fg underline decoration-1 underline-offset-text">terms</a> and the <a href="/privacy" target="_blank" className="text-fg underline decoration-1 underline-offset-text">privacy and biometric policy</a>. Camera and microphone are only used after I agree at the start of an interview.</span>
         </label>
       )}
       {mode === "signup" && <FieldError id="accept-error">{acceptError}</FieldError>}

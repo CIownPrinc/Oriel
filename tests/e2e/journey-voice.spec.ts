@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { onboard, signUp } from "./helpers";
 
 /**
@@ -14,7 +14,7 @@ test("voice interview with recording and audio-derived Read", async ({ page }) =
   await consent.getByLabel("Type your full name to sign").fill("Jamie Park");
   await consent.getByRole("button", { name: "Agree and continue" }).click();
   await expect(page.getByText("Microphone", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Enter the Room" }).click();
+  await page.getByRole("button", { name: "Start the interview" }).click();
 
   // Wait for at least two full answer cycles (question → listen → endpoint → next question).
   const whisper = page.locator("p[aria-live=polite]");
@@ -30,7 +30,7 @@ test("voice interview with recording and audio-derived Read", async ({ page }) =
   }
   expect(cycles).toBeGreaterThanOrEqual(2);
   await page.getByRole("button", { name: "End", exact: true }).click();
-  await page.getByRole("button", { name: "End and see my Read" }).click();
+  await page.getByRole("button", { name: "End and see my feedback" }).click();
   await expect(page).toHaveURL(/playback\//, { timeout: 60_000 });
   await expect(page.getByText("What we measured")).toBeVisible({ timeout: 120_000 });
 

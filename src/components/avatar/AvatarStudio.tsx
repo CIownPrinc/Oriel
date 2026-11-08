@@ -179,7 +179,7 @@ function Studio({ personaId, saved, onClose, onSaved }: { personaId: PersonaId; 
               );
             })}
           </div>
-          <p className="mt-2 text-meta text-fg-subtle" aria-live="polite">{voiceNote ?? "Press play to hear a voice. The interviewer speaks with it in the Room and in drills."}</p>
+          <p className="mt-2 text-meta text-fg-subtle" aria-live="polite">{voiceNote ?? "Press play to hear a voice. The interviewer uses it in interviews and drills."}</p>
         </fieldset>
 
         <fieldset>

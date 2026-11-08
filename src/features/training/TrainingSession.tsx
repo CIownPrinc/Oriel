@@ -26,8 +26,8 @@ import { CATEGORIES } from "@/lib/training/competencies";
 const LEVEL_WORD = (l: CriterionLevel) => (l === 2 ? "clearly shown" : l === 1 ? "partly shown" : l === 0 ? "not shown" : "couldn't tell");
 const OUTCOME_WORD: Record<"same" | "new" | "later", Record<Outcome, string>> = {
   same: { yes: "Improved when you tried again", no: "Didn't improve on the retry", not_assessed: "Not assessed" },
-  new: { yes: "Carried over to a question you hadn't seen", no: "Didn't carry over yet", not_assessed: "Not assessed" },
-  later: { yes: "Held after the delay", no: "Didn't hold after the delay", not_assessed: "Not assessed" },
+  new: { yes: "Did it on a question you hadn't seen", no: "Not yet on a new question", not_assessed: "Not assessed" },
+  later: { yes: "Still there days later", no: "Faded by the later review", not_assessed: "Not assessed" },
 };
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 const key = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -194,7 +194,7 @@ export function TrainingSession({ initial }: { initial: LoopView }) {
               onChange={(e) => { started.current ??= performance.now(); setAnswer(e.target.value); }}
               onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void submit(); } }}
               readOnly={recording !== "off"}
-              placeholder={recording === "on" ? "Listening… your words appear here." : "Answer out loud, or type, as you would in the room."}
+              placeholder={recording === "on" ? "Listening… your words appear here." : "Answer out loud, or type, as you would in a real interview."}
               className="min-h-44 w-full resize-y rounded-control border border-control bg-surface px-4 py-3.5 text-body leading-relaxed text-fg placeholder:text-fg-subtle transition-colors duration-press hover:border-fg-subtle disabled:opacity-60" />
             <div className="mt-3 flex flex-wrap items-center gap-3">
               {canRecord && (
@@ -235,7 +235,7 @@ export function TrainingSession({ initial }: { initial: LoopView }) {
 const STAGE_WORD = { initial: "First answer", retry: "Retry", transfer: "New question", review: "Review" } as const;
 
 function transitionLine(view: LoopView, last: AttemptView | null): string {
-  if (!last) return view.kind === "review" ? "A question to answer cold, as before." : "Answer as you would in the room. Feedback comes after.";
+  if (!last) return view.kind === "review" ? "A new question, no hints, like last time." : "Answer as you would in a real interview. Feedback comes after.";
   if (view.step?.kind === "reassess" || (last.evaluation && !last.evaluation.enoughEvidence)) return "Same question. Give it a full answer.";
   if (view.stage === "retry") return "Same question. Answer it again, your way.";
   if (view.stage === "transfer") return "Next question.";

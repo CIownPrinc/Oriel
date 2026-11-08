@@ -134,7 +134,7 @@ export const LESSONS: Record<LessonKey, LessonDef> = {
       { title: "Look away to think, then come back", body: "Nobody stares. Just return when you start speaking again." },
       { title: "Use a sticker", body: "A small sticker beside the camera is a reminder that works." },
     ],
-    drillId: "hold_the_lens", goal: "Estimated camera engagement of 55% or more in an interview.", rewrites: false,
+    drillId: "hold_the_lens", goal: "Estimated eye contact of 55% or more in an interview.", rewrites: false,
   },
   posture: {
     key: "posture", track: "presence", title: "Sit tall, stay steady", promise: "An upright, settled posture that reads as composed.",

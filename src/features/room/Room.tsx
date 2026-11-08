@@ -23,6 +23,8 @@ import { PALETTE } from "@/lib/palette";
 export interface RoomProps {
   sessionId: string;
   resuming: boolean;
+  /** Time since the session started (server), for a session being rejoined; null for a new one. */
+  sessionElapsedMs: number | null;
   seats: (AvatarSeatConfig & { title: string })[];
   pressure: number;
   stillness: number;
@@ -72,7 +74,9 @@ export function Room(props: RoomProps) {
   const [asked, setAsked] = useState<{ t: number; who: string; text: string }[]>([]);
   const lastAsked = useRef<string | null>(null);
   const startedAt = useRef(0);
+  const mountedAt = useRef(0);
   const provider = useMemo(() => new LocalAvatarProvider(), []);
+  useEffect(() => { mountedAt.current = performance.now(); }, []);
   const controller = useRef<RoomController | null>(null);
   const avatarSession = useRef<AvatarSession | null>(null);
   const vision = useRef<VisionTracker | null>(null);
@@ -174,12 +178,14 @@ export function Room(props: RoomProps) {
       await new ExternalAvatarProvider().createSession({ seats: props.seats, pressure: props.pressure, stillness: props.stillness });
     } catch { /* not configured → local */ }
     avatarSession.current = await provider.createSession({ seats: props.seats, pressure: props.pressure, stillness: props.stillness });
+    // A rejoined session keeps its clock: elapsed when the page was served, plus time since then.
+    const clockStartMs = props.sessionElapsedMs === null ? 0 : props.sessionElapsedMs + (performance.now() - mountedAt.current);
     const sttMode = !devices.mic ? "none" : LiveTranscriber.supported() ? "browser" : props.serverStt ? "server" : "none";
     const c = new RoomController({
       sessionId: props.sessionId, provider, avatarSession: avatarSession.current,
       micStream: devices.mic, cameraStream: devices.cam, record: consent.recording,
       vision: consent.cameraMetrics && visionReady ? vision.current : null, videoEl: analysisVideoRef.current,
-      sttMode, onEnded: () => router.push(`/playback/${props.sessionId}?processing=1`),
+      sttMode, clockStartMs, onEnded: () => router.push(`/playback/${props.sessionId}?processing=1`),
       onState: (st) => {
         setUi(st);
         if (st.phase === "listening" && st.caption && st.caption !== lastAsked.current) {
@@ -193,15 +199,14 @@ export function Room(props: RoomProps) {
     if (sttMode === "none") c.switchToText();
     controller.current = c;
     await new Promise((r) => setTimeout(r, 900)); // let the room light up before the first word
-    startedAt.current = Date.now();
+    startedAt.current = Date.now() - clockStartMs;
     setStage("live");
     void c.start();
   }, [consent, devices, props, provider, router, visionReady]);
 
   useEffect(() => {
     if (stage !== "live") return;
-    const t0 = Date.now();
-    const id = setInterval(() => setElapsed(Date.now() - t0), 1000);
+    const id = setInterval(() => setElapsed(Date.now() - startedAt.current), 1000);
     return () => clearInterval(id);
   }, [stage]);
 
@@ -273,6 +278,7 @@ export function Room(props: RoomProps) {
             </div>
             <div className="flex shrink-0 items-center gap-4 text-meta">
               {ui?.recording && <span className="flex items-center gap-1.5 text-fg-muted"><span className="size-1.5 rounded-full bg-danger" aria-hidden />Recording</span>}
+              {ui?.recordingIssue && <span role="status" className="text-warning">{ui.recordingIssue}</span>}
               <span className="text-fg"><Clock text={clock} /><span className="hidden text-fg-subtle sm:inline"> · {Math.ceil(remaining / 60000)} min left</span></span>
             </div>
           </header>
@@ -408,7 +414,7 @@ export function Room(props: RoomProps) {
               <Check ok={!!devices.cam} label={devices.cam ? "Camera" : devices.camError ?? "Camera off"} />
               <Check ok={!devices.mic ? false : LiveTranscriber.supported() || props.serverStt} label={!devices.mic ? "Text mode: you'll type your answers" : LiveTranscriber.supported() ? "Live speech recognition" : props.serverStt ? "Server transcription (answers are transcribed after you finish)" : "No speech recognition, so you'll type"} />
               {consent?.cameraMetrics && devices.cam && (
-                <Check ok={calib === "done"} label={calib === "done" ? "Camera lens calibrated" : calib === "unavailable" ? "On-device tracking unavailable, so camera signals will be skipped" : "Calibrate to measure camera engagement and posture (skip it and we won't measure gaze, slouch or lean)"}>
+                <Check ok={calib === "done"} label={calib === "done" ? "Camera lens calibrated" : calib === "unavailable" ? "On-device tracking unavailable, so camera signals will be skipped" : "Calibrate so we can measure eye contact and posture (skip it and we won't measure eye contact, slouch or lean)"}>
                   {calib !== "done" && calib !== "unavailable" && <Button size="sm" variant="secondary" className="mt-2" onClick={calibrate} loading={calib === "running"} disabled={!visionReady}>{visionReady ? "Sit as you normally would and look at the lens for 2 seconds" : "Loading on-device model…"}</Button>}
                   {calib === "failed" && <p className="mt-1.5 text-meta text-warning">We couldn&apos;t see your face clearly. Check your lighting and try again.</p>}
                 </Check>
@@ -428,7 +434,7 @@ export function Room(props: RoomProps) {
             </ul>
             {(devices.micError || devices.camError) && <p className="mt-6 text-meta text-fg-subtle">To allow access later, use the camera icon in your browser&apos;s address bar, then reload.</p>}
             <div className="mt-10 flex gap-3">
-              <Button size="lg" onClick={enter}>{props.resuming ? "Rejoin the Room" : "Enter the Room"}</Button>
+              <Button size="lg" onClick={enter}>{props.resuming ? "Rejoin the interview" : "Start the interview"}</Button>
               <Button variant="ghost" size="lg" onClick={() => router.push("/practice")}>Back</Button>
             </div>
           </div>
@@ -436,14 +442,14 @@ export function Room(props: RoomProps) {
       )}
 
       {stage === "entering" && (
-        <div className="absolute inset-0 z-10 grid place-items-center"><Thinking label="Entering the room" className="text-body" /></div>
+        <div className="absolute inset-0 z-10 grid place-items-center"><Thinking label="Starting the interview" className="text-body" /></div>
       )}
 
       {(stage === "ending" || phase === "ending" || phase === "ended") && (
         <div className="absolute inset-0 z-30 grid place-items-center bg-page/90">
           <div className="text-center">
             <p className="text-display-l text-fg">{ui?.complete ? "That's the interview." : "Wrapping up."}</p>
-            <p className="mt-4"><Thinking label="Saving your session and preparing your Read" /></p>
+            <p className="mt-4"><Thinking label="Saving your session and preparing your feedback" /></p>
           </div>
         </div>
       )}
@@ -464,10 +470,10 @@ export function Room(props: RoomProps) {
       <Modal open={confirmEnd} onClose={() => setConfirmEnd(false)} title="End the interview?">
         <div className="p-8">
           <h2 className="text-display-m text-fg">End the interview?</h2>
-          <p className="mt-3 text-ui text-fg-muted">You&apos;ll still get a Read and Playback for everything you said so far.</p>
+          <p className="mt-3 text-ui text-fg-muted">You&apos;ll still get feedback and a replay for everything you said so far.</p>
           <div className="mt-7 flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setConfirmEnd(false)}>Keep going</Button>
-            <Button variant="danger" onClick={endNow}>End and see my Read</Button>
+            <Button variant="danger" onClick={endNow}>End and see my feedback</Button>
           </div>
         </div>
       </Modal>

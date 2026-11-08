@@ -27,6 +27,8 @@ export default defineConfig({
         "--use-fake-device-for-media-stream",
         `--use-file-for-fake-audio-capture=${wav}`,
         "--autoplay-policy=no-user-gesture-required",
+        // The interviewer speaks during the journeys; keep it off the developer's speakers.
+        "--mute-audio",
       ],
     },
     trace: "retain-on-failure",

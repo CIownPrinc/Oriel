@@ -13,4 +13,4 @@ export const POST = authed(async (_req, { user }) => {
     return json({ error: "Managed avatar provider is not configured; using the on-device interviewer." }, { status: 501 });
   }
   return json({ error: `Avatar provider "${process.env.AVATAR_PROVIDER}" adapter is not implemented yet.` }, { status: 501 });
-}, { limit: 10 });
+}, { limit: 10, shared: true });

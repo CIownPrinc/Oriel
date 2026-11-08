@@ -12,7 +12,7 @@ export const PROGRESS_METRICS: { key: string; label: string; unit: string; bette
   { key: "structure_score", label: "Structure", unit: "%", better: "higher", format: (v) => `${Math.round(v)}%` },
   { key: "specificity", label: "Specificity", unit: "%", better: "higher", format: (v) => `${Math.round(v)}%` },
   { key: "hedges_per_min", label: "Hedging", unit: "/min", better: "lower", format: (v) => `${v.toFixed(1)}/min` },
-  { key: "camera_engagement", label: "Camera engagement (est.)", unit: "%", better: "higher", format: (v) => `${Math.round(v)}%` },
+  { key: "camera_engagement", label: "Eye contact (est.)", unit: "%", better: "higher", format: (v) => `${Math.round(v)}%` },
 ];
 
 export function medianOf(xs: number[]): number | null {
@@ -67,7 +67,7 @@ export function recommendDrill(latest: MetricMap): { drillId: string; reason: st
     [(latest.filler_per_min ?? 0) > 4, "replace_filler", "Filler words were above 4 per minute."],
     [(latest.specificity ?? 100) < 55, "quantify_results", "Many answers lacked a number, name or timeframe."],
     [(latest.structure_score ?? 100) < 60, "star_structure", "Answers often stopped before the result."],
-    [(latest.camera_engagement ?? 100) < 45, "hold_the_lens", "Estimated camera engagement was low."],
+    [(latest.camera_engagement ?? 100) < 45, "hold_the_lens", "Estimated eye contact was low."],
   ];
   const hit = checks.find(([c]) => c);
   return hit ? { drillId: hit[1], reason: hit[2] } : { drillId: "opener_30s", reason: "Sharpen your opener. It sets the tone for everything after." };

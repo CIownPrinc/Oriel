@@ -53,7 +53,7 @@ const PAST = /\b(?:I|we)\s+(?:\w+ed|was|were|had|did|led|ran|made|took|got|built
 export function precheck(answer: string, inputMode: "voice" | "text", question = ""): string | null {
   const t = answer.trim();
   const n = words(t).length;
-  if (!t || n < MIN_WORDS) return "The answer was too short to assess. Give a full answer, as you would in the room.";
+  if (!t || n < MIN_WORDS) return "The answer was too short to assess. Give a full answer, as you would in a real interview.";
   // A question about what happened, answered only with what you would do, can't show the skill as asked.
   if (ASKS_FOR_EXPERIENCE.test(question.trim()) && (t.match(CONDITIONAL) ?? []).length >= 2 && !PAST.test(t)) {
     return "This question asks about something that actually happened, and the answer describes what you would do. Answer from your own experience; if you haven't faced it, say so and describe the closest thing you have done.";

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   // Absolute URLs for the share image. Set ORIEL_SITE_URL to the deployed origin.
   metadataBase: new URL(process.env.ORIEL_SITE_URL ?? "http://localhost:3100"),
   title: { default: "Oriel: practice for the room before you're in it", template: "%s · Oriel" },
-  description: "Mock interviews with an AI interviewer who listens, follows up and pushes back. Afterwards: your recording, the moments that mattered, and what to change.",
+  description: "Mock interviews with an AI interviewer who listens, follows up and pushes back. Afterwards you get your recording, the key moments and what to change.",
 };
 
 export const viewport: Viewport = { themeColor: PALETTE.bg, colorScheme: "dark" };

@@ -24,7 +24,7 @@ export function ConsentDialog({ open, defaults, recordingAllowed, onConfirm, onC
     return n;
   });
   return (
-    <Modal open={open} onClose={onCancel} title="Before you enter the room" dismissible={false} className="w-[min(620px,calc(100vw-32px))]">
+    <Modal open={open} onClose={onCancel} title="Before you start" dismissible={false} className="w-[min(620px,calc(100vw-32px))]">
       <div className="max-h-[calc(100dvh-48px)] overflow-y-auto p-7 sm:p-9">
         <h2 className="text-display-l text-fg">Your interviewer is an AI.</h2>
         <p className="mt-3 text-ui leading-relaxed text-fg-muted">The face and voice are simulated for practice. It will remember what you say during this session and may push back. Nothing is scored on screen while you talk.</p>

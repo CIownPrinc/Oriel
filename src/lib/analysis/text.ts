@@ -1,7 +1,9 @@
 /**
  * Deterministic language analysis of spoken answers. Runs in the browser (for live
- * interrupt decisions) and on the server (controller + the Read). No model calls:
- * these are transcript patterns, which is why the Read reports them at HIGH confidence.
+ * interrupt decisions) and on the server (controller + feedback). No model calls.
+ *
+ * Words that are fillers or hedges only in some uses ("actually", "literally", "just") are
+ * counted only in those uses: "what actually happened" and "just two weeks" carry meaning.
  */
 
 export const FILLER_PATTERNS: { key: string; re: RegExp }[] = [
@@ -10,7 +12,9 @@ export const FILLER_PATTERNS: { key: string; re: RegExp }[] = [
   { key: "like", re: /(?<!\b(?:would|i|you|we|they|feel|looks?|seems?|just)\s)\blike\b(?!\s+(?:to|that|this|it|a|the)\b)/gi },
   { key: "you know", re: /\byou know\b(?!\s+(?:how|what|that|the|a|it|when|where|why))/gi },
   { key: "kind of", re: /\b(?:kind of|kinda|sort of|sorta)\b/gi },
-  { key: "basically", re: /\b(?:basically|literally|actually)\b/gi },
+  { key: "basically", re: /\bbasically\b/gi },
+  // Filler only as a discourse marker: set off by a comma, next to another filler, or opening the answer.
+  { key: "actually", re: /(?:^|(?<=[,.!?]\s*)|(?<=\b(?:so|and|but|um|uh|like|i mean),?\s))(?:actually|literally)\b(?=\s*,|\s+(?:like|um|uh|you know|i mean|basically)\b)|\b(?:actually|literally),/gim },
 ];
 
 export const HEDGE_PATTERNS: { key: string; re: RegExp }[] = [
@@ -19,7 +23,8 @@ export const HEDGE_PATTERNS: { key: string; re: RegExp }[] = [
   { key: "i guess", re: /\bi guess\b/gi },
   { key: "probably", re: /\bprobably\b/gi },
   { key: "i feel like", re: /\bi feel like\b/gi },
-  { key: "just", re: /\bjust\b/gi },
+  // Softening "just" ("I just helped", "just kind of"); not "just two weeks", "just in time", "just as".
+  { key: "just", re: /\b(?:(?<=\b(?:i|we|i've|we've|i'm|we're)\s)just\b(?!\s+(?:in time|as|before|after|now|then)\b)|just(?=\s+(?:kind of|sort of|a little|a bit|wanted|thought|felt|tried|trying|helped|did|kept)\b))/gi },
   { key: "a little", re: /\b(?:a little|a bit|somewhat)\b/gi },
   { key: "i'm not sure", re: /\bi'?m not (?:sure|certain)\b/gi },
 ];

@@ -79,14 +79,20 @@ export async function sessionDetail(sessionId: string, userId: string) {
   const segments = await db.select().from(schema.transcriptSegments).where(eq(schema.transcriptSegments.sessionId, sessionId)).orderBy(asc(schema.transcriptSegments.startMs)).all();
   const metrics = await db.select().from(schema.metrics).where(eq(schema.metrics.sessionId, sessionId)).all();
   const clips = await db.select().from(schema.playbackClips).where(eq(schema.playbackClips.sessionId, sessionId)).orderBy(asc(schema.playbackClips.startMs)).all();
-  const media = await db.select().from(schema.mediaObjects).where(and(eq(schema.mediaObjects.sessionId, sessionId), eq(schema.mediaObjects.kind, "session_recording"))).get();
-  const mediaUsable = media && media.status !== "deleted" && media.bytes > 0 && (!media.expiresAt || media.expiresAt.getTime() > Date.now());
+  // A recording can have several parts (one per page load of the Room), played in session-clock order.
+  const parts = await db.select().from(schema.mediaObjects).where(and(eq(schema.mediaObjects.sessionId, sessionId), eq(schema.mediaObjects.kind, "session_recording")))
+    .orderBy(asc(schema.mediaObjects.startOffsetMs), asc(schema.mediaObjects.createdAt)).all();
+  const now = Date.now();
+  const usable = parts.filter((m) => m.status !== "deleted" && m.bytes > 0 && (!m.expiresAt || m.expiresAt.getTime() > now));
   const snapshot = await db.select().from(schema.progressSnapshots).where(eq(schema.progressSnapshots.sessionId, sessionId)).get();
   return {
     session, interview, questions, answers, segments, metrics, clips, snapshot,
     interviewers: interviewers.map((i) => ({ ...i, persona: PERSONAS[i.personaId as PersonaId] })),
-    media: mediaUsable ? { id: media!.id, url: signMediaUrl(media!.id, userId, 60 * 60), mimeType: media!.mimeType, expiresAt: media!.expiresAt } : null,
-    mediaDeleted: media ? !mediaUsable : false,
+    media: usable.length ? {
+      parts: usable.map((m) => ({ id: m.id, url: signMediaUrl(m.id, userId, 60 * 60), mimeType: m.mimeType, startMs: m.startOffsetMs })),
+      expiresAt: usable[0].expiresAt,
+    } : null,
+    mediaDeleted: parts.length > 0 && usable.length === 0,
   };
 }
 

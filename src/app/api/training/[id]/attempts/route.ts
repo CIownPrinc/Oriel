@@ -21,4 +21,4 @@ export const POST = authed<IdParams>(async (req, { params, user }) => {
   const { id } = await params;
   const body = await parseBody(req, Body);
   return json(await submitAttempt(user.id, id, body));
-}, { limit: 30, name: "training-attempt" });
+}, { limit: 30, name: "training-attempt", shared: true });

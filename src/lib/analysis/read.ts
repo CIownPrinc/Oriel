@@ -58,7 +58,29 @@ export interface MetricResult {
   detail?: Record<string, unknown>;
 }
 
-export interface ReadOptions { cameraMetrics: boolean; gaze: boolean; posture: boolean }
+export interface ReadOptions {
+  cameraMetrics: boolean;
+  gaze: boolean;
+  posture: boolean;
+  /** Which rubric applies. Story structure (situation, action, result) is judged only on story answers. */
+  interviewType?: "behavioral" | "technical" | "case" | "leadership" | "mixed";
+}
+
+const INTERVIEW_TYPES = ["behavioral", "technical", "case", "leadership", "mixed"] as const;
+/** The stored interview type as a rubric choice; anything unrecognised is treated as mixed. */
+export function interviewTypeOf(stored: string): NonNullable<ReadOptions["interviewType"]> {
+  return (INTERVIEW_TYPES as readonly string[]).includes(stored) ? (stored as NonNullable<ReadOptions["interviewType"]>) : "mixed";
+}
+
+const STORY_PROMPT = /\b(?:tell me about a time|describe a (?:time|situation)|give (?:me )?an example|walk me through a (?:time|situation)|when (?:have you|did you)|a time (?:when|you))\b/i;
+
+/** A question that asks for a story from experience, where situation → action → result is the right shape. */
+export function isStoryQuestion(q: { questionText: string; questionKind: string }, interviewType: ReadOptions["interviewType"]): boolean {
+  if (q.questionKind === "intro" || q.questionKind === "closing") return false;
+  if (STORY_PROMPT.test(q.questionText)) return true;
+  const type = interviewType ?? "behavioral"; // the product's default interview type
+  return (type === "behavioral" || type === "leadership") && (q.questionKind === "primary" || q.questionKind === "follow_up");
+}
 
 const median = (xs: number[]) => {
   if (!xs.length) return null;
@@ -211,19 +233,25 @@ export function computeRead(answers: AnswerInputRow[], audio: AudioSample[], vis
   });
   metrics.push({
     key: "hedges_per_min", label: "Hedging", value: totalSpeakingMin > 0 ? round(hd.total / totalSpeakingMin, 1) : null,
-    low: null, high: null, unit: "/min", confidence: "high", targetLow: 0, targetHigh: 2,
+    // Medium: a softener is a pattern; whether it weakened the answer is a judgment.
+    low: null, high: null, unit: "/min", confidence: "medium", targetLow: 0, targetHigh: 2,
     note: `${hd.total} hedges: ${Object.entries(hd.byType).map(([k, v]) => `"${k}" ×${v}`).join(", ") || "none"}.`, detail: { byType: hd.byType },
   });
 
   // Structure & specificity — MEDIUM (pattern + model assisted).
   const substantive = per.filter((p) => p.h.wordCount >= 30 && p.answer.questionKind !== "closing");
+  // Story structure is the right yardstick only for story questions; a technical explanation or a
+  // case walk-through isn't marked down for having no "result" sentence.
+  const stories = substantive.filter((p) => isStoryQuestion(p.answer, opts.interviewType));
   const missing = { situation: 0, action: 0, result: 0, outcome: 0 };
-  for (const p of substantive) for (const k of Object.keys(missing) as (keyof typeof missing)[]) if (!p.h.star[k]) missing[k]++;
+  for (const p of stories) for (const k of Object.keys(missing) as (keyof typeof missing)[]) if (!p.h.star[k]) missing[k]++;
   metrics.push({
-    key: "structure_score", label: "Answer structure", value: substantive.length ? round(mean(substantive.map((p) => p.h.starScore))! * 100, 0) : null,
+    key: "structure_score", label: "Story structure", value: stories.length ? round(mean(stories.map((p) => p.h.starScore))! * 100, 0) : null,
     low: null, high: null, unit: "%", confidence: "medium", targetLow: 70, targetHigh: 100,
-    note: substantive.length ? `Across ${substantive.length} answers: situation missing ${missing.situation}×, personal action missing ${missing.action}×, result missing ${missing.result}×, outcome missing ${missing.outcome}×.` : "Not enough substantive answers to judge structure.",
-    detail: { missing },
+    note: stories.length
+      ? `Across ${stories.length} story answers: situation missing ${missing.situation}×, personal action missing ${missing.action}×, result missing ${missing.result}×, outcome missing ${missing.outcome}×. Checked by phrasing, so a clear story in unusual words can be missed.`
+      : substantive.length ? "Not measured: no question asked for a story from your experience, so story structure doesn't apply." : "Not enough substantive answers to judge structure.",
+    detail: { missing, stories: stories.length },
   });
   const quantifiedAnswers = substantive.filter((p) => p.h.quantified.length > 0).length;
   metrics.push({
@@ -260,7 +288,7 @@ export function computeRead(answers: AnswerInputRow[], audio: AudioSample[], vis
     const inAnswers = vision.filter((v) => v.face && v.engaged !== null && per.some((p) => v.t >= p.answer.startMs && v.t <= p.answer.endMs));
     const est = inAnswers.length >= 10 ? inAnswers.filter((v) => (v.engaged ?? 0) >= 0.5).length / inAnswers.length : null;
     metrics.push({
-      key: "camera_engagement", label: "Camera engagement", value: est === null ? null : round(est * 100, 0),
+      key: "camera_engagement", label: "Eye contact", value: est === null ? null : round(est * 100, 0),
       low: est === null ? null : round(Math.max(0, est * 100 - 12), 0), high: est === null ? null : round(Math.min(100, est * 100 + 12), 0),
       unit: "% (estimated)", confidence: est === null ? "low" : "medium", targetLow: 55, targetHigh: 90,
       note: "Estimated from head pose and eye position while you spoke. Webcams misread gaze, especially with glasses or off-center cameras, so treat this as approximate. Looking away to think is normal.",
@@ -316,8 +344,8 @@ export function computeRead(answers: AnswerInputRow[], audio: AudioSample[], vis
   if (cam && cam.value === null) {
     const faceFrames = vision.filter((v) => v.face).length;
     cam.note = !vision.length ? "Not measured: no camera frames were available for this session."
-      : faceFrames >= 10 && vision.every((v) => v.engaged === null) ? "Not measured: camera engagement needs the 2-second lens calibration at the start, so it is judged against your own setup rather than a generic baseline."
-      : "Not enough frames with your face visible to estimate camera engagement.";
+      : faceFrames >= 10 && vision.every((v) => v.engaged === null) ? "Not measured: eye contact needs the 2-second lens calibration at the start, so it is judged against your own setup rather than a generic baseline."
+      : "Not enough frames with your face visible to estimate eye contact.";
   }
   const mov = metrics.find((m) => m.key === "movement");
   if (mov && mov.value === null && !vision.length) mov.note = "Not measured: no camera frames were available for this session.";
@@ -363,7 +391,7 @@ export function candidateMoments(per: PerAnswer[], opts: ReadOptions): Moment[] 
       out.push({ ...base, signal: "vague", severity: p.h.vagueness * 0.9, confidence: "medium",
         evidence: `No concrete number, name or timeframe${p.h.quantified.length ? "" : " anywhere in the answer"}; ${p.h.star.action ? "" : "no first-person action stated; "}language stayed general.` });
     }
-    if (p.h.wordCount >= 50 && !p.h.star.result && a.questionKind !== "closing") {
+    if (p.h.wordCount >= 50 && !p.h.star.result && isStoryQuestion(a, opts.interviewType)) {
       out.push({ ...base, signal: "structure", severity: 0.55, confidence: "medium", evidence: `${Math.round(p.durationSec)}-second answer with no stated result or outcome.` });
     }
     if (a.inputMode !== "text" && p.durationSec > 150) {
@@ -376,7 +404,7 @@ export function candidateMoments(per: PerAnswer[], opts: ReadOptions): Moment[] 
       out.push({ ...base, signal: "pace", severity: Math.min(1, Math.abs(p.wpm - 140) / 80), confidence: "high", evidence: `Pace was about ${Math.round(p.wpm)} words per minute (comfortable range 120–160).` });
     }
     if (opts.cameraMetrics && opts.gaze && p.engagement !== null && p.engagement < 0.4 && p.durationSec > 15) {
-      out.push({ ...base, signal: "camera", severity: (0.4 - p.engagement) * 1.5, confidence: "medium", evidence: `Estimated camera engagement was about ${Math.round(p.engagement * 100)}% during this answer (webcam estimate).` });
+      out.push({ ...base, signal: "camera", severity: (0.4 - p.engagement) * 1.5, confidence: "medium", evidence: `Estimated eye contact was about ${Math.round(p.engagement * 100)}% during this answer (webcam estimate).` });
     }
   }
   return out;

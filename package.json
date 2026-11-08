@@ -15,6 +15,8 @@
     "predev": "node scripts/copy-mediapipe.mjs",
     "prebuild": "node scripts/copy-mediapipe.mjs",
     "validate:speech": "tsx --tsconfig tsconfig.json scripts/validate-speech.ts",
+    "admin:grant": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/set-role.ts admin",
+    "admin:revoke": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/set-role.ts user",
     "validate:camera": "playwright test --config playwright.validation.config.ts"
   },
   "dependencies": {

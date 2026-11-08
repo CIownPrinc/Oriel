@@ -19,4 +19,4 @@ const Body = z.object({
 export const POST = authed(async (req, { user }) => {
   const body = await parseBody(req, Body);
   return json(await createInterview(user.id, body));
-}, { limit: 20 });
+}, { limit: 20, shared: true });

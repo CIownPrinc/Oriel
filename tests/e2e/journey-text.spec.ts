@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { onboard, signUp } from "./helpers";
 
 /**
@@ -32,7 +32,7 @@ test("text-mode journey from signup to deletion", async ({ page }) => {
   await dialog.getByRole("switch").nth(1).click(); // camera off
   await dialog.getByRole("button", { name: "Continue in text mode" }).click();
   await expect(page.getByText("Text mode: you'll type your answers")).toBeVisible();
-  await page.getByRole("button", { name: "Enter the Room" }).click();
+  await page.getByRole("button", { name: "Start the interview" }).click();
   await expect(page.getByText(/^Captain Byte · /)).toBeVisible({ timeout: 30_000 });
 
   const answers = [
@@ -49,10 +49,10 @@ test("text-mode journey from signup to deletion", async ({ page }) => {
   }
   await expect(page.getByPlaceholder("Type your answer. Enter sends it.")).toBeVisible({ timeout: 60_000 });
   await page.getByRole("button", { name: "End", exact: true }).click();
-  await page.getByRole("button", { name: "End and see my Read" }).click();
+  await page.getByRole("button", { name: "End and see my feedback" }).click();
 
   await expect(page).toHaveURL(/playback\//, { timeout: 60_000 });
-  await expect(page.getByText("The moments that mattered")).toBeVisible({ timeout: 120_000 });
+  await expect(page.getByText("Key moments")).toBeVisible({ timeout: 120_000 });
   await expect(page.getByText("What we measured")).toBeVisible();
   await expect(page.getByText("Not measured: recovery needs spoken answers.")).toBeVisible();
   const transcript = page.getByText("Transcript", { exact: true });
@@ -84,7 +84,7 @@ test("text-mode journey from signup to deletion", async ({ page }) => {
 
   // Lesson practice is a drill: the free plan's one drill a day is now used.
   await page.goto("/playback");
-  await page.getByRole("link").filter({ hasText: /Read ready/ }).first().click();
+  await page.getByRole("link").filter({ hasText: /Feedback ready/ }).first().click();
   await page.getByRole("link", { name: /^Drill:/ }).click();
   await expect(page).toHaveURL(/drills\//);
   await page.getByRole("button", { name: "Type instead" }).click();
@@ -97,9 +97,9 @@ test("text-mode journey from signup to deletion", async ({ page }) => {
 
   // Progress and dashboard.
   await page.goto("/progress");
-  await expect(page.getByRole("heading", { name: /Baseline set|You against you/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Baseline set|Compared with your own past sessions/ })).toBeVisible();
   await page.goto("/home");
-  await expect(page.getByRole("heading", { name: /Ready for the room/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Ready for your next interview/ })).toBeVisible();
 
   // Privacy: switch off camera signals.
   await page.goto("/profile#privacy");
@@ -109,7 +109,7 @@ test("text-mode journey from signup to deletion", async ({ page }) => {
 
   // Delete the session.
   await page.goto("/playback");
-  await page.getByRole("link").filter({ hasText: /Read ready/ }).first().click();
+  await page.getByRole("link").filter({ hasText: /Feedback ready/ }).first().click();
   await page.getByRole("button", { name: "Delete this session" }).click();
   await page.getByRole("button", { name: "Delete permanently" }).click();
   await expect(page).toHaveURL(/\/playback$/);

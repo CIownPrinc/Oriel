@@ -39,12 +39,12 @@ export async function onboard(page: Page, opts: { resume: boolean }) {
   await page.getByRole("button", { name: "Continue" }).click();
   if (opts.resume) {
     await page.getByPlaceholder("Paste your resume text").fill(RESUME);
-    await page.getByRole("button", { name: "Read resume" }).click();
+    await page.getByRole("button", { name: "Use this resume" }).click();
     await expect(page.getByText("Roles found")).toBeVisible();
     await page.getByRole("button", { name: "Continue" }).click();
     await page.getByPlaceholder("Paste the job description").fill(JD);
-    await page.getByRole("button", { name: "Read job description" }).click();
-    await expect(page.getByText("What they'll probe")).toBeVisible();
+    await page.getByRole("button", { name: "Use this job description" }).click();
+    await expect(page.getByText("What they'll ask about")).toBeVisible();
     await page.getByRole("button", { name: "Continue" }).click();
   } else {
     await page.getByRole("button", { name: "Skip for now" }).click();

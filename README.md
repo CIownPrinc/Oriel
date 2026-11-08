@@ -63,12 +63,20 @@ Serverless functions have no lasting disk, so a deployment keeps its data elsewh
 | `GEMINI_API_KEY` | Interviewer voice, speech-to-text and the language model. |
 | `ORIEL_SECRET` | Long random string; signs sessions and derives the encryption keys. Keep it stable, or old recordings can't be read. |
 | `ORIEL_SITE_URL` | The deployment's public URL. |
+| `CRON_SECRET` | Long random string. Vercel Cron sends it to `/api/cron/cleanup` once a day (`vercel.json`); without it the route refuses every call and nothing expired gets deleted. |
+| `ORIEL_CONTACT_EMAIL` | The public contact address. Contact links (footer, pricing, privacy, password help) stay hidden until it's set. |
+| `RESEND_API_KEY`, `ORIEL_EMAIL_FROM` | Password reset emails. Without them, "Forgot password?" says reset by email isn't set up yet. |
+| `ORIEL_DAILY_COST_LIMIT_USD` | Optional. Ceiling on one person's AI spend per 24 hours (default $5). |
 
 Plan limits are off for now, so everyone gets every feature. Set `ORIEL_ENFORCE_LIMITS=1` to enforce them.
 
 Analysis runs after the response with `after()`, and the routes that start it allow up to 300 seconds. Rate limits are kept in memory per instance, so they're looser on a serverless host than on a single server.
 
 Without the Turso and Blob variables the app falls back to `data/oriel.db` and `data/media/`, which is what local development uses.
+
+**Admins.** Signup only ever creates regular accounts. To give an existing account the admin console, run `npm run admin:grant -- someone@example.com` against the database (`npm run admin:revoke` undoes it). Both sign the account out so the change applies at once.
+
+**Cleanup.** Retention deletes, idle-session finalising, inactive-account deletion, stuck-analysis recovery and old rate-limit counters run as one job. On Vercel it runs from the daily cron; on a long-running server (`next start`) a timer runs it every 10 minutes. Each run is recorded in `cleanup_runs` with counts and failures, only one run holds the lease at a time, and a recording that storage fails to delete stays queued for the next run.
 
 ## Architecture
 
@@ -111,7 +119,7 @@ Turn latency, server side (request → first interviewer audio): **planned quest
 
 - Standalone consent before any device turns on; the version shown is logged with every choice.
 - Face and pose landmarks never leave the browser — only derived numbers (engagement estimate, lean, sway…). The signal API's schema cannot carry images or landmarks.
-- Recordings: uploaded in chunks as they are produced, sealed with AES-256-GCM under per-user HKDF keys, served only through short-lived HMAC-signed URLs *and* the owner's session, with range support. Default retention 30 days (1/7/30/90 configurable, applied retroactively), then deleted by a sweeper.
+- Recordings: uploaded in chunks as they are produced, sealed with AES-256-GCM under per-user HKDF keys, served only through short-lived HMAC-signed URLs *and* the owner's session, with range support. Default retention 30 days (1/7/30/90 configurable, applied retroactively). A session's recording and its signal timelines share one deadline; after it the recording can't be played, the session accepts no new data, and the daily cleanup deletes both.
 - One-click session deletion and account deletion; JSON export of everything stored.
 - Never measured: attractiveness, age, race, emotion, personality, accent. Gaze and posture can be switched off.
 - Server-side provider calls only; keys never reach the client. Per-user rate limits, same-origin check on mutations, CSP and security headers, audit log.
@@ -119,7 +127,7 @@ Turn latency, server side (request → first interviewer audio): **planned quest
 ## Not yet wired (by design, with adapters in place)
 
 - **Managed avatar vendor** (HeyGen LiveAvatar / Tavus / Anam): `ExternalAvatarProvider` + `/api/avatar/session` exist; without credentials the on-device bot interviewer is used. The business plan recommends measuring two vendors for latency, idle billing and concurrency first.
-- **Payments**: `ORIEL_PAYMENTS=dev` applies plan changes instantly with no charge (clearly labelled). Stripe Checkout + webhook plugs into `/api/billing/checkout`.
+- **Payments**: not live. The site says Oriel is in beta and every feature is free. `ORIEL_PAYMENTS=dev` applies plan changes instantly with no charge. Stripe Checkout + webhook plugs into `/api/billing/checkout`; setting `ORIEL_PAYMENTS=stripe` turns off the beta wording once that exists.
 - **Storage**: a local SQLite file and encrypted files on disk in development; Turso and a private Vercel Blob store when deployed (see below).
 - **Quotas**: a free-tier Gemini key allows ~10 TTS requests/minute. Oriel budgets prewarming within `ORIEL_TTS_RPM` and falls back to a sibling model on 429, but sustained use needs a paid tier.
 
